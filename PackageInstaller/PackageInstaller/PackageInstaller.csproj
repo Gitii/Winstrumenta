@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows10.0.20348.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>PackageInstaller</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;arm64</Platforms>
+    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <StartupObject>PackageInstaller.Program</StartupObject>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Assets\DistroIcons\128_alpine.png" />
+    <None Remove="Assets\DistroIcons\128_debian.png" />
+    <None Remove="Assets\DistroIcons\128_fedora_newlogo.png" />
+    <None Remove="Assets\DistroIcons\128_kali.png" />
+    <None Remove="Assets\DistroIcons\128_suse.png" />
+    <None Remove="Assets\DistroIcons\128_ubuntu.png" />
+    <None Remove="Assets\DistroIcons\128_unknown.png" />
+    <None Remove="Assets\parcel.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Extensions.Hosting.WindowsAppSdk" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.194" />
+    <PackageReference Include="ReactiveUI" Version="16.4.1" />
+    <PackageReference Include="ReactiveUI.WinUI" Version="16.4.1" />
+    <PackageReference Include="Sextant" Version="2.12.4" />
+    <PackageReference Include="Splat" Version="14.1.1" />
+    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.1" />
+    <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.1.1" />
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\NativeInterop.Win32.Xaml\NativeInterop.Win32.Xaml.csproj" />
+    <ProjectReference Include="..\..\NativeInterop.Win32\NativeInterop.Win32.csproj" />
+    <ProjectReference Include="..\..\PackageInstaller.Core.Services\PackageInstaller.Core.Services.csproj" />
+    <ProjectReference Include="..\..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
+    <ProjectReference Include="..\..\Sextant.WinUI\Sextant.WinUI.csproj" />
+  </ItemGroup>
+</Project>

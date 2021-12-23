@@ -1,0 +1,45 @@
+﻿using ReactiveUI;
+using Sextant;
+using System.Reactive;
+
+using System.Reactive;
+using System.Reactive.Linq;
+using ReactiveUI;
+using PackageInstaller.Core.Helpers;
+
+namespace PackageInstaller.Core
+{
+    public class InstallViewModel : ReactiveObject, Sextant.IViewModel, INavigable
+    {
+        public struct NavigationParameter
+        {
+            public string[] Arguments { get; set; }
+        }
+
+        public string Id => nameof(InstallViewModel);
+
+        public IObservable<Unit> WhenNavigatedFrom(INavigationParameter parameter)
+        {
+            return Observable.Return(Unit.Default);
+        }
+
+        public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
+        {
+            var parms = parameter.FromNavigationParameter<NavigationParameter>();
+
+            if (parms.Arguments.Length == 0)
+            {
+                throw new Exception($"No arguments");
+            }
+
+            var package = parms.Arguments[0];
+
+            return Observable.Return(Unit.Default);
+        }
+
+        public IObservable<Unit> WhenNavigatingTo(INavigationParameter parameter)
+        {
+            return Observable.Return(Unit.Default);
+        }
+    }
+}
