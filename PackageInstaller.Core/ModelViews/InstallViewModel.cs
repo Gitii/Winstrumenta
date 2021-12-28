@@ -1,13 +1,10 @@
-﻿using ReactiveUI;
-using Sextant;
-using System.Reactive;
-
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Linq;
-using ReactiveUI;
 using PackageInstaller.Core.Helpers;
+using ReactiveUI;
+using Sextant;
 
-namespace PackageInstaller.Core
+namespace PackageInstaller.Core.ModelViews
 {
     public class InstallViewModel : ReactiveObject, Sextant.IViewModel, INavigable
     {

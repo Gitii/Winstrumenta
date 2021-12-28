@@ -47,19 +47,31 @@ namespace PackageInstaller
                         .RegisterParameterViewStackService()
                         .RegisterViewWinUI<PackageActions, PackageActionsViewModel>()
                         .RegisterViewWinUI<Error, ErrorViewModel>()
+                        .RegisterViewWinUI<Result, ResultViewModel>()
                         .RegisterViewWinUI<Preparation, PreparationViewModel>();
 
                     collection.AddSingleton<MainWindow>();
-                    collection.AddTransient<InstallViewModel>();
-                    collection.AddTransient<ErrorViewModel>();
-                    collection.AddTransient<PackageActionsViewModel>();
-                    collection.AddTransient<PreparationViewModel>();
-                    collection.AddTransient<IDebianPackageReader, DebianPackageReader>();
-                    collection.AddTransient<IPackageReader, PackageReader>();
-                    collection.AddTransient<IWsl, WslImpl>();
-                    collection.AddTransient<IWslApi, ComBasedWslApi>();
-                    collection.AddTransient<IPackageManager, PackageManager>();
-                    collection.AddTransient<IDpkg, Dpkg>();
+                    //collection.AddTransient<InstallViewModel>();
+                    //collection.AddTransient<ErrorViewModel>();
+                    //collection.AddTransient<PackageActionsViewModel>();
+                    //collection.AddTransient<PreparationViewModel>();
+                    //collection.AddTransient<IDebianPackageReader, DebianPackageReader>();
+                    //collection.AddTransient<IPackageReader, PackageReader>();
+                    //collection.AddTransient<IWsl, WslImpl>();
+                    collection.AddTransient<IWslApi, ManagedWslApi>();
+                    //collection.AddTransient<IPackageManager, PackageManager>();
+                    //collection.AddTransient<IDpkg, Dpkg>();
+                    collection.Scan(
+                        scan =>
+                            scan
+                            // We start out with all types in the assembly of ITransientService
+                            .FromAssembliesOf(typeof(IWsl), typeof(WslImpl))
+                                .AddClasses(true)
+                                .AsImplementedInterfaces()
+                                .WithTransientLifetime()
+                                .AddClasses((classes) => classes.AssignableTo<ReactiveObject>())
+                                .AsSelf()
+                    );
                     //collection.RemoveAll<IActivationForViewFetcher>();
                     //collection.AddTransient<IActivationForViewFetcher, ActivationForViewFetcher>();
                 }

@@ -22,7 +22,6 @@ namespace PackageInstaller.Core.Services.Tests
         [Test]
         public void testversions()
         {
-            // type: () -> None
             _test_version("1:1.4.1-1", "1", "1.4.1", "1");
             _test_version("7.1.ds-1", "", "7.1.ds", "1");
             _test_version("10.11.1.3-2", "", "10.11.1.3", "2");
@@ -71,7 +70,6 @@ namespace PackageInstaller.Core.Services.Tests
 
         public static Func<T, T, bool> _get_truth_fn<T>(string cmp_oper) where T : IComparable<T>
         {
-            // type: (str) -> Any
             if (cmp_oper == "<")
             {
                 return (T a, T b) => a.CompareTo(b) < 0;
@@ -114,7 +112,6 @@ namespace PackageInstaller.Core.Services.Tests
         // Test comparison against all combinations of Version classes
         public void test_comparisons()
         {
-            // type: () -> None
             _test_comparison("0", "<", "a");
             _test_comparison("1.0", "<", "1.1");
             _test_comparison("1.2", "<", "1.11");

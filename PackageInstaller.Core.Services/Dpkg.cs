@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using Community.Wsl.Sdk;
 using ReactiveUI;
 
@@ -19,7 +20,9 @@ namespace PackageInstaller.Core.Services
                 .ExecuteCommandAsync(
                     distroName,
                     "dpkg",
-                    new[] { "--status-logger=echo", "1", "-s", packageName }
+                    new[] { "-s", packageName },
+                    ignoreExitCode: true,
+                    includeStandardError: true
                 )
                 .ConfigureAwait(false);
 
@@ -29,11 +32,7 @@ namespace PackageInstaller.Core.Services
         public async Task<IDpkg.PackageInfo> GetPackage(string distroName, string packageName)
         {
             var output = await _wslCommands
-                .ExecuteCommandAsync(
-                    distroName,
-                    "dpkg",
-                    new[] { "--status-logger=echo", "1", "-s", packageName }
-                )
+                .ExecuteCommandAsync(distroName, "dpkg", new[] { "-s", packageName })
                 .ConfigureAwait(false);
 
             if (output.Contains($"dpkg-query: package '{packageName}' is not installed"))
@@ -65,16 +64,15 @@ namespace PackageInstaller.Core.Services
             return pva.CompareTo(pvb);
         }
 
-        public async Task Install(
+        private async Task<(bool success, string[] logs)> ExecuteDpkg(
             string distroName,
-            string unixfilePath,
-            IProgress<(int, string)> progress
+            params string[] arguments
         )
         {
             var cmd = _wslCommands.CreateCommand(
                 distroName,
                 "dpkg",
-                new[] { "--status-fd=echo", "-i", unixfilePath },
+                arguments,
                 new CommandExecutionOptions()
                 {
                     FailOnNegativeExitCode = false,
@@ -86,44 +84,63 @@ namespace PackageInstaller.Core.Services
 
             var pipes = cmd.Start();
 
-            ReadLines(pipes.StandardOutput).ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(ParseStatusMessage)
+            var taskOutput = ReadLines(pipes.StandardOutput!)
+                .Merge(ReadLines(pipes.StandardError!))
+                .ToArray()
+                .ToTask();
 
-            var results = await cmd.WaitAndGetResultsAsync();
+            var results = await cmd.WaitAndGetResultsAsync(); // wait for command to finish
+
+            var output = await taskOutput; // wait for output to be fetched
+
+            return (results.ExitCode == 0, output);
         }
 
-        private DpkgStatusMessage? ParseStatusMessage<TResult>(string line)
+        public Task<(bool success, string[] logs)> Install(string distroName, string unixFilePath)
         {
-            var parts = line.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-            if (parts.Length <= 3)
-            {
-                return null;
-            }
-
-            if (parts[0] == "status")
+            return ExecuteDpkg(
+                distroName,
+                "--force-confold",
+                "--force-confdef",
+                "-i",
+                unixFilePath
+            );
         }
 
-        private readonly struct DpkgStatusMessage
+        public Task<(bool success, string[] logs)> Uninstall(string distroName, string packageName)
         {
-            public bool IsStatusUpdate { get; init; }
+            return ExecuteDpkg(distroName, "-r", packageName);
+        }
 
-            public bool IsProgressUpdate { get; init; }
+        public Task<(bool success, string[] logs)> Upgrade(string distroName, string unixFilePath)
+        {
+            return Install(distroName, unixFilePath);
+        }
 
-            public string? Package { get; init; }
-
-            public string? Error { get; init; }
-
-            public string ProgressState { get; init; }
+        public Task<(bool success, string[] logs)> Downgrade(string distroName, string unixFilePath)
+        {
+            return ExecuteDpkg(
+                distroName,
+                "--force-confold",
+                "--force-confdef",
+                "--force-downgrade",
+                "-i",
+                unixFilePath
+            );
         }
 
         public static IObservable<string> ReadLines(StreamReader reader)
         {
             return Observable.Using(
                 () => reader,
-                r => Observable.FromAsync(r.ReadLineAsync)
-                    .Repeat()
-                    .TakeWhile(line => line != null).Select((line) => line ?? String.Empty));
+                r =>
+                    Observable
+                        .FromAsync(r.ReadLineAsync, RxApp.TaskpoolScheduler)
+                        .Repeat()
+                        .TakeWhile(line => line != null)
+                        .Select((line) => (line ?? String.Empty).Replace("\0", ""))
+                        .Where((line) => line.Length != 0)
+            );
         }
     }
 }

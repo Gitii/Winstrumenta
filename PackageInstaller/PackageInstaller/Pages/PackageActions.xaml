@@ -4,16 +4,29 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:attached="using:PackageInstaller.AttachedProperties"
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
-    xmlns:core="using:PackageInstaller.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:PackageInstaller.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:media="using:Microsoft.UI.Xaml.Media.Animation"
     xmlns:modelViews="using:PackageInstaller.Core.ModelViews"
     xmlns:reactiveUi="using:ReactiveUI"
     xmlns:xaml="using:Microsoft.UI.Xaml"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d">
-
-    <controls:Grid Padding="40">
+    <controls:Page.Triggers>
+        <xaml:EventTrigger RoutedEvent="Page.Loaded">
+            <media:BeginStoryboard>
+                <media:Storyboard AutoReverse="False" RepeatBehavior="Forever">
+                    <media:DoubleAnimation
+                        media:Storyboard.TargetName="PrimaryActionButtonIcon"
+                        media:Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.Rotation)"
+                        To="360"
+                        Duration="0:0:2" />
+                </media:Storyboard>
+            </media:BeginStoryboard>
+        </xaml:EventTrigger>
+    </controls:Page.Triggers>
+    <controls:Grid Padding="30,0,30,30">
         <controls:Grid.ColumnDefinitions>
             <controls:ColumnDefinition Width="*" />
             <controls:ColumnDefinition Width="Auto" />
@@ -24,7 +37,7 @@
         </controls:Grid.RowDefinitions>
         <controls:Grid controls:Grid.Column="0" controls:Grid.Row="0">
             <controls:Grid.ColumnDefinitions>
-                <controls:ColumnDefinition Width="30" />
+                <controls:ColumnDefinition Width="100" />
                 <controls:ColumnDefinition Width="*" />
             </controls:Grid.ColumnDefinitions>
             <controls:Grid.RowDefinitions>
@@ -40,43 +53,62 @@
                 controls:Grid.ColumnSpan="2"
                 FontSize="24"
                 FontWeight="Bold"
-                Foreground="White"
                 TextWrapping="Wrap" />
             <controls:TextBlock
                 x:Name="Version"
                 controls:Grid.Column="1"
                 controls:Grid.Row="1" />
-            <controls:FontIcon
+            <controls:StackPanel
                 controls:Grid.Column="0"
                 controls:Grid.Row="1"
-                FontFamily="{StaticResource SymbolThemeFontFamily}"
-                FontSize="10"
-                Glyph="&#59543;" />
-
+                Orientation="Horizontal"
+                Spacing="5">
+                <controls:FontIcon
+                    FontFamily="{StaticResource SymbolThemeFontFamily}"
+                    FontSize="10"
+                    Glyph="&#59543;" />
+                <controls:TextBlock>
+                    Version
+                </controls:TextBlock>
+            </controls:StackPanel>
             <controls:TextBlock
                 x:Name="Architecture"
                 controls:Grid.Column="1"
                 controls:Grid.Row="2" />
-            <controls:FontIcon
+            <controls:StackPanel
                 controls:Grid.Column="0"
                 controls:Grid.Row="2"
-                FontFamily="{StaticResource SymbolThemeFontFamily}"
-                FontSize="10"
-                Glyph="&#59155;" />
+                Orientation="Horizontal"
+                Spacing="5">
+                <controls:FontIcon
+                    FontFamily="{StaticResource SymbolThemeFontFamily}"
+                    FontSize="10"
+                    Glyph="&#59155;" />
+                <controls:TextBlock>
+                    Architecture
+                </controls:TextBlock>
+            </controls:StackPanel>
 
             <controls:TextBlock
                 x:Name="Description"
                 controls:Grid.Column="1"
                 controls:Grid.Row="3"
                 TextWrapping="Wrap" />
-            <controls:FontIcon
-                Margin="5"
+            <controls:StackPanel
                 VerticalAlignment="Top"
                 controls:Grid.Column="0"
                 controls:Grid.Row="3"
-                FontFamily="{StaticResource SymbolThemeFontFamily}"
-                FontSize="12"
-                Glyph="&#59959;" />
+                Orientation="Horizontal"
+                Spacing="5">
+                <controls:FontIcon
+                    FontFamily="{StaticResource SymbolThemeFontFamily}"
+                    FontSize="12"
+                    Glyph="&#59959;" />
+                <controls:TextBlock>
+                    Description
+                </controls:TextBlock>
+            </controls:StackPanel>
+
         </controls:Grid>
 
         <controls:Image
@@ -90,20 +122,44 @@
             controls:Grid.Column="0"
             controls:Grid.ColumnSpan="2"
             controls:Grid.Row="1"
-            Orientation="Horizontal">
-
-            <controls:ComboBox x:Name="DistroList" Width="200">
-                <controls:ComboBox.ItemTemplate>
-                    <xaml:DataTemplate d:DataContext="{d:DesignInstance modelViews:WslDistributionModelView, IsDesignTimeCreatable=False}" x:DataType="modelViews:WslDistributionModelView">
-                        <controls:StackPanel Orientation="Horizontal" Spacing="10">
-                            <controls:Image Height="20" attached:ImageExtensions.SourceUri="{Binding Icon}" />
-                            <controls:TextBlock Text="{Binding Name}" />
-                        </controls:StackPanel>
-                    </xaml:DataTemplate>
-                </controls:ComboBox.ItemTemplate>
-            </controls:ComboBox>
-            <SplitButton Content="Install" />
+            Orientation="Vertical"
+            Spacing="4">
+            <controls:StackPanel
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <controls:ComboBox x:Name="DistroList" Width="200">
+                    <controls:ComboBox.ItemTemplate>
+                        <xaml:DataTemplate d:DataContext="{d:DesignInstance modelViews:WslDistributionModelView, IsDesignTimeCreatable=False}" x:DataType="modelViews:WslDistributionModelView">
+                            <controls:StackPanel Orientation="Horizontal" Spacing="10">
+                                <controls:Image Height="20" attached:ImageExtensions.SourceUri="{Binding Icon}" />
+                                <controls:TextBlock Text="{Binding Name}" />
+                            </controls:StackPanel>
+                        </xaml:DataTemplate>
+                    </controls:ComboBox.ItemTemplate>
+                </controls:ComboBox>
+                <controls:Button x:Name="PrimaryActionButton">
+                    <controls:StackPanel Orientation="Horizontal">
+                        <controls:FontIcon
+                            x:Name="PrimaryActionButtonIcon"
+                            Margin="0,0,4,0"
+                            FontFamily="{StaticResource SymbolThemeFontFamily}"
+                            Glyph="&#61802;"
+                            RenderTransformOrigin="0.5,0.5">
+                            <controls:FontIcon.RenderTransform>
+                                <CompositeTransform />
+                            </controls:FontIcon.RenderTransform>
+                        </controls:FontIcon>
+                        <controls:TextBlock x:Name="PrimaryActionButtonText" />
+                    </controls:StackPanel>
+                </controls:Button>
+            </controls:StackPanel>
+            <controls:TextBlock
+                x:Name="Remarks"
+                FontSize="10"
+                Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" />
         </controls:StackPanel>
+
 
     </controls:Grid>
 </local:ReactivePagePackageActions>

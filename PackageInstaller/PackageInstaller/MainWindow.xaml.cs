@@ -11,7 +11,10 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using NativeInterop.Win32;
@@ -19,7 +22,6 @@ using NativeInterop.Win32.Xaml;
 using PackageInstaller.Core;
 using PackageInstaller.Pages;
 using ReactiveUI;
-using Vanara.PInvoke;
 using Microsoft.Extensions.DependencyInjection;
 using Splat;
 using Sextant.WinUI;
@@ -38,9 +40,10 @@ namespace PackageInstaller
         {
             this.InitializeComponent();
 
-            _nativeWindow.SetTitlebarBackgroundColor(Color.Black);
+            ExtendsContentIntoTitleBar = true;
+            // SetTitleBar(TitleBar);
+
             this.services = services;
-            //ExtendsContentIntoTitleBar = true;
         }
 
         public void SetLaunchArgs(string arguments)
@@ -50,11 +53,38 @@ namespace PackageInstaller
 
         private void MainWindow_OnActivated(object sender, WindowLoadedEventArgs args)
         {
+            var uiContext =
+                SynchronizationContext.Current ?? throw new Exception("UI Context is null!");
+
+            RxApp.DefaultExceptionHandler = Observer
+                .Create<Exception>(
+                    (ex) =>
+                    {
+                        uiContext.Post(
+                            (_) =>
+                            {
+                                var navParms = new ErrorViewModel.NavigationParameter()
+                                {
+                                    Exception = ex
+                                };
+
+                                this.services
+                                    .GetRequiredService<IParameterViewStackService>()
+                                    .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
+                                    .Subscribe();
+                            },
+                            null
+                        );
+                    }
+                )
+                .NotifyOn(RxApp.MainThreadScheduler);
+
             Sextant.WinUI.NavigationView? navigationView = Locator.Current.GetNavigationView(
                 "NavigationView"
             );
             navigationView.ShowDefaultBackButton = false;
-            Content = navigationView;
+            ContentControl.Content = navigationView;
+            ForceUpdateTheme();
 
             var navParams = new PreparationViewModel.NavigationParameter()
             {
@@ -65,6 +95,17 @@ namespace PackageInstaller
                 .GetRequiredService<IParameterViewStackService>()
                 .PushPage<PreparationViewModel>(navParams.ToNavigationParameter())
                 .Subscribe();
+        }
+
+        private void CloseButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Environment.Exit(0);
+        }
+
+        private void TitleBar_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            _nativeWindow.StartDragging();
+            e.Handled = true;
         }
     }
 }

@@ -19,7 +19,9 @@ namespace PackageInstaller.Core.Services
             string command,
             string[] arguments,
             bool asRoot = false,
-            bool shellExecute = false
+            bool shellExecute = false,
+            bool ignoreExitCode = false,
+            bool includeStandardError = false
         );
     }
 }

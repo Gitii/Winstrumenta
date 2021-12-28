@@ -14,7 +14,14 @@ namespace PackageInstaller.Core.Services
             bool shellExecute = false
         )
         {
-            throw new NotImplementedException();
+            return new ManagedCommand(
+                distroName,
+                command,
+                arguments,
+                options,
+                asRoot,
+                shellExecute
+            );
         }
 
         public async Task<string> ExecuteCommandAsync(
@@ -22,7 +29,9 @@ namespace PackageInstaller.Core.Services
             string command,
             string[] arguments,
             bool asRoot = false,
-            bool shellExecute = false
+            bool shellExecute = false,
+            bool ignoreExitCode = false,
+            bool includeStandardError = false
         )
         {
             var cmd = CreateCommand(
@@ -31,14 +40,18 @@ namespace PackageInstaller.Core.Services
                 arguments,
                 new CommandExecutionOptions()
                 {
-                    FailOnNegativeExitCode = true,
-                    StdoutDataProcessingMode = DataProcessingMode.String
+                    FailOnNegativeExitCode = !ignoreExitCode,
+                    StdoutDataProcessingMode = DataProcessingMode.String,
+                    StdErrDataProcessingMode =
+                        includeStandardError ? DataProcessingMode.String : DataProcessingMode.Drop
                 }
             );
 
             var result = await cmd.StartAndGetResultsAsync().ConfigureAwait(false);
 
-            return result.Stdout ?? string.Empty;
+            string stdOut = result.Stdout ?? string.Empty;
+            string stdErr = result.Stderr ?? String.Empty;
+            return (stdOut + stdErr).Trim();
         }
     }
 }

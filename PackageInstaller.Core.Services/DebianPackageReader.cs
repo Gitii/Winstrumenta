@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CST.RecursiveExtractor;
 
 namespace PackageInstaller.Core.Services
@@ -7,6 +8,10 @@ namespace PackageInstaller.Core.Services
     {
         private static readonly IReadOnlyList<byte> DEB_FILE_HEADER = Encoding.ASCII.GetBytes(
             "!<arch>\n"
+        );
+
+        private static readonly Regex _relativePathMatcher = new Regex(
+            @"^control[.]tar[.][\w]{0,2}(\\control[.]tar)?\\control$"
         );
 
         public async Task<DebianPackageMetaData> ReadMetaData(string filePath)
@@ -30,7 +35,7 @@ namespace PackageInstaller.Core.Services
             )
             {
                 var relPath = Path.GetRelativePath(filePath, fileEntry.FullPath);
-                if (relPath == "control.tar.xz\\control.tar\\control")
+                if (_relativePathMatcher.IsMatch(relPath))
                 {
                     return await ReadFromControlFile(fileEntry.Content);
                 }

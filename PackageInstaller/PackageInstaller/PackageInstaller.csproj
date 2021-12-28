@@ -21,20 +21,24 @@
     <None Remove="Assets\DistroIcons\128_suse.png" />
     <None Remove="Assets\DistroIcons\128_ubuntu.png" />
     <None Remove="Assets\DistroIcons\128_unknown.png" />
+    <None Remove="Assets\error.png" />
     <None Remove="Assets\parcel.svg" />
+    <None Remove="Assets\success.png" />
+    <None Remove="Assets\warning.png" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Extensions.Hosting.WindowsAppSdk" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.194" />
-    <PackageReference Include="ReactiveUI" Version="16.4.1" />
-    <PackageReference Include="ReactiveUI.WinUI" Version="16.4.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.196" />
+    <PackageReference Include="ReactiveUI" Version="17.1.9" />
+    <PackageReference Include="ReactiveUI.WinUI" Version="17.1.9" />
+    <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Sextant" Version="2.12.4" />
-    <PackageReference Include="Splat" Version="14.1.1" />
-    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.1" />
-    <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.1.1" />
+    <PackageReference Include="Splat" Version="14.1.17" />
+    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.17" />
+    <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.1.17" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 

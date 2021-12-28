@@ -24,6 +24,16 @@ namespace PackageInstaller.Core.Services
 
                 return this;
             }
+
+            public override string? ToString()
+            {
+                if (Key == null && Content == null)
+                {
+                    return "<Empty>";
+                }
+
+                return $"{Key} = {Content}";
+            }
         }
 
         private IList<Entry> _entries = new List<Entry>();

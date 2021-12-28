@@ -1,69 +1,37 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Windows.Sdk;
-using Vanara.PInvoke;
-using HWND = Vanara.PInvoke.HWND;
-using RECT = Vanara.PInvoke.RECT;
+using Windows.UI.ViewManagement;
+using Windows.UI.Xaml;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Graphics.Dwm;
+using Windows.Win32.UI.WindowsAndMessaging;
+using Microsoft.UI.Xaml;
+using Microsoft.Win32.SafeHandles;
 
 namespace NativeInterop.Win32
 {
-    [Flags]
-    public enum WindowStyles : uint
-    {
-        WS_BORDER = 0x800000,
-        WS_CAPTION = 0xc00000,
-        WS_CHILD = 0x40000000,
-        WS_CLIPCHILDREN = 0x2000000,
-        WS_CLIPSIBLINGS = 0x4000000,
-        WS_DISABLED = 0x8000000,
-        WS_DLGFRAME = 0x400000,
-        WS_GROUP = 0x20000,
-        WS_HSCROLL = 0x100000,
-        WS_MAXIMIZE = 0x1000000,
-        WS_MAXIMIZEBOX = 0x10000,
-        WS_MINIMIZE = 0x20000000,
-        WS_MINIMIZEBOX = 0x20000,
-        WS_OVERLAPPED = 0x0,
-        WS_OVERLAPPEDWINDOW =
-            WS_OVERLAPPED
-            | WS_CAPTION
-            | WS_SYSMENU
-            | WS_SIZEFRAME
-            | WS_MINIMIZEBOX
-            | WS_MAXIMIZEBOX,
-        WS_POPUP = 0x80000000u,
-        WS_POPUPWINDOW = WS_POPUP | WS_BORDER | WS_SYSMENU,
-        WS_SIZEFRAME = 0x40000,
-        WS_SYSMENU = 0x80000,
-        WS_TABSTOP = 0x10000,
-        WS_VISIBLE = 0x10000000,
-        WS_VSCROLL = 0x200000,
-        WS_THICKFRAME = 0x00040000
-    }
-
-    enum WindoowZOrder : int
-    {
-        HWND_BOTTOM = 1,
-        HWND_NOTOPMOST = -2,
-        HWND_TOP = 0,
-        HWND_TOPMOST = -1,
-    }
-
-    public readonly struct Size
-    {
-        public int Width { get; init; }
-
-        public int Height { get; init; }
-    }
-
     public class NativeWindow
     {
         private IntPtr _hwnd;
+        private IList<INativeWindowListener> _listeners = new List<INativeWindowListener>();
+        private UISettings _uiSettings;
+
+        private readonly static Windows.UI.Color White = Windows.UI.Color.FromArgb(
+            255,
+            255,
+            255,
+            255
+        );
+
+        private readonly static Windows.UI.Color Black = Windows.UI.Color.FromArgb(255, 0, 0, 0);
 
         public NativeWindow(IntPtr hwnd)
         {
@@ -75,115 +43,197 @@ namespace NativeInterop.Win32
             _hwnd = hwnd;
 
             SubClassingWin32();
+
+            var settings = _uiSettings = new UISettings();
+            settings.ColorValuesChanged += SettingsOnColorValuesChanged;
         }
 
-        private Microsoft.Windows.Sdk.PInvoke.WinProc newWndProc = null;
+        private void SettingsOnColorValuesChanged(UISettings sender, object args)
+        {
+            var fg = sender.GetColorValue(UIColorType.Foreground);
+            var bg = sender.GetColorValue(UIColorType.Background);
+
+            foreach (var listener in _listeners)
+            {
+                listener.OnSystemThemeChanged(this, fg, bg);
+            }
+        }
+
+        private PInvoke.WinProc newWndProc = null;
         private IntPtr oldWndProc = IntPtr.Zero;
 
         private bool _dragWindow = false;
-        private Point _lastPosition = new Point(0, 0);
+        private POINT _lastPosition = new POINT() { x = 0, y = 0 };
         private bool _visible = true;
 
-        private unsafe void SubClassingWin32()
+        public void AddListener(INativeWindowListener listener)
         {
-            newWndProc = new PInvoke.WinProc(NewWindowProc);
-            oldWndProc = Microsoft.Windows.Sdk.PInvoke.SetWindowLongPtr(
-                _hwnd,
-                User32.WindowLongFlags.GWL_WNDPROC,
-                newWndProc
-            );
+            _listeners.Add(listener);
         }
 
-        public const int WM_NCLBUTTONDOWN = 0xA1;
-        public const int HT_CAPTION = 0x2;
-
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        public static extern bool ReleaseCapture();
+        private void SubClassingWin32()
+        {
+            newWndProc = NewWindowProc;
+            oldWndProc = PInvoke.SetWindowLongPtr(
+                new HWND(_hwnd),
+                WINDOW_LONG_PTR_INDEX.GWL_WNDPROC,
+                Marshal.GetFunctionPointerForDelegate(newWndProc)
+            );
+        }
 
         public void StartDragging()
         {
-            // _dragWindow = true;
-
-            // User32.GetCursorPos(out _lastPosition);
-
-            ReleaseCapture();
-            SendMessage(_hwnd, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            _dragWindow = true;
+            PInvoke.ReleaseCapture();
+            PInvoke.SendMessage(new HWND(_hwnd), PInvoke.WM_NCLBUTTONDOWN, PInvoke.HT_CAPTION, 0);
         }
 
-        private IntPtr NewWindowProc(
-            IntPtr hWnd,
-            User32.WindowMessage Msg,
-            IntPtr wParam,
-            IntPtr lParam
-        )
+        private IntPtr NewWindowProc(IntPtr hWnd, WindowMessage Msg, IntPtr wParam, IntPtr lParam)
         {
-            if (_dragWindow)
+            switch (Msg)
             {
-                switch (Msg)
+                case WindowMessage.WM_LBUTTONUP:
                 {
-                    case User32.WindowMessage.WM_LBUTTONDOWN:
-                    {
-                        _dragWindow = true;
-                        break;
-                    }
-                    case User32.WindowMessage.WM_LBUTTONUP:
+                    if (_dragWindow)
                     {
                         _dragWindow = false;
-                        break;
                     }
-                    case User32.WindowMessage.WM_MOUSEMOVE:
-                    {
-                        if (_dragWindow)
-                        {
-                            RECT windowRect;
-                            User32.GetWindowRect(_hwnd, out windowRect);
-
-                            Point location;
-                            User32.GetCursorPos(out location);
-
-                            int x = location.X - _lastPosition.X;
-                            int y = location.Y - _lastPosition.Y;
-                            User32.MoveWindow(
-                                _hwnd,
-                                x,
-                                y,
-                                windowRect.Width,
-                                windowRect.Height,
-                                false
-                            );
-
-                            _lastPosition = location;
-                        }
-                        break;
-                    }
+                    break;
                 }
+                case WindowMessage.WM_MOUSEMOVE:
+                {
+                    if (_dragWindow)
+                    {
+                        RECT windowRect;
+                        PInvoke.GetWindowRect(new HWND(_hwnd), out windowRect);
+
+                        POINT location;
+                        PInvoke.GetCursorPos(out location);
+
+                        int x = location.x - _lastPosition.x;
+                        int y = location.y - _lastPosition.y;
+
+                        PInvoke.MoveWindow(
+                            new HWND(_hwnd),
+                            x,
+                            y,
+                            windowRect.right - windowRect.left,
+                            windowRect.bottom - windowRect.top,
+                            false
+                        );
+
+                        _lastPosition = location;
+                    }
+                    break;
+                }
+                case WindowMessage.WM_ACTIVATE:
+                    foreach (var listener in _listeners)
+                    {
+                        listener.Activated(this);
+                    }
+                    break;
+
+                case WindowMessage.WM_GETMINMAXINFO:
+                    MINMAXINFO minMaxInfo = Marshal.PtrToStructure<MINMAXINFO>(lParam);
+                    minMaxInfo.ptMinTrackSize.x = (short)DisplayInformation.ConvertEpxToPixel(
+                        hWnd,
+                        MinWidth
+                    );
+                    minMaxInfo.ptMinTrackSize.y = (short)DisplayInformation.ConvertEpxToPixel(
+                        hWnd,
+                        MinHeight
+                    );
+                    if (MaxWidth > 0)
+                    {
+                        minMaxInfo.ptMaxTrackSize.x = (short)DisplayInformation.ConvertEpxToPixel(
+                            hWnd,
+                            MaxWidth
+                        );
+                    }
+
+                    if (MaxHeight > 0)
+                    {
+                        minMaxInfo.ptMaxTrackSize.y = (short)DisplayInformation.ConvertEpxToPixel(
+                            hWnd,
+                            MaxHeight
+                        );
+                    }
+
+                    Marshal.StructureToPtr(minMaxInfo, lParam, true);
+                    break;
+
+                case WindowMessage.WM_CLOSE:
+                    if (!IsClosing)
+                    {
+                        IsClosing = true;
+                        foreach (var listener in _listeners)
+                        {
+                            listener.Closing(this);
+                        }
+                    }
+                    break;
+
+                case WindowMessage.WM_MOVE:
+                    foreach (var listener in _listeners)
+                    {
+                        listener.Moving(this);
+                    }
+                    break;
+                case WindowMessage.WM_SIZING:
+                    foreach (var listener in _listeners)
+                    {
+                        listener.Sizing(this);
+                    }
+                    break;
+                case WindowMessage.WM_DPICHANGED:
+                    foreach (var listener in _listeners)
+                    {
+                        listener.DpiChanged(this, HiWord(wParam));
+                    }
+                    break;
+                case WindowMessage.WM_SETTINGCHANGE:
+                    var ptrToStringAuto = Marshal.PtrToStringAnsi(lParam);
+                    Debug.WriteLine(ptrToStringAuto);
+                    if (ptrToStringAuto == "ImmersiveColorSet")
+                    {
+                        SettingsOnColorValuesChanged(_uiSettings, null);
+                    }
+                    break;
             }
 
-            return Microsoft.Windows.Sdk.PInvoke.CallWindowProc(
-                oldWndProc,
-                hWnd,
-                Msg,
-                wParam,
-                lParam
-            );
+            return PInvoke.CallWindowProc(oldWndProc, hWnd, Msg, wParam, lParam);
+        }
+
+        private static uint HiWord(IntPtr ptr)
+        {
+            uint value = (uint)(int)ptr;
+            if ((value & 0x80000000) == 0x80000000)
+                return (value >> 16);
+            else
+                return (value >> 16) & 0xffff;
+        }
+
+        public Rectangle RawBounds
+        {
+            get
+            {
+                RECT rect;
+                Windows.Win32.PInvoke.GetWindowRect(new HWND(_hwnd), out rect);
+
+                return new Rectangle
+                {
+                    Bottom = rect.bottom,
+                    Left = rect.left,
+                    Right = rect.right,
+                    Top = rect.top
+                };
+            }
         }
 
         public Size RawSize
         {
-            get
-            {
-                Vanara.PInvoke.RECT rect;
-                Vanara.PInvoke.User32.GetWindowRect(_hwnd, out rect);
-
-                return new Size()
-                {
-                    Width = rect.right - rect.left,
-                    Height = rect.bottom - rect.top
-                };
-            }
+            get { return RawBounds.Size; }
+            set { SetRawSize(value.Width, value.Height); }
         }
 
         public Size Size
@@ -200,35 +250,29 @@ namespace NativeInterop.Win32
             }
         }
 
-        public void SetRawSize(int width, int height)
+        private void SetRawSize(int width, int height)
         {
-            Vanara.PInvoke.RECT rect;
-            Vanara.PInvoke.User32.GetWindowRect(_hwnd, out rect);
+            var bounds = RawBounds;
 
-            Vanara.PInvoke.User32.MoveWindow(_hwnd, rect.left, rect.top, width, height, true);
+            Windows.Win32.PInvoke.MoveWindow(
+                new HWND(_hwnd),
+                bounds.Left,
+                bounds.Top,
+                width,
+                height,
+                true
+            );
         }
 
         public int RawWidth
         {
-            get
-            {
-                Vanara.PInvoke.RECT rect;
-                Vanara.PInvoke.User32.GetWindowRect(_hwnd, out rect);
-
-                return rect.right - rect.left;
-            }
+            get { return RawBounds.Width; }
             set { SetRawSize(value, RawHeight); }
         }
 
         public int RawHeight
         {
-            get
-            {
-                Vanara.PInvoke.RECT rect;
-                Vanara.PInvoke.User32.GetWindowRect(_hwnd, out rect);
-
-                return rect.bottom - rect.top;
-            }
+            get { return RawBounds.Height; }
             set { SetRawSize(RawWidth, value); }
         }
 
@@ -250,46 +294,46 @@ namespace NativeInterop.Win32
             set
             {
                 _visible = value;
-                Vanara.PInvoke.User32.ShowWindow(
-                    _hwnd,
-                    value ? ShowWindowCommand.SW_SHOW : ShowWindowCommand.SW_HIDE
+                Windows.Win32.PInvoke.ShowWindow(
+                    new HWND(_hwnd),
+                    value ? SHOW_WINDOW_CMD.SW_SHOW : SHOW_WINDOW_CMD.SW_HIDE
                 );
             }
         }
 
+        public uint Dpi
+        {
+            get { return Windows.Win32.PInvoke.GetDpiForWindow(new HWND(_hwnd)); }
+        }
+
+        public int MinWidth { get; set; }
+        public int MinHeight { get; set; }
+        public int MaxWidth { get; set; }
+        public int MaxHeight { get; set; }
+
         public void HideMinimizeAndMaximizeButtons()
         {
-            var currentStyle = (WindowStyles)Vanara.PInvoke.User32.GetWindowLong(
-                _hwnd,
-                User32.WindowLongFlags.GWL_STYLE
-            );
-
-            Vanara.PInvoke.User32.SetWindowLong(
-                _hwnd,
-                User32.WindowLongFlags.GWL_STYLE,
-                (int)(
-                    currentStyle
-                    & ~WindowStyles.WS_SIZEFRAME
-                    & ~WindowStyles.WS_MAXIMIZEBOX
-                    & ~WindowStyles.WS_MINIMIZEBOX
-                )
-            );
+            CurrentWindowStyles =
+                CurrentWindowStyles
+                & ~WindowStyles.WS_SIZEFRAME
+                & ~WindowStyles.WS_MAXIMIZEBOX
+                & ~WindowStyles.WS_MINIMIZEBOX;
         }
 
         public WindowStyles CurrentWindowStyles
         {
             get
             {
-                return (WindowStyles)Vanara.PInvoke.User32.GetWindowLong(
-                    _hwnd,
-                    User32.WindowLongFlags.GWL_STYLE
+                return (WindowStyles)Windows.Win32.PInvoke.GetWindowLong(
+                    new HWND(_hwnd),
+                    WINDOW_LONG_PTR_INDEX.GWL_STYLE
                 );
             }
             set
             {
-                Vanara.PInvoke.User32.SetWindowLong(
-                    _hwnd,
-                    User32.WindowLongFlags.GWL_STYLE,
+                Windows.Win32.PInvoke.SetWindowLong(
+                    new HWND(_hwnd),
+                    WINDOW_LONG_PTR_INDEX.GWL_STYLE,
                     (int)(value)
                 );
             }
@@ -297,82 +341,92 @@ namespace NativeInterop.Win32
 
         public void HideCaptionAndBorder()
         {
-            WindowStyles currentStyle = (WindowStyles)Vanara.PInvoke.User32.GetWindowLong(
-                _hwnd,
-                User32.WindowLongFlags.GWL_STYLE
-            );
-
-            Vanara.PInvoke.User32.SetWindowLong(
-                _hwnd,
-                User32.WindowLongFlags.GWL_STYLE,
-                (IntPtr)(User32.WindowStyles.WS_POPUPWINDOW)
-            );
+            CurrentWindowStyles = WindowStyles.WS_POPUPWINDOW;
         }
 
         public void SetTopMost(bool isTopMost)
         {
-            Vanara.PInvoke.RECT rect;
-            Vanara.PInvoke.User32.GetWindowRect(_hwnd, out rect);
+            var rect = RawBounds;
 
-            Vanara.PInvoke.User32.SetWindowPos(
-                _hwnd,
-                new HWND(
-                    (nint)(isTopMost ? WindoowZOrder.HWND_TOPMOST : WindoowZOrder.HWND_NOTOPMOST)
-                ),
-                rect.left,
-                rect.top,
-                rect.right - rect.left,
-                rect.bottom - rect.top,
-                User32.SetWindowPosFlags.SWP_SHOWWINDOW
+            Windows.Win32.PInvoke.SetWindowPos(
+                new HWND(_hwnd),
+                new HWND((nint)(isTopMost ? ZOrder.HWND_TOPMOST : ZOrder.HWND_NOTOPMOST)),
+                rect.Left,
+                rect.Top,
+                rect.Width,
+                rect.Height,
+                SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW
             );
         }
 
-        public void CenterOnScreen()
+        public Color TitleBarColor
         {
-            var display = DisplayInformation.GetDisplay(_hwnd);
-
-            var size = RawSize;
-
-            Vanara.PInvoke.User32.MoveWindow(
-                _hwnd,
-                display.WorkArea.left + display.ScreenWidth / 2 - size.Width / 2,
-                display.WorkArea.top + display.ScreenHeight / 2 - size.Height / 2,
-                size.Width,
-                size.Height,
-                true
-            );
+            get => GetTitlebarBackgroundColor();
+            set => SetTitlebarBackgroundColor(value);
         }
 
-        public void EnableBlur(uint blurOpacity, uint blurBackgroundColor)
+        public bool IsClosing { get; private set; }
+
+        public Microsoft.UI.Xaml.ApplicationTheme CurrentSystemTheme
         {
-            WindowComposition.EnableBlur(_hwnd, blurOpacity, blurBackgroundColor);
+            get
+            {
+                var fg = _uiSettings.GetColorValue(UIColorType.Foreground);
+                var bg = _uiSettings.GetColorValue(UIColorType.Background);
+
+                if (fg == White && bg == Black)
+                {
+                    return Microsoft.UI.Xaml.ApplicationTheme.Dark;
+                }
+                else if (fg == Black && bg == White)
+                {
+                    return Microsoft.UI.Xaml.ApplicationTheme.Light;
+                }
+                else
+                {
+                    // if a custom theme is active, fall back to "light" theme
+                    return ApplicationTheme.Light;
+                }
+            }
         }
 
-        public void SetWindowTheme(string subAppName, string? subIdList = null)
-        {
-            Vanara.PInvoke.UxTheme.SetWindowTheme(_hwnd, subAppName, subIdList);
-        }
+        const int DWMWA_CAPTION_COLOR = 35;
 
-        public void SetTitlebarBackgroundColor(Color titlebarBackgroundColor)
+        public unsafe Color GetTitlebarBackgroundColor()
         {
-            const int DWMWA_CAPTION_COLOR = 35;
             IntPtr pnt = Marshal.AllocHGlobal(Marshal.SizeOf<COLORREF>());
 
             try
             {
-                var nativeColor = new COLORREF()
-                {
-                    R = titlebarBackgroundColor.R,
-                    G = titlebarBackgroundColor.G,
-                    B = titlebarBackgroundColor.B
-                };
+                PInvoke.DwmGetWindowAttribute(
+                    new HWND(_hwnd),
+                    (DWMWINDOWATTRIBUTE)DWMWA_CAPTION_COLOR,
+                    (void*)pnt,
+                    sizeof(uint)
+                );
+
+                return Marshal.PtrToStructure<COLORREF>(pnt).GetColor();
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pnt);
+            }
+        }
+
+        public unsafe void SetTitlebarBackgroundColor(Color titlebarBackgroundColor)
+        {
+            IntPtr pnt = Marshal.AllocHGlobal(Marshal.SizeOf<COLORREF>());
+
+            try
+            {
+                var nativeColor = new COLORREF(titlebarBackgroundColor);
 
                 Marshal.StructureToPtr(nativeColor, pnt, false);
 
-                DwmApi.DwmSetWindowAttribute(
-                    _hwnd,
-                    (DwmApi.DWMWINDOWATTRIBUTE)DWMWA_CAPTION_COLOR,
-                    pnt,
+                PInvoke.DwmSetWindowAttribute(
+                    new HWND(_hwnd),
+                    (DWMWINDOWATTRIBUTE)DWMWA_CAPTION_COLOR,
+                    (void*)pnt,
                     sizeof(uint)
                 );
             }
@@ -382,16 +436,58 @@ namespace NativeInterop.Win32
             }
         }
 
-        public void SetBlackBackgroundColor()
+        public void LoadIcon(string iconName)
         {
-            //var hdc = PInvoke.GetDC(_hwnd);
-            //var blackBrush = PInvoke.GetStockObject(GetStockObject_iFlags.GRAY_BRUSH);
-            //PInvoke.SetDCBrushColor(hdc, (uint) blackBrush.Value);
-            //PInvoke.ReleaseDC(_hwnd, hdc);
-            //RECT rect;
-            //PInvoke.GetClientRect(_hwnd, out rect);
-            //PInvoke.InvalidateRect(_hwnd, rect, true);
-            //PInvoke.UpdateWindow(_hwnd);
+            SafeFileHandle hIcon = Windows.Win32.PInvoke.LoadImage(
+                new SafeFileHandle(IntPtr.Zero, false),
+                iconName,
+                GDI_IMAGE_TYPE.IMAGE_ICON,
+                16,
+                16,
+                IMAGE_FLAGS.LR_LOADFROMFILE
+            );
+
+            Windows.Win32.PInvoke.SendMessage(
+                new HWND(_hwnd),
+                (uint)WindowMessage.WM_SETICON,
+                0,
+                hIcon.DangerousGetHandle()
+            );
+
+            hIcon.SetHandleAsInvalid();
+        }
+
+        public void Maximize()
+        {
+            Windows.Win32.PInvoke.ShowWindow(new HWND(_hwnd), SHOW_WINDOW_CMD.SW_MAXIMIZE);
+        }
+
+        public void Minimize()
+        {
+            Windows.Win32.PInvoke.ShowWindow(new HWND(_hwnd), SHOW_WINDOW_CMD.SW_MINIMIZE);
+        }
+
+        public void Restore()
+        {
+            Windows.Win32.PInvoke.ShowWindow(new HWND(_hwnd), SHOW_WINDOW_CMD.SW_RESTORE);
+        }
+
+        public void Hide()
+        {
+            Windows.Win32.PInvoke.ShowWindow(new HWND(_hwnd), SHOW_WINDOW_CMD.SW_HIDE);
+        }
+
+        public void BringToTop()
+        {
+            Windows.Win32.PInvoke.SetWindowPos(
+                new HWND(_hwnd),
+                (HWND)(int)ZOrder.HWND_TOPMOST,
+                0,
+                0,
+                0,
+                0,
+                SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE
+            );
         }
     }
 }

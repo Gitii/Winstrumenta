@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Community.Wsl.Sdk" Version="0.1.4" />
     <PackageReference Include="Microsoft.CST.RecursiveExtractor" Version="1.1.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
-    <ProjectReference Include="..\wsl-sdk-dotnet\Community.Wsl.Sdk\Community.Wsl.Sdk.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
-﻿<local:ReactivePageError
-    x:Class="PackageInstaller.Pages.Error"
+﻿<local:ReactivePageResult
+    x:Class="PackageInstaller.Pages.Result"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
@@ -7,8 +7,7 @@
     xmlns:local="using:PackageInstaller.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
-    <controls:Grid Padding="40" Background="DarkRed">
+    <controls:Grid Padding="40,0,40,40">
         <controls:Grid.ColumnDefinitions>
             <controls:ColumnDefinition Width="*" />
             <controls:ColumnDefinition Width="Auto" />
@@ -22,13 +21,14 @@
             <Run
                 x:Name="Title"
                 FontSize="24"
-                FontWeight="Bold"
-                Foreground="White" />
+                FontWeight="Bold" />
             <LineBreak />
-            <Run x:Name="Description" Foreground="#ffcccb" />
+            <Run x:Name="Description" />
         </controls:TextBlock>
 
         <controls:ScrollViewer
+            x:Name="DetailsContainer"
+            Margin="0,5,0,5"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             controls:Grid.Column="0"
@@ -36,16 +36,17 @@
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto">
             <controls:TextBlock
-                x:Name="ErrorDetails"
+                x:Name="Details"
                 FontFamily="Courier New"
+                FontSize="10"
                 TextWrapping="NoWrap" />
         </controls:ScrollViewer>
         <controls:Image
+            x:Name="Icon"
             MaxWidth="100"
             VerticalAlignment="Top"
             controls:Grid.Column="1"
-            controls:Grid.Row="0"
-            Source="ms-appx:///Assets/error.png" />
+            controls:Grid.Row="0" />
 
         <controls:StackPanel
             HorizontalAlignment="Right"
@@ -55,11 +56,11 @@
             Orientation="Horizontal"
             Spacing="5">
             <controls:Button
-                x:Name="ToggleErrorDetails"
+                x:Name="ToggleDetails"
                 VerticalAlignment="Top"
                 Content="Show details"
                 IsEnabled="True" />
             <controls:Button x:Name="Button" Content="Close" />
         </controls:StackPanel>
     </controls:Grid>
-</local:ReactivePageError>
+</local:ReactivePageResult>

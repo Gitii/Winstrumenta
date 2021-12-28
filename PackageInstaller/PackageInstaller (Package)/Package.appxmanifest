@@ -12,7 +12,7 @@
     Version="1.0.0.0" />
 
   <Properties>
-    <DisplayName>PackageInstaller (Package)</DisplayName>
+    <DisplayName>Package Installer</DisplayName>
     <PublisherDisplayName>germi</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
@@ -31,8 +31,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="PackageInstaller (Package)"
-        Description="PackageInstaller (Package)"
+        DisplayName="Package Installer"
+        Description="Package Installer which is part of the Winstrumenta toolset. It allows users to install any supported linux package to be installed, without using command line tools."
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">

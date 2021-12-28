@@ -1,5 +1,10 @@
-﻿using System.Reactive.Disposables;
+﻿using System;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using DynamicData.Binding;
+using Microsoft.UI.Xaml;
 using PackageInstaller.Core.ModelViews;
+using PackageInstaller.Core.Services;
 using ReactiveUI;
 
 namespace PackageInstaller.Pages
@@ -14,21 +19,157 @@ namespace PackageInstaller.Pages
         {
             InitializeComponent();
 
-            this.WhenActivated((disposable) =>
-            {
-                this.OneWayBind(ViewModel, (vm) => vm.PackageMetaData.Package, (v) => v.PackageName.Text).DisposeWith(disposable);
-                this.OneWayBind(ViewModel, (vm) => vm.PackageMetaData.Architecture, (v) => v.Architecture.Text)
-                    .DisposeWith(disposable);
-                this.OneWayBind(ViewModel, (vm) => vm.PackageMetaData.Version, (v) => v.Version.Text)
-                    .DisposeWith(disposable);
-                this.OneWayBind(ViewModel, (vm) => vm.PackageMetaData.Description, (v) => v.Description.Text)
-                    .DisposeWith(disposable);
-                this.OneWayBind(ViewModel, (vm) => vm.DistroList, (v) => v.DistroList.ItemsSource)
-                    .DisposeWith(disposable);
+            this.WhenActivated(
+                (disposable) =>
+                {
+                    this.OneWayBind(
+                            ViewModel,
+                            (vm) => vm.PackageMetaData.Package,
+                            (v) => v.PackageName.Text
+                        )
+                        .DisposeWith(disposable);
 
-                this.Bind(ViewModel, (vm) => vm.SelectedWslDistribution, (v) => v.DistroList.SelectedValue)
-                    .DisposeWith(disposable);
-            });
+                    this.ViewModel
+                        .WhenAnyValue((vm) => vm.InProgress, vm => vm.SelectedWslDistribution)
+                        .CombineLatest(
+                            ViewModel!.DistroList
+                                .ToObservableChangeSet()
+                                .Select((c) => ViewModel.DistroList.Count),
+                            (firstT, distroListCount) =>
+                                firstT.Item1 && (firstT.Item2 == null || distroListCount > 1)
+                        )
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .BindTo(this, v => v.DistroList.IsEnabled)
+                        .DisposeWith(disposable);
+
+                    this.OneWayBind(
+                            ViewModel,
+                            (vm) => vm.InProgress,
+                            (v) => v.PrimaryActionButton.IsEnabled,
+                            (isInProgress) => !isInProgress
+                        )
+                        .DisposeWith(disposable);
+
+                    this.OneWayBind(
+                            ViewModel,
+                            (vm) => vm.PackageMetaData.Architecture,
+                            (v) => v.Architecture.Text
+                        )
+                        .DisposeWith(disposable);
+                    this.OneWayBind(
+                            ViewModel,
+                            (vm) => vm.PackageMetaData.Version,
+                            (v) => v.Version.Text
+                        )
+                        .DisposeWith(disposable);
+                    this.OneWayBind(
+                            ViewModel,
+                            (vm) => vm.PackageMetaData.Description,
+                            (v) => v.Description.Text
+                        )
+                        .DisposeWith(disposable);
+
+                    this.OneWayBind(
+                            ViewModel,
+                            (vm) => vm.DistroList,
+                            (v) => v.DistroList.ItemsSource
+                        )
+                        .DisposeWith(disposable);
+
+                    this.Bind(
+                            ViewModel,
+                            (vm) => vm.SelectedWslDistribution,
+                            (v) => v.DistroList.SelectedItem
+                        )
+                        .DisposeWith(disposable);
+
+                    this.OneWayBind(
+                            ViewModel,
+                            (vm) => vm.PackageInstallationStatus,
+                            (v) => v.PrimaryActionButtonText.Text,
+                            StatusToText
+                        )
+                        .DisposeWith(disposable);
+
+                    ViewModel.PrimaryPackageCommand.IsExecuting
+                        .Select((isExecuting) =>
+                            isExecuting ? Microsoft.UI.Xaml.Visibility.Visible : Visibility.Collapsed)
+                        .BindTo(this, (v) => v.PrimaryActionButtonIcon.Visibility)
+                        .DisposeWith(disposable);
+
+                    this.ViewModel
+                        .WhenAnyValue(
+                            (vm) => vm.PackageInstallationStatus,
+                            (vm) => vm.InstalledPackageVersion
+                        )
+                        .Select(StatusToRemarks)
+                        .BindTo(this, (v) => v.Remarks.Text)
+                        .DisposeWith(disposable);
+
+                    this.BindCommand(
+                            ViewModel,
+                            (vm) => vm.PrimaryPackageCommand,
+                            (v) => v.PrimaryActionButton
+                        )
+                        .DisposeWith(disposable);
+
+                    ViewModel!.DistroList
+                        .ToObservable()
+                        .Subscribe(
+                            item =>
+                            {
+                                if (ViewModel.SelectedWslDistribution != null)
+                                {
+                                    ViewModel.SelectedWslDistribution = item;
+                                }
+                            }
+                        )
+                        .DisposeWith(disposable);
+                }
+            );
+        }
+
+        private string StatusToRemarks(
+            (IPackageManager.PackageInstallationStatus? status, string? version) arg
+        )
+        {
+            if (!arg.status.HasValue)
+            {
+                return String.Empty;
+            }
+
+            switch (arg.status)
+            {
+                case IPackageManager.PackageInstallationStatus.NotInstalled:
+                    return "Package isn't installed.";
+                case IPackageManager.PackageInstallationStatus.InstalledSameVersion:
+                    return "Same version is already installed.";
+                case IPackageManager.PackageInstallationStatus.InstalledOlderVersion:
+                    return $"An older version ({arg.version}) is installed";
+                case IPackageManager.PackageInstallationStatus.InstalledNewerVersion:
+                    return $"A newer version ({arg.version}) is installed";
+                default:
+                    return "Unknown status";
+            }
+        }
+
+        private string StatusToText(IPackageManager.PackageInstallationStatus? arg)
+        {
+            switch (arg)
+            {
+                case IPackageManager.PackageInstallationStatus.NotInstalled:
+                    return "Install";
+                case IPackageManager.PackageInstallationStatus.InstalledSameVersion:
+                    return "Reinstall";
+                case IPackageManager.PackageInstallationStatus.InstalledOlderVersion:
+                    return "Upgrade";
+                case IPackageManager.PackageInstallationStatus.InstalledNewerVersion:
+                    return "Downgrade";
+                case null:
+                    return "Close";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(arg), arg, null);
+            }
         }
     }
 }

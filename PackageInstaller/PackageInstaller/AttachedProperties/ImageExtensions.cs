@@ -2,12 +2,38 @@
 using System.Diagnostics;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace PackageInstaller.AttachedProperties
 {
     public class ImageExtensions : DependencyObject
     {
+        public static ImageSource? GetImageSourceFromUri(string? uriPath)
+        {
+            uriPath = uriPath?.Trim().Trim('\\', '/'); // clean path
+
+            if (string.IsNullOrEmpty(uriPath))
+            {
+                return null;
+            }
+
+            var uri = new Uri($"ms-appx:///{uriPath}");
+
+            if (uri.AbsolutePath.EndsWith(".svg", true, null))
+            {
+                var source = new SvgImageSource(uri);
+                source.OpenFailed += SourceOnOpenFailed;
+                return source;
+            }
+            else
+            {
+                var source = new BitmapImage(uri);
+                source.ImageFailed += OnImageLoadFailed;
+                return source;
+            }
+        }
+
         public static readonly DependencyProperty SourceUriProperty =
             DependencyProperty.RegisterAttached(
                 "SourceUri",
@@ -29,19 +55,7 @@ namespace PackageInstaller.AttachedProperties
                 }
                 else if (e.NewValue is string uriPath)
                 {
-                    var uri = new Uri($"ms-appx:///{uriPath}");
-
-                    if (uri.AbsolutePath.EndsWith(".svg", true, null))
-                    {
-                        var source = new SvgImageSource(uri);
-                        image.Source = source;
-                    }
-                    else
-                    {
-                        var source = new BitmapImage(uri);
-                        source.ImageFailed += OnImageLoadFailed;
-                        image.Source = source;
-                    }
+                    image.Source = GetImageSourceFromUri(uriPath);
                 }
                 else
                 {
@@ -63,8 +77,17 @@ namespace PackageInstaller.AttachedProperties
 
         private static void OnImageLoadFailed(object sender, ExceptionRoutedEventArgs e)
         {
-            if (Debugger.IsAttached) Debugger.Break();
+            if (Debugger.IsAttached)
+                Debugger.Break();
         }
 
+        private static void SourceOnOpenFailed(
+            SvgImageSource sender,
+            SvgImageSourceFailedEventArgs args
+        )
+        {
+            if (Debugger.IsAttached)
+                Debugger.Break();
+        }
     }
 }

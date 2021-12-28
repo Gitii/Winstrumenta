@@ -6,85 +6,58 @@ using System.Text;
 using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Windows.Sdk
+namespace Windows.Win32
 {
-    internal enum AccentState
-    {
-        ACCENT_DISABLED = 0,
-        ACCENT_ENABLE_GRADIENT = 1,
-        ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
-        ACCENT_ENABLE_BLURBEHIND = 3,
-        ACCENT_ENABLE_ACRYLICBLURBEHIND = 4,
-        ACCENT_INVALID_STATE = 5
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct AccentPolicy
-    {
-        public AccentState AccentState;
-        public uint AccentFlags;
-        public uint GradientColor;
-        public uint AnimationId;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct WindowCompositionAttributeData
-    {
-        public WindowCompositionAttribute Attribute;
-        public IntPtr Data;
-        public int SizeOfData;
-    }
-
-    internal enum WindowCompositionAttribute
-    {
-        // ...
-        WCA_ACCENT_POLICY = 19
-        // ...
-    }
-
     internal static partial class PInvoke
     {
-        [DllImport("user32.dll")]
-        internal static extern int SetWindowCompositionAttribute(
-            IntPtr hwnd,
-            ref WindowCompositionAttributeData data
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HT_CAPTION = 0x2;
+
+        // This helper static method is required because the 32-bit version of user32.dll does not contain this API
+        // (on any versions of Windows), so linking the method will fail at run-time. The bridge dispatches the request
+        // to the correct function (GetWindowLong in 32-bit mode and GetWindowLongPtr in 64-bit mode)
+        public static IntPtr SetWindowLongPtr(
+            Win32.Foundation.HWND hWnd,
+            Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX nIndex,
+            IntPtr dwNewLong
+        )
+        {
+            if (Environment.Is64BitProcess)
+            {
+                return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+            }
+
+            return new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
+        }
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
+        private static extern int SetWindowLong32(
+            Win32.Foundation.HWND hWnd,
+            Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX nIndex,
+            int dwNewLong
         );
 
-        [DllImport("user32")]
-        internal static extern IntPtr SetWindowLongPtr(
-            IntPtr hWnd,
-            Vanara.PInvoke.User32.WindowLongFlags flags,
-            WinProc newProc
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+        private static extern IntPtr SetWindowLongPtr64(
+            Win32.Foundation.HWND hWnd,
+            Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX nIndex,
+            IntPtr dwNewLong
         );
 
         [DllImport("user32.dll")]
         internal static extern IntPtr CallWindowProc(
             IntPtr lpPrevWndFunc,
             IntPtr hWnd,
-            Vanara.PInvoke.User32.WindowMessage Msg,
+            WindowMessage Msg,
             IntPtr wParam,
             IntPtr lParam
         );
 
         public delegate IntPtr WinProc(
             IntPtr hWnd,
-            Vanara.PInvoke.User32.WindowMessage Msg,
+            WindowMessage Msg,
             IntPtr wParam,
             IntPtr lParam
-        );
-
-        [DllImport("user32.dll")]
-        internal static extern int FillRect(
-            IntPtr hDC,
-            [In] ref Vanara.PInvoke.RECT lprc,
-            IntPtr hbr
-        );
-
-        [DllImport("user32.dll")]
-        internal extern static bool GetUpdateRect(
-            IntPtr hWnd,
-            ref Vanara.PInvoke.RECT rect,
-            bool bErase
         );
     }
 }

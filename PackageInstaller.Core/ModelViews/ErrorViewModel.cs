@@ -27,6 +27,13 @@ namespace PackageInstaller.Core.ModelViews
                     Environment.Exit(1);
                 }
             );
+
+            ToggleErrorDetails = ReactiveCommand.Create(
+                () =>
+                {
+                    ErrorDetailsVisible = !ErrorDetailsVisible;
+                }
+            );
         }
 
         public string Id { get; } = nameof(ErrorViewModel);
@@ -45,6 +52,21 @@ namespace PackageInstaller.Core.ModelViews
 
         private string _errorTitle;
         private string _errorDescription;
+        string _errorDetails;
+
+        bool _errorDetailsVisible;
+
+        public bool ErrorDetailsVisible
+        {
+            get { return _errorDetailsVisible; }
+            set { this.RaiseAndSetIfChanged(ref _errorDetailsVisible, value); }
+        }
+
+        public string ErrorDetails
+        {
+            get { return _errorDetails; }
+            set { this.RaiseAndSetIfChanged(ref _errorDetails, value); }
+        }
 
         public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
         {
@@ -61,11 +83,16 @@ namespace PackageInstaller.Core.ModelViews
             var navParms = parameter.FromNavigationParameter<NavigationParameter>();
 
             ErrorTitle = "An unhandled exception occurred";
-            ErrorDescription = navParms.Exception.ToString();
+            ErrorDescription = navParms.Exception.Message.ToString();
+            ErrorDetails = navParms.Exception.ToString();
+
+            ErrorDetailsVisible = false;
 
             return Observable.Return(Unit.Default);
         }
 
         public ReactiveCommand<Unit, Unit> Close { get; }
+
+        public ReactiveCommand<Unit, Unit> ToggleErrorDetails { get; }
     }
 }

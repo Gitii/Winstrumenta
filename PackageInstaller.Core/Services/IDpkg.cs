@@ -13,6 +13,9 @@
 
         int CompareVersions(string versionA, string versionB);
 
-        Task Install(string distroName, string unixfilePath, IProgress<(int, string)> progress);
+        Task<(bool success, string[] logs)> Install(string distroName, string unixFilePath);
+        Task<(bool success, string[] logs)> Uninstall(string distroName, string packageName);
+        Task<(bool success, string[] logs)> Upgrade(string distroName, string unixFilePath);
+        Task<(bool success, string[] logs)> Downgrade(string distroName, string unixFilePath);
     }
 }

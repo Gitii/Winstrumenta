@@ -34,6 +34,9 @@
             string packageVersion
         );
 
-        public Task InstallPackage(string filePath) { }
+        public Task<string> InstallPackage(WslDistribution distribution, string filePath);
+        public Task<string> UpgradePackage(WslDistribution distribution, string filePath);
+        public Task<string> DowngradePackage(WslDistribution distribution, string filePath);
+        public Task<string> UninstallPackage(WslDistribution distribution, string packageName);
     }
 }

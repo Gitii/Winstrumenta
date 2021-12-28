@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net5.0-windows10.0.19041</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -18,9 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Vanara.PInvoke.DwmApi" Version="3.3.14" />
-    <PackageReference Include="Vanara.PInvoke.User32" Version="3.3.14" />
-    <PackageReference Include="Vanara.PInvoke.UxTheme" Version="3.3.14" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.1.619-beta">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

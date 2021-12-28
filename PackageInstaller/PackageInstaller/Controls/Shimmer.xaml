@@ -57,9 +57,9 @@
                             CenterY="0.5"
                             Rotation="95" />
                     </LinearGradientBrush.RelativeTransform>
-                    <GradientStop Offset="0" Color="{StaticResource EmptyStateLightGray}" />
-                    <GradientStop Offset="0.5" Color="{StaticResource MidStateLightGray}" />
-                    <GradientStop Offset="1" Color="{StaticResource EmptyStateLightGray}" />
+                    <GradientStop Offset="0" Color="{ThemeResource EmptyStateLightGray}" />
+                    <GradientStop Offset="0.5" Color="{ThemeResource MidStateLightGray}" />
+                    <GradientStop Offset="1" Color="{ThemeResource EmptyStateLightGray}" />
                 </LinearGradientBrush>
             </shapes:Rectangle.Fill>
         </shapes:Rectangle>
