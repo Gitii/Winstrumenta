@@ -11,7 +11,7 @@
 
     public interface IDebianPackageReader
     {
-        public Task<DebianPackageMetaData> ReadMetaData(string filePath);
-        public Task<(bool isSupported, string? reason)> IsSupported(string filePath);
+        public Task<DebianPackageMetaData> ReadMetaData(FileSystemPath filePath);
+        public Task<(bool isSupported, string? reason)> IsSupported(FileSystemPath filePath);
     }
 }

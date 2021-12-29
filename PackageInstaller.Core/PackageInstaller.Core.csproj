@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
     <PackageReference Include="ReactiveUI" Version="17.1.9" />
     <PackageReference Include="Sextant" Version="2.12.4" />
+    <PackageReference Include="Z.Linq.Async" Version="1.0.3" />
   </ItemGroup>
 
 </Project>

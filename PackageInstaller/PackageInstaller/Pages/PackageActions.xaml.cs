@@ -36,7 +36,7 @@ namespace PackageInstaller.Pages
                                 .ToObservableChangeSet()
                                 .Select((c) => ViewModel.DistroList.Count),
                             (firstT, distroListCount) =>
-                                firstT.Item1 && (firstT.Item2 == null || distroListCount > 1)
+                                !firstT.Item1 && (firstT.Item2 == null || distroListCount > 1)
                         )
                         .ObserveOn(RxApp.MainThreadScheduler)
                         .BindTo(this, v => v.DistroList.IsEnabled)
@@ -92,8 +92,12 @@ namespace PackageInstaller.Pages
                         .DisposeWith(disposable);
 
                     ViewModel.PrimaryPackageCommand.IsExecuting
-                        .Select((isExecuting) =>
-                            isExecuting ? Microsoft.UI.Xaml.Visibility.Visible : Visibility.Collapsed)
+                        .Select(
+                            (isExecuting) =>
+                                isExecuting
+                                    ? Microsoft.UI.Xaml.Visibility.Visible
+                                    : Visibility.Collapsed
+                        )
                         .BindTo(this, (v) => v.PrimaryActionButtonIcon.Visibility)
                         .DisposeWith(disposable);
 
@@ -130,7 +134,7 @@ namespace PackageInstaller.Pages
         }
 
         private string StatusToRemarks(
-            (IPackageManager.PackageInstallationStatus? status, string? version) arg
+            (IPlatformDependentPackageManager.PackageInstallationStatus? status, string? version) arg
         )
         {
             if (!arg.status.HasValue)
@@ -140,30 +144,30 @@ namespace PackageInstaller.Pages
 
             switch (arg.status)
             {
-                case IPackageManager.PackageInstallationStatus.NotInstalled:
+                case IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled:
                     return "Package isn't installed.";
-                case IPackageManager.PackageInstallationStatus.InstalledSameVersion:
+                case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion:
                     return "Same version is already installed.";
-                case IPackageManager.PackageInstallationStatus.InstalledOlderVersion:
+                case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion:
                     return $"An older version ({arg.version}) is installed";
-                case IPackageManager.PackageInstallationStatus.InstalledNewerVersion:
+                case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion:
                     return $"A newer version ({arg.version}) is installed";
                 default:
                     return "Unknown status";
             }
         }
 
-        private string StatusToText(IPackageManager.PackageInstallationStatus? arg)
+        private string StatusToText(IPlatformDependentPackageManager.PackageInstallationStatus? arg)
         {
             switch (arg)
             {
-                case IPackageManager.PackageInstallationStatus.NotInstalled:
+                case IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled:
                     return "Install";
-                case IPackageManager.PackageInstallationStatus.InstalledSameVersion:
+                case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion:
                     return "Reinstall";
-                case IPackageManager.PackageInstallationStatus.InstalledOlderVersion:
+                case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion:
                     return "Upgrade";
-                case IPackageManager.PackageInstallationStatus.InstalledNewerVersion:
+                case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion:
                     return "Downgrade";
                 case null:
                     return "Close";

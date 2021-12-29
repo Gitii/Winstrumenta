@@ -4,10 +4,12 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using Microsoft.Extensions.Hosting;
+using PackageInstaller.Core.Exceptions;
 using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
 using Sextant;
+using Z.Linq;
 
 namespace PackageInstaller.Core.ModelViews;
 
@@ -17,13 +19,14 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     private readonly IWsl _wsl;
     private readonly SourceList<WslDistributionModelView> _distroSourceList;
     private readonly ReadOnlyObservableCollection<WslDistributionModelView> _distroList;
-    private IPackageManager _packageManager;
+    private IEnumerable<IPlatformDependentPackageManager> _packageManagers;
     bool _inProgress;
     string _progressStatusMessage;
-    string _packageFilePath;
+    FileSystemPath _packageFilePath;
     private readonly IParameterViewStackService _viewStackService;
+    private IPath _path;
 
-    public string PackageFilePath
+    public FileSystemPath PackageFilePath
     {
         get { return _packageFilePath; }
         set { this.RaiseAndSetIfChanged(ref _packageFilePath, value); }
@@ -43,22 +46,24 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
     public readonly struct NavigationParameter
     {
-        public readonly PackageMetaData PackageMetaData { get; init; }
+        public readonly IPlatformDependentPackageManager.PackageMetaData PackageMetaData { get; init; }
 
-        public readonly string PackageFilePath { get; init; }
+        public readonly FileSystemPath PackageFilePath { get; init; }
     }
 
     public PackageActionsViewModel(
         IHostApplicationLifetime applicationLifetime,
         IWsl wsl,
-        IPackageManager packageManager,
-        IParameterViewStackService viewStackService
+        IParameterViewStackService viewStackService,
+        IEnumerable<IPlatformDependentPackageManager> packageManagers,
+        IPath path
     )
     {
         _applicationLifetime = applicationLifetime;
         _wsl = wsl;
-        _packageManager = packageManager;
         _viewStackService = viewStackService;
+        _packageManagers = packageManagers;
+        _path = path;
 
         _distroSourceList = new SourceList<WslDistributionModelView>();
         _distroSourceList
@@ -73,7 +78,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             () =>
             {
                 _applicationLifetime.StopApplication();
-                Environment.Exit(1);
+                Environment.Exit(0);
             }
         );
 
@@ -100,13 +105,13 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     {
         switch (PackageInstallationStatus)
         {
-            case IPackageManager.PackageInstallationStatus.NotInstalled:
+            case IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled:
                 return Install();
-            case IPackageManager.PackageInstallationStatus.InstalledSameVersion:
+            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion:
                 return ReInstall();
-            case IPackageManager.PackageInstallationStatus.InstalledOlderVersion:
+            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion:
                 return Upgrade();
-            case IPackageManager.PackageInstallationStatus.InstalledNewerVersion:
+            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion:
                 return Downgrade();
             default:
                 throw new ArgumentOutOfRangeException(
@@ -125,10 +130,19 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
             ProgressStatusMessage = "Downgrading package...";
 
-            var log = await _packageManager.InstallPackage(
-                SelectedWslDistribution!.Distro,
-                PackageFilePath
+            var distroName = SelectedWslDistribution!.Name;
+
+            var packageManager = await _packageManagers.GetSupportedManager(
+                PackageFilePath,
+                distroName
             );
+
+            var (success, log) = await packageManager.Downgrade(distroName, PackageFilePath);
+
+            if (!success)
+            {
+                throw new DetailedException("Failed to install package", log);
+            }
 
             ProgressStatusMessage = "Package downgraded!";
 
@@ -168,10 +182,19 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
             ProgressStatusMessage = "Upgrading package...";
 
-            var log = await _packageManager.InstallPackage(
-                SelectedWslDistribution!.Distro,
-                PackageFilePath
+            var distroName = SelectedWslDistribution!.Name;
+
+            var packageManager = await _packageManagers.GetSupportedManager(
+                PackageFilePath,
+                distroName
             );
+
+            var (success, log) = await packageManager.Upgrade(distroName, PackageFilePath);
+
+            if (!success)
+            {
+                throw new DetailedException("Failed to install package", log);
+            }
 
             ProgressStatusMessage = "Package upgraded!";
 
@@ -216,10 +239,19 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
             ProgressStatusMessage = "Installing package...";
 
-            var log = await _packageManager.InstallPackage(
-                SelectedWslDistribution!.Distro,
-                PackageFilePath
+            var distroName = SelectedWslDistribution!.Name;
+
+            var packageManager = await _packageManagers.GetSupportedManager(
+                PackageFilePath,
+                distroName
             );
+
+            var (success, log) = await packageManager.Install(distroName, PackageFilePath);
+
+            if (!success)
+            {
+                throw new DetailedException("Failed to install package", log);
+            }
 
             ProgressStatusMessage = "Package installed!";
 
@@ -256,18 +288,44 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     {
         if (arg != null)
         {
-            var status = await _packageManager.CheckInstallationStatus(
-                arg.Distro,
-                PackageMetaData.Package,
-                PackageMetaData.Version
+            var distroName = SelectedWslDistribution!.Name;
+
+            var packageManager = await _packageManagers.GetSupportedManager(
+                PackageFilePath,
+                distroName
             );
 
-            PackageInstallationStatus = status.Status;
-            InstalledPackageVersion = status.InstalledPackageVersion;
+            var isInstalled = await packageManager.IsPackageInstalled(
+                distroName,
+                PackageMetaData.Package
+            );
+
+            if (!isInstalled)
+            {
+                PackageInstallationStatus =
+                    IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled;
+                InstalledPackageVersion = String.Empty;
+            }
+            else
+            {
+                var installedPackageInfo = await packageManager.GetInstalledPackageInfo(
+                    distroName,
+                    PackageMetaData.Package
+                );
+
+                var installationStatus = packageManager.CompareVersions(
+                    installedPackageInfo.Version,
+                    PackageMetaData.Version
+                );
+
+                PackageInstallationStatus = installationStatus;
+                InstalledPackageVersion = installedPackageInfo.Version;
+            }
         }
         else
         {
-            PackageInstallationStatus = IPackageManager.PackageInstallationStatus.NotInstalled;
+            PackageInstallationStatus =
+                IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled;
             InstalledPackageVersion = null;
         }
 
@@ -276,9 +334,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
     public string Id { get; } = nameof(PackageActionsViewModel);
 
-    PackageMetaData _packageMetaData;
+    IPlatformDependentPackageManager.PackageMetaData _packageMetaData;
 
-    public PackageMetaData PackageMetaData
+    public IPlatformDependentPackageManager.PackageMetaData PackageMetaData
     {
         get { return _packageMetaData; }
         set { this.RaiseAndSetIfChanged(ref _packageMetaData, value); }
@@ -292,9 +350,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         set { this.RaiseAndSetIfChanged(ref _selectedWslDistribution, value); }
     }
 
-    IPackageManager.PackageInstallationStatus? _packageInstallationStatus;
+    IPlatformDependentPackageManager.PackageInstallationStatus? _packageInstallationStatus;
 
-    public IPackageManager.PackageInstallationStatus? PackageInstallationStatus
+    public IPlatformDependentPackageManager.PackageInstallationStatus? PackageInstallationStatus
     {
         get { return _packageInstallationStatus; }
         set { this.RaiseAndSetIfChanged(ref _packageInstallationStatus, value); }
@@ -314,16 +372,30 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
         var distros = await _wsl.GetAllInstalledDistributions();
 
+        var supportedDistros = await distros.WhereAsync(
+            async (d) =>
+            {
+                foreach (var packageManager in _packageManagers)
+                {
+                    if (await packageManager.IsSupportedByDistribution(d.Name))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        );
+
         _distroSourceList.Edit(
             (list) =>
             {
                 list.Clear();
                 list.AddRange(
-                    distros
+                    supportedDistros
                         .Where(
                             (d) =>
                                 d.IsRunning
-                                && d.SupportedPackageTypes.HasFlag(PackageMetaData.PackageType)
                                 && d.Name is not ("docker-desktop-data" or "docker-desktop")
                         )
                         .Select((d) => new WslDistributionModelView(d))

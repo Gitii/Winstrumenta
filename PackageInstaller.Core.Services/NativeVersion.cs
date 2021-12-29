@@ -24,7 +24,7 @@ public class NativeVersion : BaseVersion
         {
             return 1;
         }
-        
+
         // Convert other into an instance of BaseVersion if it's not already.
         // (All we need is epoch, upstream_version, and debian_revision
         // attributes, which BaseVersion gives us.) Requires other's string
@@ -36,10 +36,12 @@ public class NativeVersion : BaseVersion
         {
             return -1;
         }
+
         if (lepoch > repoch)
         {
             return 1;
         }
+
         var res = _version_cmp_part(
             FirstNotEmpty(UpstreamVersion, "0"),
             FirstNotEmpty(other.UpstreamVersion, "0")
@@ -56,6 +58,26 @@ public class NativeVersion : BaseVersion
         );
     }
 
+    public IPlatformDependentPackageManager.PackageInstallationStatus GetInstallationStatusFromComparison(
+        BaseVersion? other
+    )
+    {
+        var versionComparison = CompareTo(other);
+
+        if (versionComparison < 0)
+        {
+            return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion;
+        }
+        else if (versionComparison > 0)
+        {
+            return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion;
+        }
+        else
+        {
+            return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion;
+        }
+    }
+
     // Return an integer value for character x
     public int _order(char x)
     {
@@ -63,14 +85,17 @@ public class NativeVersion : BaseVersion
         {
             return -1;
         }
+
         if (char.IsNumber(x))
         {
             return Convert.ToInt32(x) + 1;
         }
+
         if (re_alpha.IsMatch(x.ToString()))
         {
             return Ord(x);
         }
+
         return Ord(x) + 256;
 
         int Ord(char character)

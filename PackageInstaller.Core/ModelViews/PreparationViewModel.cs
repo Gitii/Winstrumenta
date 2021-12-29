@@ -10,7 +10,8 @@ namespace PackageInstaller.Core.ModelViews
 {
     public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
     {
-        private IPackageReader _packageReader;
+        private IEnumerable<IPlatformDependentPackageManager> _packagesManagers;
+        private IPath _path;
 
         public readonly struct NavigationParameter
         {
@@ -22,11 +23,11 @@ namespace PackageInstaller.Core.ModelViews
 
         public PreparationViewModel(
             IParameterViewStackService viewStackService,
-            IPackageReader packageReader
-        )
+            IEnumerable<IPlatformDependentPackageManager> packagesManagers, IPath path)
         {
             _viewStackService = viewStackService;
-            _packageReader = packageReader;
+            _packagesManagers = packagesManagers;
+            _path = path;
         }
 
         public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
@@ -52,17 +53,11 @@ namespace PackageInstaller.Core.ModelViews
 
             try
             {
-                string packageFilePath = ParseArguments(arguments);
+                var packageFilePath = ParseArguments(arguments);
 
-                (var isSupported, string? reason) = await _packageReader.IsSupported(packageFilePath);
+                var packageManager = await _packagesManagers.GetSupportedManager(packageFilePath);
 
-                if (!isSupported)
-                {
-                    throw new Exception($"File is not a valid package: {reason}");
-                }
-
-                var data = await _packageReader.ReadMetaData(packageFilePath);
-
+                var data = await packageManager.ExtractPackageMetaData(packageFilePath);
 
                 var navParms = new PackageActionsViewModel.NavigationParameter()
                 {
@@ -84,7 +79,7 @@ namespace PackageInstaller.Core.ModelViews
             }
         }
 
-        private string ParseArguments(string[] arguments)
+        private FileSystemPath ParseArguments(string[] arguments)
         {
             if (arguments.Length == 0)
             {
@@ -106,7 +101,7 @@ namespace PackageInstaller.Core.ModelViews
                 throw new FileNotFoundException("The file doesn't exist", filePath);
             }
 
-            return filePath;
+            return _path.ToFileSystemPath(filePath);
         }
     }
 }

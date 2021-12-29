@@ -56,6 +56,8 @@ namespace PackageInstaller
             var uiContext =
                 SynchronizationContext.Current ?? throw new Exception("UI Context is null!");
 
+            var stackService = this.services.GetRequiredService<IParameterViewStackService>();
+
             RxApp.DefaultExceptionHandler = Observer
                 .Create<Exception>(
                     (ex) =>
@@ -68,8 +70,7 @@ namespace PackageInstaller
                                     Exception = ex
                                 };
 
-                                this.services
-                                    .GetRequiredService<IParameterViewStackService>()
+                                stackService
                                     .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
                                     .Subscribe();
                             },
@@ -91,8 +92,7 @@ namespace PackageInstaller
                 Arguments = Environment.GetCommandLineArgs().Skip(1).ToArray(),
             };
 
-            this.services
-                .GetRequiredService<IParameterViewStackService>()
+            stackService
                 .PushPage<PreparationViewModel>(navParams.ToNavigationParameter())
                 .Subscribe();
         }

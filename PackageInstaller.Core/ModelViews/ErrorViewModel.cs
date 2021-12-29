@@ -1,6 +1,7 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Hosting;
+using PackageInstaller.Core.Exceptions;
 using PackageInstaller.Core.Helpers;
 using ReactiveUI;
 using Sextant;
@@ -84,7 +85,9 @@ namespace PackageInstaller.Core.ModelViews
 
             ErrorTitle = "An unhandled exception occurred";
             ErrorDescription = navParms.Exception.Message.ToString();
-            ErrorDetails = navParms.Exception.ToString();
+            ErrorDetails = navParms.Exception is DetailedException dex
+                ? dex.Details
+                : navParms.Exception.ToString();
 
             ErrorDetailsVisible = false;
 

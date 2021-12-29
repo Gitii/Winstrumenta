@@ -14,9 +14,9 @@ namespace PackageInstaller.Core.Services
             @"^control[.]tar[.][\w]{0,2}(\\control[.]tar)?\\control$"
         );
 
-        public async Task<DebianPackageMetaData> ReadMetaData(string filePath)
+        public async Task<DebianPackageMetaData> ReadMetaData(FileSystemPath filePath)
         {
-            if (await IsDebFile(filePath) is false)
+            if (await IsDebFile(filePath.WindowsPath) is false)
             {
                 throw new ArgumentException("File is not a deb package file");
             }
@@ -25,7 +25,7 @@ namespace PackageInstaller.Core.Services
 
             await foreach (
                 var fileEntry in extractor.ExtractAsync(
-                    filePath,
+                    filePath.WindowsPath,
                     new ExtractorOptions()
                     {
                         Recurse = true,
@@ -34,7 +34,7 @@ namespace PackageInstaller.Core.Services
                 )
             )
             {
-                var relPath = Path.GetRelativePath(filePath, fileEntry.FullPath);
+                var relPath = Path.GetRelativePath(filePath.WindowsPath, fileEntry.FullPath);
                 if (_relativePathMatcher.IsMatch(relPath))
                 {
                     return await ReadFromControlFile(fileEntry.Content);
@@ -44,9 +44,9 @@ namespace PackageInstaller.Core.Services
             throw new Exception("Deb package file is malformed");
         }
 
-        public async Task<(bool isSupported, string? reason)> IsSupported(string filePath)
+        public async Task<(bool isSupported, string? reason)> IsSupported(FileSystemPath filePath)
         {
-            if (await IsDebFile(filePath))
+            if (await IsDebFile(filePath.WindowsPath))
             {
                 return (true, null);
             }

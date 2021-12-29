@@ -22,6 +22,7 @@
     <None Remove="Assets\DistroIcons\128_ubuntu.png" />
     <None Remove="Assets\DistroIcons\128_unknown.png" />
     <None Remove="Assets\error.png" />
+    <None Remove="Assets\package_closed.png" />
     <None Remove="Assets\parcel.svg" />
     <None Remove="Assets\success.png" />
     <None Remove="Assets\warning.png" />

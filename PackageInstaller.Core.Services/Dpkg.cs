@@ -7,11 +7,13 @@ namespace PackageInstaller.Core.Services
 {
     public class Dpkg : IDpkg
     {
-        private IWslCommands _wslCommands;
+        private readonly IWslCommands _wslCommands;
+        private IDebianPackageReader _debianPackageReader;
 
-        public Dpkg(IWslCommands wslCommands)
+        public Dpkg(IWslCommands wslCommands, IDebianPackageReader debianPackageReader)
         {
             _wslCommands = wslCommands;
+            _debianPackageReader = debianPackageReader;
         }
 
         public async Task<bool> IsPackageInstalled(string distroName, string packageName)
@@ -29,10 +31,40 @@ namespace PackageInstaller.Core.Services
             return !output.Contains($"dpkg-query: package '{packageName}' is not installed");
         }
 
-        public async Task<IDpkg.PackageInfo> GetPackage(string distroName, string packageName)
+        public async Task<IPlatformDependentPackageManager.PackageMetaData> ExtractPackageMetaData(
+            FileSystemPath filePath)
+        {
+            var data = await Task.Run(
+                async () => await _debianPackageReader.ReadMetaData(filePath)
+            );
+
+            return new IPlatformDependentPackageManager.PackageMetaData()
+            {
+                Package = data.Package,
+                Description = data.Description,
+                Version = data.Version,
+                Architecture = data.Architecture,
+                AllFields = data.AllFields
+            };
+        }
+
+        public Task<(bool isSupported, string? reason)> IsPackageSupported(FileSystemPath filePath)
+        {
+            return _debianPackageReader.IsSupported(filePath);
+        }
+
+        public async Task<IPlatformDependentPackageManager.PackageInfo> GetInstalledPackageInfo(
+            string distroName,
+            string packageName
+        )
         {
             var output = await _wslCommands
-                .ExecuteCommandAsync(distroName, "dpkg", new[] { "-s", packageName })
+                .ExecuteCommandAsync(
+                    distroName,
+                    "dpkg",
+                    new[] { "-s", packageName },
+                    ignoreExitCode: true
+                )
                 .ConfigureAwait(false);
 
             if (output.Contains($"dpkg-query: package '{packageName}' is not installed"))
@@ -56,15 +88,18 @@ namespace PackageInstaller.Core.Services
             }
         }
 
-        public int CompareVersions(string versionA, string versionB)
+        public IPlatformDependentPackageManager.PackageInstallationStatus CompareVersions(
+            string versionA,
+            string versionB
+        )
         {
             var pva = new NativeVersion(versionA);
             var pvb = new NativeVersion(versionB);
 
-            return pva.CompareTo(pvb);
+            return pva.GetInstallationStatusFromComparison(pvb);
         }
 
-        private async Task<(bool success, string[] logs)> ExecuteDpkg(
+        private async Task<(bool success, string logs)> ExecuteDpkg(
             string distroName,
             params string[] arguments
         )
@@ -93,31 +128,31 @@ namespace PackageInstaller.Core.Services
 
             var output = await taskOutput; // wait for output to be fetched
 
-            return (results.ExitCode == 0, output);
+            return (results.ExitCode == 0, String.Join(Environment.NewLine, output));
         }
 
-        public Task<(bool success, string[] logs)> Install(string distroName, string unixFilePath)
+        public Task<(bool success, string logs)> Install(string distroName, FileSystemPath filePath)
         {
             return ExecuteDpkg(
                 distroName,
                 "--force-confold",
                 "--force-confdef",
                 "-i",
-                unixFilePath
+                filePath.UnixPath
             );
         }
 
-        public Task<(bool success, string[] logs)> Uninstall(string distroName, string packageName)
+        public Task<(bool success, string logs)> Uninstall(string distroName, string packageName)
         {
             return ExecuteDpkg(distroName, "-r", packageName);
         }
 
-        public Task<(bool success, string[] logs)> Upgrade(string distroName, string unixFilePath)
+        public Task<(bool success, string logs)> Upgrade(string distroName, FileSystemPath filePath)
         {
-            return Install(distroName, unixFilePath);
+            return Install(distroName, filePath);
         }
 
-        public Task<(bool success, string[] logs)> Downgrade(string distroName, string unixFilePath)
+        public Task<(bool success, string logs)> Downgrade(string distroName, FileSystemPath filePath)
         {
             return ExecuteDpkg(
                 distroName,
@@ -125,8 +160,20 @@ namespace PackageInstaller.Core.Services
                 "--force-confdef",
                 "--force-downgrade",
                 "-i",
-                unixFilePath
+                filePath.UnixPath
             );
+        }
+
+        public async Task<bool> IsSupportedByDistribution(string distroName)
+        {
+            var pathToDpkg = await _wslCommands.ExecuteCommandAsync(
+                distroName,
+                "which",
+                new string[] { "dpkg" },
+                ignoreExitCode: true
+            );
+
+            return pathToDpkg.Trim().Length > 0;
         }
 
         public static IObservable<string> ReadLines(StreamReader reader)
