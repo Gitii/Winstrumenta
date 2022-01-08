@@ -8,17 +8,14 @@ public interface IPlatformDependentPackageManager
         /// The package isn't installed.
         /// </summary>
         NotInstalled,
-
         /// <summary>
         /// The package with the same version is installed.
         /// </summary>
         InstalledSameVersion,
-
         /// <summary>
         /// An older package is installed.
         /// </summary>
         InstalledOlderVersion,
-
         /// <summary>
         /// A newer version is installed.
         /// </summary>
@@ -37,6 +34,8 @@ public interface IPlatformDependentPackageManager
         public string Version { get; init; }
         public string Architecture { get; init; }
         public string Description { get; init; }
+
+        public string? IconName { get; init; }
 
         public IReadOnlyDictionary<string, string> AllFields { get; init; }
     }

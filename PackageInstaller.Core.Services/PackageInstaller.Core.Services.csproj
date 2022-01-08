@@ -4,14 +4,23 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ArrayDeconstructors.Source" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Community.Wsl.Sdk" Version="0.1.4" />
     <PackageReference Include="Microsoft.CST.RecursiveExtractor" Version="1.1.5" />
+    <PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Community.Archives.Ar\Community.Archives.Ar.csproj" />
+    <ProjectReference Include="..\Community.Archives.Rpm\Community.Archives.Rpm.csproj" />
+    <ProjectReference Include="..\Community.Archives.Tar\Community.Archives.Tar.csproj" />
     <ProjectReference Include="..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
   </ItemGroup>
 

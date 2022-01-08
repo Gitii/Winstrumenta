@@ -1,5 +1,8 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
+using Community.Archives.Ar;
+using Community.Archives.Core;
+using Community.Archives.Tar;
 using Microsoft.CST.RecursiveExtractor;
 
 namespace PackageInstaller.Core.Services
@@ -21,27 +24,81 @@ namespace PackageInstaller.Core.Services
                 throw new ArgumentException("File is not a deb package file");
             }
 
+            var arExtractor = new ArArchiveReader();
+            var tarExtractor = new TarArchiveReader();
+
             var extractor = new Extractor();
 
+            string? iconName = null;
+            DebianPackageMetaData? metaData = null;
+
+            var stream = File.OpenRead(filePath.WindowsPath);
             await foreach (
-                var fileEntry in extractor.ExtractAsync(
-                    filePath.WindowsPath,
-                    new ExtractorOptions()
-                    {
-                        Recurse = true,
-                        AllowFilters = new[] { "control.tar.xz", "control.tar", "control" }
-                    }
+                var arEntry in arExtractor.GetFileEntriesAsync(
+                    stream,
+                    IArchiveReader.MATCH_ALL_FILES
                 )
             )
             {
-                var relPath = Path.GetRelativePath(filePath.WindowsPath, fileEntry.FullPath);
-                if (_relativePathMatcher.IsMatch(relPath))
+                if (arEntry.Name.StartsWith("control.", StringComparison.OrdinalIgnoreCase))
                 {
-                    return await ReadFromControlFile(fileEntry.Content);
+                    await foreach (
+                        var controlEntry in tarExtractor.GetFileEntriesAsync(
+                            arEntry.Content,
+                            "^./control$"
+                        )
+                    )
+                    {
+                        metaData = await ReadFromControlFile(controlEntry.Content);
+                    }
+                }
+                else if (arEntry.Name.StartsWith("data.", StringComparison.OrdinalIgnoreCase))
+                {
+                    await foreach (
+                        var desktopEntry in tarExtractor.GetFileEntriesAsync(
+                            arEntry.Content,
+                            "[.]desktop$"
+                        )
+                    )
+                    {
+                        iconName = await ReadIconNameFromDesktopFile(desktopEntry.Content);
+                    }
                 }
             }
 
+            if (metaData.HasValue)
+            {
+                return new DebianPackageMetaData()
+                {
+                    Package = metaData.Value.Package,
+                    Version = metaData.Value.Version,
+                    Architecture = metaData.Value.Architecture,
+                    Description = metaData.Value.Description,
+                    IconName = iconName ?? metaData.Value.IconName,
+                    AllFields = metaData.Value.AllFields,
+                };
+            }
+
             throw new Exception("Deb package file is malformed");
+        }
+
+        private async Task<string?> ReadIconNameFromDesktopFile(Stream stream)
+        {
+            StreamReader reader = new StreamReader(stream);
+            var desktopFile = await reader.ReadToEndAsync();
+
+            DesktopFile cf = new DesktopFile();
+            cf.Parse(desktopFile);
+
+            var desktopEntry = cf.Groups
+                .FirstOrDefault((g) => g.Key == "Desktop Entry")
+                .AsNullable();
+            if (desktopEntry.HasValue)
+            {
+                return desktopEntry.Value.Entries.FirstOrDefault((e) => e.Key == "Icon").Content;
+            }
+
+            return null;
         }
 
         public async Task<(bool isSupported, string? reason)> IsSupported(FileSystemPath filePath)

@@ -1,26 +1,10 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using NativeInterop.Win32;
 using NativeInterop.Win32.Xaml;
-using PackageInstaller.Core;
-using PackageInstaller.Pages;
 using ReactiveUI;
 using Microsoft.Extensions.DependencyInjection;
 using Splat;
@@ -41,7 +25,7 @@ namespace PackageInstaller
             this.InitializeComponent();
 
             ExtendsContentIntoTitleBar = true;
-            // SetTitleBar(TitleBar);
+            // SetTitleBar(TitleBar); // do not set the title bar to use a 100% custom one.
 
             this.services = services;
         }
@@ -87,9 +71,19 @@ namespace PackageInstaller
             ContentControl.Content = navigationView;
             ForceUpdateTheme();
 
+            var arguments = Environment.GetCommandLineArgs().Skip(1).ToArray();
+            if (arguments.Length == 0)
+            {
+                var arg0 = Environment.GetEnvironmentVariable("ARG0");
+                if (arg0 != null)
+                {
+                    arguments = new[] { arg0 };
+                }
+            }
+
             var navParams = new PreparationViewModel.NavigationParameter()
             {
-                Arguments = Environment.GetCommandLineArgs().Skip(1).ToArray(),
+                Arguments = arguments,
             };
 
             stackService

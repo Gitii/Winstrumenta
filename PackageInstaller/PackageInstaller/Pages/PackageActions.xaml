@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:attached="using:PackageInstaller.AttachedProperties"
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    xmlns:controls1="using:PackageInstaller.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:PackageInstaller.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -111,12 +112,35 @@
 
         </controls:Grid>
 
-        <controls:Image
-            MaxWidth="100"
+        <controls:Grid
+            Width="100"
+            Height="100"
             VerticalAlignment="Top"
             controls:Grid.Column="1"
-            controls:Grid.Row="0"
-            Source="ms-appx:///Assets/parcel.png" />
+            controls:Grid.Row="0">
+            <controls:Grid.ColumnDefinitions>
+                <controls:ColumnDefinition Width="0.3*" />
+                <controls:ColumnDefinition Width="0.7*" />
+            </controls:Grid.ColumnDefinitions>
+
+            <controls:Grid.RowDefinitions>
+                <controls:RowDefinition Height="0.3*" />
+                <controls:RowDefinition Height="0.7*" />
+            </controls:Grid.RowDefinitions>
+            <controls:Image
+                controls:Grid.Column="0"
+                controls:Grid.ColumnSpan="2"
+                controls:Grid.Row="0"
+                controls:Grid.RowSpan="2"
+                Source="ms-appx:///Assets/parcel.png" />
+
+            <controls1:SKElement
+                x:Name="PackageIcon"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                controls:Grid.Column="1"
+                controls:Grid.Row="1" />
+        </controls:Grid>
         <controls:StackPanel
             HorizontalAlignment="Right"
             controls:Grid.Column="0"

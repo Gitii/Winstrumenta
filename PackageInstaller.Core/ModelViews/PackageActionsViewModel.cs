@@ -25,6 +25,14 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     FileSystemPath _packageFilePath;
     private readonly IParameterViewStackService _viewStackService;
     private IPath _path;
+    Stream? _packageIconStream;
+    private IIconThemeManager _iconThemeManager;
+
+    public Stream? PackageIconStream
+    {
+        get { return _packageIconStream; }
+        set { this.RaiseAndSetIfChanged(ref _packageIconStream, value); }
+    }
 
     public FileSystemPath PackageFilePath
     {
@@ -56,7 +64,8 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         IWsl wsl,
         IParameterViewStackService viewStackService,
         IEnumerable<IPlatformDependentPackageManager> packageManagers,
-        IPath path
+        IPath path,
+        IIconThemeManager iconThemeManager
     )
     {
         _applicationLifetime = applicationLifetime;
@@ -64,6 +73,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         _viewStackService = viewStackService;
         _packageManagers = packageManagers;
         _path = path;
+        _iconThemeManager = iconThemeManager;
 
         _distroSourceList = new SourceList<WslDistributionModelView>();
         _distroSourceList
@@ -84,7 +94,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
         this.WhenAnyValue((vm) => vm.SelectedWslDistribution)
             .ObserveOn(RxApp.MainThreadScheduler)
-            .SelectMany(OnSelectedDistributonChanged)
+            .SelectMany(OnSelectedDistributionChanged)
             .Subscribe();
 
         PrimaryPackageCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryCommand);
@@ -282,7 +292,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
     }
 
-    private async Task<WslDistributionModelView?> OnSelectedDistributonChanged(
+    private async Task<WslDistributionModelView?> OnSelectedDistributionChanged(
         WslDistributionModelView? arg
     )
     {
@@ -407,6 +417,17 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         {
             await Task.Delay(TimeSpan.FromMilliseconds(100));
             SelectedWslDistribution = _distroSourceList.Items.First();
+        }
+
+        if (PackageMetaData.IconName == null)
+        {
+            PackageIconStream = null;
+        }
+        else
+        {
+            PackageIconStream = await _iconThemeManager.ActiveIconTheme.GetSvgIconByName(
+                PackageMetaData.IconName
+            );
         }
 
         InProgress = false;

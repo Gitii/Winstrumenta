@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using DynamicData.Aggregation;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -88,6 +89,94 @@ namespace PackageInstaller.AttachedProperties
         {
             if (Debugger.IsAttached)
                 Debugger.Break();
+        }
+
+        public static readonly DependencyProperty AutoRasterizationProperty =
+            DependencyProperty.RegisterAttached(
+                "AutoRasterization",
+                typeof(bool),
+                typeof(ImageExtensions),
+                new PropertyMetadata(default(bool), OnAutoRasterizationChanged)
+            );
+
+        private static void OnAutoRasterizationChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
+        {
+            if (d is Image image)
+            {
+                bool isEnabled = (bool)e.NewValue;
+
+                if (isEnabled)
+                {
+                    image.ImageOpened += OnImageLoaded;
+                    image.RegisterPropertyChangedCallback(
+                        Image.SourceProperty,
+                        OnImageSourceChanged
+                    );
+                    image.LayoutUpdated += ImageOnLayoutUpdated;
+                    image.SizeChanged += ImageOnSizeChanged;
+                }
+            }
+        }
+
+        private static void ImageOnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (sender is Image image && !e.NewSize.IsEmpty)
+            {
+                if (image.Source is SvgImageSource svg)
+                {
+                    svg.RasterizePixelHeight = image.ActualHeight;
+                    svg.RasterizePixelWidth = image.ActualWidth;
+                }
+            }
+        }
+
+        private static void ImageOnLayoutUpdated(object? sender, object e)
+        {
+            if (sender is Image image && image.ActualWidth > 0)
+            {
+                if (image.Source is SvgImageSource svg)
+                {
+                    svg.RasterizePixelHeight = image.ActualHeight;
+                    svg.RasterizePixelWidth = image.ActualWidth;
+                }
+            }
+        }
+
+        private static void OnImageSourceChanged(DependencyObject sender, DependencyProperty dp)
+        {
+            if (sender is Image image && image.ActualWidth > 0)
+            {
+                if (image.Source is SvgImageSource svg)
+                {
+                    svg.RasterizePixelHeight = image.ActualHeight;
+                    svg.RasterizePixelWidth = image.ActualWidth;
+                }
+            }
+        }
+
+        private static void OnImageLoaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is Image image)
+            {
+                if (image.Source is SvgImageSource svg)
+                {
+                    svg.RasterizePixelHeight = image.ActualHeight;
+                    svg.RasterizePixelWidth = image.ActualWidth;
+                }
+            }
+        }
+
+        public static void SetAutoRasterization(Image element, bool value)
+        {
+            element.SetValue(AutoRasterizationProperty, value);
+        }
+
+        public static bool GetAutoRasterization(Image element)
+        {
+            return (bool)element.GetValue(AutoRasterizationProperty);
         }
     }
 }

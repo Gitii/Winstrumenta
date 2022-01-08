@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PackageInstaller.Core;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services;
+using PackageInstaller.IconThemes;
 using PackageInstaller.Pages;
 using ReactiveUI;
 using Sextant;
@@ -59,6 +60,7 @@ namespace PackageInstaller
                     //collection.AddTransient<IPackageReader, PackageReader>();
                     //collection.AddTransient<IWsl, WslImpl>();
                     collection.AddTransient<IWslApi, ManagedWslApi>();
+                    collection.AddSingleton<IIconThemeManager, IconThemeManager>();
                     //collection.AddTransient<IPackageManager, PackageManager>();
                     //collection.AddTransient<IDpkg, Dpkg>();
                     collection.Scan(
@@ -86,5 +88,10 @@ namespace PackageInstaller
         }
 
         public static IServiceProvider Container { get; private set; }
+
+        public static MainWindow? MainWindow
+        {
+            get => Container.GetService<MainWindow>();
+        }
     }
 }

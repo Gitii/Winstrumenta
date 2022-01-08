@@ -1,8 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using DynamicData.Binding;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
@@ -87,8 +91,14 @@ namespace PackageInstaller.Pages
                             ViewModel,
                             (vm) => vm.PackageInstallationStatus,
                             (v) => v.PrimaryActionButtonText.Text,
-                            StatusToText
+                            selector: StatusToText
                         )
+                        .DisposeWith(disposable);
+
+                    this.ViewModel
+                        .WhenAnyValue((vm) => vm.PackageIconStream)
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .BindTo(this, (v) => v.PackageIcon.Source)
                         .DisposeWith(disposable);
 
                     ViewModel.PrimaryPackageCommand.IsExecuting

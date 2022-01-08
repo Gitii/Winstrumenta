@@ -45,10 +45,6 @@ public class PathImpl : IPath
             );
         }
 
-        return new FileSystemPath()
-        {
-            UnixPath = ToUnixPath(windowsPath),
-            WindowsPath = windowsPath
-        };
+        return new FileSystemPath(ToUnixPath(windowsPath), windowsPath);
     }
 }

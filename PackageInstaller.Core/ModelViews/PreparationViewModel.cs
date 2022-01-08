@@ -12,6 +12,7 @@ namespace PackageInstaller.Core.ModelViews
     {
         private IEnumerable<IPlatformDependentPackageManager> _packagesManagers;
         private IPath _path;
+        private IIconThemeManager _iconThemeManager;
 
         public readonly struct NavigationParameter
         {
@@ -23,11 +24,15 @@ namespace PackageInstaller.Core.ModelViews
 
         public PreparationViewModel(
             IParameterViewStackService viewStackService,
-            IEnumerable<IPlatformDependentPackageManager> packagesManagers, IPath path)
+            IEnumerable<IPlatformDependentPackageManager> packagesManagers,
+            IPath path,
+            IIconThemeManager iconThemeManager
+        )
         {
             _viewStackService = viewStackService;
             _packagesManagers = packagesManagers;
             _path = path;
+            _iconThemeManager = iconThemeManager;
         }
 
         public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
@@ -49,10 +54,12 @@ namespace PackageInstaller.Core.ModelViews
 
         public async Task Process(string[] arguments)
         {
-            await Task.Delay(100);
+            await Task.Delay(10);
 
             try
             {
+                await _iconThemeManager.LoadThemes();
+
                 var packageFilePath = ParseArguments(arguments);
 
                 var packageManager = await _packagesManagers.GetSupportedManager(packageFilePath);

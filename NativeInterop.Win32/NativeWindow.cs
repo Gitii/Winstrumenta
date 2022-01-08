@@ -59,7 +59,7 @@ namespace NativeInterop.Win32
             }
         }
 
-        private PInvoke.WinProc newWndProc = null;
+        private PInvoke.WinProc newWndProc = null!;
         private IntPtr oldWndProc = IntPtr.Zero;
 
         private bool _dragWindow = false;

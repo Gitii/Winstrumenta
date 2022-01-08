@@ -29,6 +29,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ArrayDeconstructors.Source" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="CommunityToolkit.Extensions.Hosting.WindowsAppSdk" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
@@ -40,6 +44,8 @@
     <PackageReference Include="Splat" Version="14.1.17" />
     <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.17" />
     <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.1.17" />
+    <PackageReference Include="Svg.Skia" Version="0.5.11" />
+    <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 

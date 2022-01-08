@@ -32,7 +32,8 @@ namespace PackageInstaller.Core.Services
         }
 
         public async Task<IPlatformDependentPackageManager.PackageMetaData> ExtractPackageMetaData(
-            FileSystemPath filePath)
+            FileSystemPath filePath
+        )
         {
             var data = await Task.Run(
                 async () => await _debianPackageReader.ReadMetaData(filePath)
@@ -44,6 +45,7 @@ namespace PackageInstaller.Core.Services
                 Description = data.Description,
                 Version = data.Version,
                 Architecture = data.Architecture,
+                IconName = data.IconName,
                 AllFields = data.AllFields
             };
         }
@@ -152,7 +154,10 @@ namespace PackageInstaller.Core.Services
             return Install(distroName, filePath);
         }
 
-        public Task<(bool success, string logs)> Downgrade(string distroName, FileSystemPath filePath)
+        public Task<(bool success, string logs)> Downgrade(
+            string distroName,
+            FileSystemPath filePath
+        )
         {
             return ExecuteDpkg(
                 distroName,
