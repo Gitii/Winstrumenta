@@ -1,5 +1,4 @@
-﻿using System.Reactive.Disposables;
-using PackageInstaller.Core.ModelViews;
+﻿using PackageInstaller.Core.ModelViews;
 using ReactiveUI;
 
 namespace PackageInstaller.Pages

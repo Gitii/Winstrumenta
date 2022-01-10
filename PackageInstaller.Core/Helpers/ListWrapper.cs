@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace PackageInstaller.Core.Helpers
 {
@@ -17,7 +12,7 @@ namespace PackageInstaller.Core.Helpers
         /// <typeparam name="TTo">The destination type</typeparam>
         /// <param name="list">The source list.</param>
         /// <param name="forwardConverter">A function that converts an instance of <typeparamref name="TFrom"/> to <typeparamref name="TTo"/>.</param>
-        /// <param name="backwardConverter">A function that converts an instance of <typeparamref name="TTo"/> to <typeparamref name="TFrom"/>. if <code>null</code>, backward conversion is not supported and at runtime a <see cref="NotSupportedException"/> will be supported.</param>
+        /// <param name="backwardConverter">A function that converts an instance of <typeparamref name="TTo"/> to <typeparamref name="TFrom"/>. If <code>null</code>, backward conversion is not supported and at runtime a <see cref="NotSupportedException"/> will be thrown.</param>
         /// <returns>A list of type <see cref="List{T}"/> </returns>
         public static IList<TTo> WrapAs<TFrom, TTo>(
             this IList<TFrom> list,
@@ -29,12 +24,12 @@ namespace PackageInstaller.Core.Helpers
                 list,
                 forwardConverter,
                 backwardConverter
-                    ?? (
-                        _ =>
-                            throw new NotSupportedException(
-                                $"Conversion from {typeof(TTo).FullName} to {typeof(TFrom).FullName} is not supported."
-                            )
-                    )
+                ?? (
+                    _ =>
+                        throw new NotSupportedException(
+                            $"Conversion from {typeof(TTo).FullName} to {typeof(TFrom).FullName} is not supported."
+                        )
+                )
             );
         }
 

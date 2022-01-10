@@ -36,6 +36,16 @@
                         <uap:Logo>package_closed.png</uap:Logo>
                     </uap3:FileTypeAssociation>
                 </uap:Extension>
+                <uap:Extension Category="windows.fileTypeAssociation">
+                    <uap:FileTypeAssociation Name="x-rpm">
+                        <uap:SupportedFileTypes>
+                            <uap:FileType ContentType="application/x-rpm">.rpm</uap:FileType>
+                        </uap:SupportedFileTypes>
+                        <uap:DisplayName>Rpm Package</uap:DisplayName>
+                        <uap:Logo>package_closed.png</uap:Logo>
+                        <uap:InfoTip>Software package used in many Linux distributions such as Fedora Linux, AlmaLinux, CentOS and openSUSE and its derivatives.</uap:InfoTip>
+                    </uap:FileTypeAssociation>
+                </uap:Extension>
             </Extensions>
         </Application>
     </Applications>

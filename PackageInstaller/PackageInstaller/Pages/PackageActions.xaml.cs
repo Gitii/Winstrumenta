@@ -1,12 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using DynamicData.Binding;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services;
 using ReactiveUI;

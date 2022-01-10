@@ -3,8 +3,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -17,7 +15,6 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using ReactiveUI;
 using Splat;
-using Windows.UI.Core;
 
 namespace Sextant.WinUI
 {
@@ -57,7 +54,9 @@ namespace Sextant.WinUI
         /// Initializes a new instance of the <see cref="NavigationView"/> class.
         /// </summary>
         public NavigationView()
-            : this(RxApp.MainThreadScheduler, RxApp.TaskpoolScheduler, ViewLocator.Current) { }
+            : this(RxApp.MainThreadScheduler, RxApp.TaskpoolScheduler, ViewLocator.Current)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationView"/> class.
@@ -203,6 +202,7 @@ namespace Sextant.WinUI
                         {
                             void RoutedHandler(object? sender, RoutedEventArgs e) =>
                                 handler(Unit.Default);
+
                             return RoutedHandler;
                         },
                         x => backButton.Click += x,

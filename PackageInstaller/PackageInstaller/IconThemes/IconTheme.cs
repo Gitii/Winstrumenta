@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
 
 namespace PackageInstaller.IconThemes;
@@ -12,7 +13,7 @@ namespace PackageInstaller.IconThemes;
 internal class IconTheme : IIconTheme
 {
     private readonly Func<Task<Stream>> _iconsFileStreamFactory;
-    private IDictionary<string, string> _entries = new Dictionary<string, string>();
+    private string _mapping;
     private string _license = String.Empty;
 
     public IconTheme(string name, string description, Func<Task<Stream>> iconsFileStreamFactory)
@@ -39,25 +40,34 @@ internal class IconTheme : IIconTheme
     {
         using var reader = new StreamReader(stream, Encoding.UTF8);
 
-        string? line;
-        while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
-        {
-            if (!string.IsNullOrEmpty(line))
-            {
-                var (name, target) = line.Split(';');
-
-                _entries.Add(name, target);
-            }
-        }
+        _mapping = await reader.ReadToEndAsync();
     }
 
     public string Name { get; }
     public string Description { get; }
     public string License => _license;
 
+    private bool TryFindMapping(string iconName, out string fileName)
+    {
+        var iconNameSpan = iconName.AsSpan();
+        foreach (var (line, _) in _mapping.AsSpan().SplitLines())
+        {
+            var (key, value) = line.Split(';');
+
+            if (key.Equals(iconNameSpan, StringComparison.Ordinal))
+            {
+                fileName = value.ToString();
+                return true;
+            }
+        }
+
+        fileName = String.Empty;
+        return true;
+    }
+
     public async Task<Stream?> GetSvgIconByName(string packageThemeName)
     {
-        if (_entries.TryGetValue(packageThemeName, out string fileName))
+        if (TryFindMapping(packageThemeName, out string fileName))
         {
             await using var stream = await _iconsFileStreamFactory();
             using var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read);

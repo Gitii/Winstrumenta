@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
@@ -9,7 +8,6 @@ using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
 using Sextant;
-using Z.Linq;
 
 namespace PackageInstaller.Core.ModelViews;
 
@@ -382,34 +380,29 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
         var distros = await _wsl.GetAllInstalledDistributions();
 
-        var supportedDistros = await distros.WhereAsync(
-            async (d) =>
-            {
-                foreach (var packageManager in _packageManagers)
+        var supportedDistros = await distros
+            .Where((d) => d.IsRunning && d.Name is not ("docker-desktop-data" or "docker-desktop"))
+            .WhereAsync(
+                async (d) =>
                 {
-                    if (await packageManager.IsSupportedByDistribution(d.Name))
+                    foreach (var packageManager in _packageManagers)
                     {
-                        return true;
+                        if (await packageManager.IsSupportedByDistribution(d.Name)
+                            && (await packageManager.IsPackageSupported(PackageFilePath)).isSupported)
+                        {
+                            return true;
+                        }
                     }
-                }
 
-                return false;
-            }
-        );
+                    return false;
+                }
+            );
 
         _distroSourceList.Edit(
             (list) =>
             {
                 list.Clear();
-                list.AddRange(
-                    supportedDistros
-                        .Where(
-                            (d) =>
-                                d.IsRunning
-                                && d.Name is not ("docker-desktop-data" or "docker-desktop")
-                        )
-                        .Select((d) => new WslDistributionModelView(d))
-                );
+                list.AddRange(supportedDistros.Select((d) => new WslDistributionModelView(d)));
             }
         );
 

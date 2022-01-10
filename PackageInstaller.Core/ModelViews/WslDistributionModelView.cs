@@ -56,6 +56,7 @@ namespace PackageInstaller.Core.ModelViews
         }
 
         WslDistribution _distro;
+
         public WslDistribution Distro
         {
             get { return _distro; }
@@ -67,5 +68,10 @@ namespace PackageInstaller.Core.ModelViews
 
         readonly ObservableAsPropertyHelper<string> _icon;
         public string Icon => _icon.Value;
+
+        public override string ToString()
+        {
+            return $"Distro {Name} ({Distro.Version}, {Distro.Type})";
+        }
     }
 }

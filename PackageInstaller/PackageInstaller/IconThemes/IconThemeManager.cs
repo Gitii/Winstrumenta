@@ -5,8 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
-using Windows.Storage;
-using ICSharpCode.SharpZipLib.Tar;
 using PackageInstaller.Core.Services;
 using PackageInstaller.Core.Helpers;
 

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.UI.ViewManagement;
-using Windows.UI.Xaml;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Dwm;
@@ -98,6 +93,7 @@ namespace NativeInterop.Win32
                     {
                         _dragWindow = false;
                     }
+
                     break;
                 }
                 case WindowMessage.WM_MOUSEMOVE:
@@ -124,6 +120,7 @@ namespace NativeInterop.Win32
 
                         _lastPosition = location;
                     }
+
                     break;
                 }
                 case WindowMessage.WM_ACTIVATE:
@@ -131,6 +128,7 @@ namespace NativeInterop.Win32
                     {
                         listener.Activated(this);
                     }
+
                     break;
 
                 case WindowMessage.WM_GETMINMAXINFO:
@@ -171,6 +169,7 @@ namespace NativeInterop.Win32
                             listener.Closing(this);
                         }
                     }
+
                     break;
 
                 case WindowMessage.WM_MOVE:
@@ -178,18 +177,21 @@ namespace NativeInterop.Win32
                     {
                         listener.Moving(this);
                     }
+
                     break;
                 case WindowMessage.WM_SIZING:
                     foreach (var listener in _listeners)
                     {
                         listener.Sizing(this);
                     }
+
                     break;
                 case WindowMessage.WM_DPICHANGED:
                     foreach (var listener in _listeners)
                     {
                         listener.DpiChanged(this, HiWord(wParam));
                     }
+
                     break;
                 case WindowMessage.WM_SETTINGCHANGE:
                     var ptrToStringAuto = Marshal.PtrToStringAnsi(lParam);
@@ -198,6 +200,7 @@ namespace NativeInterop.Win32
                     {
                         SettingsOnColorValuesChanged(_uiSettings, null);
                     }
+
                     break;
             }
 

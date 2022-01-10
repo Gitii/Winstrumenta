@@ -1,7 +1,9 @@
 ﻿using System.Reactive.Disposables;
 using Microsoft.UI.Xaml;
 using PackageInstaller.Core.ModelViews;
+using PackageInstaller.Core.Services;
 using ReactiveUI;
+using Splat;
 
 namespace PackageInstaller.Pages
 {
@@ -26,17 +28,14 @@ namespace PackageInstaller.Pages
                             (v) => v.Description.Text
                         )
                         .DisposeWith(disposable);
-                    this.OneWayBind(
-                            ViewModel,
-                            (vm) => vm.ErrorDetails,
-                            (v) => v.ErrorDetails.Text
-                        )
+                    this.OneWayBind(ViewModel, (vm) => vm.ErrorDetails, (v) => v.ErrorDetails.Text)
                         .DisposeWith(disposable);
                     this.OneWayBind(
                             ViewModel,
                             (vm) => vm.ErrorDetailsVisible,
                             (v) => v.ErrorDetails.Visibility,
-                            (bool isVisible) => isVisible ? Visibility.Visible : Visibility.Collapsed
+                            (bool isVisible) =>
+                                isVisible ? Visibility.Visible : Visibility.Collapsed
                         )
                         .DisposeWith(disposable);
                     this.OneWayBind(
@@ -48,10 +47,16 @@ namespace PackageInstaller.Pages
                         .DisposeWith(disposable);
                     this.BindCommand(ViewModel, (vm) => vm.Close, (v) => v.Button)
                         .DisposeWith(disposable);
-                    this.BindCommand(ViewModel, (vm) => vm.ToggleErrorDetails, (v) => v.ToggleErrorDetails)
+                    this.BindCommand(
+                            ViewModel,
+                            (vm) => vm.ToggleErrorDetails,
+                            (v) => v.ToggleErrorDetails
+                        )
                         .DisposeWith(disposable);
                 }
             );
+
+            Locator.Current.GetService<IThemeManager>()!.SetTitleBarColor(255, 139, 0, 0);
         }
     }
 }

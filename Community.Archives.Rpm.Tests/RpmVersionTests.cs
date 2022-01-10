@@ -13,11 +13,6 @@
 // limitations under the License.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -123,9 +118,7 @@ namespace Community.Archives.Rpm.Tests
         [Test]
         public void Test_CompareVersions(string first, string second, int expectedComparision)
         {
-            RpmVersion v = new RpmVersion();
-
-            RpmVersion.compare(first, second).Should().Be(expectedComparision);
+            RpmVersion.Compare(first, second).Should().Be(expectedComparision);
         }
     }
 }

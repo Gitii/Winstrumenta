@@ -12,6 +12,8 @@ using Sextant.WinUI;
 using Sextant;
 using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.ModelViews;
+using PackageInstaller.Core.Services;
+using PackageInstaller.Themes;
 
 namespace PackageInstaller
 {
@@ -69,6 +71,9 @@ namespace PackageInstaller
             );
             navigationView.ShowDefaultBackButton = false;
             ContentControl.Content = navigationView;
+
+            Locator.Current.GetService<ThemeManager>()!.SetPanel(TitleBar);
+
             ForceUpdateTheme();
 
             var arguments = Environment.GetCommandLineArgs().Skip(1).ToArray();

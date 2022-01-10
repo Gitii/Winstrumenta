@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using Microsoft.UI.Xaml;
 using WinRT;
-using Windows.UI;
 
 namespace NativeInterop.Win32.Xaml
 {

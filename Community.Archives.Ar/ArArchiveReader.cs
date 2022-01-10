@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using Community.Archives.Core;
 

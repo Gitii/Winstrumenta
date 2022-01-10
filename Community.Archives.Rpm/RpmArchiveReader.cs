@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using System.Runtime.InteropServices;
 using Community.Archives.Core;
 using Community.Archives.Cpio;
 

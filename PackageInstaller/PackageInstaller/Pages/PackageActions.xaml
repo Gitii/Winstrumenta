@@ -152,7 +152,7 @@
                 HorizontalAlignment="Right"
                 Orientation="Horizontal"
                 Spacing="8">
-                <controls:ComboBox x:Name="DistroList" Width="200">
+                <controls:ComboBox x:Name="DistroList" Width="250">
                     <controls:ComboBox.ItemTemplate>
                         <xaml:DataTemplate d:DataContext="{d:DesignInstance modelViews:WslDistributionModelView, IsDesignTimeCreatable=False}" x:DataType="modelViews:WslDistributionModelView">
                             <controls:StackPanel Orientation="Horizontal" Spacing="10">

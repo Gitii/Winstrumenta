@@ -23,5 +23,13 @@ namespace PackageInstaller.Core.Services
             bool ignoreExitCode = false,
             bool includeStandardError = false
         );
+
+        /// <summary>
+        /// Checks if the specified command (program) exists.
+        /// </summary>
+        /// <param name="distroName">The name of the distribution.</param>
+        /// <param name="command">The command to check.</param>
+        /// <returns><c>true</c> if the command exists, <c>false</c> is the command doesn't exist.</returns>
+        public Task<bool> CheckCommandExists(string distroName, string command);
     }
 }

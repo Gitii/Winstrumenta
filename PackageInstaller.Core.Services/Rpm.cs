@@ -1,143 +1,135 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Community.Archives.Core;
-using Community.Archives.Rpm;
+﻿using Community.Archives.Rpm;
 
-namespace PackageInstaller.Core.Services
+namespace PackageInstaller.Core.Services;
+
+public class Rpm : IRpm
 {
-    public interface IRpm : IPlatformDependentPackageManager
+    private readonly IWslCommands _wslCommands;
+
+    public Rpm(IWslCommands wslCommands)
     {
+        _wslCommands = wslCommands;
     }
 
-    public class Rpm : IRpm
+    public async Task<bool> IsPackageInstalled(string distroName, string packageName)
     {
-        private readonly IWslCommands _wslCommands;
+        var result = await _wslCommands.ExecuteCommandAsync(
+            distroName,
+            "rpm",
+            new[] { "-q", packageName },
+            true
+        );
 
-        public Rpm(IWslCommands wslCommands)
+        if (result == $"package {packageName} is not installed")
         {
-            _wslCommands = wslCommands;
+            return false;
         }
 
-        public async Task<bool> IsPackageInstalled(string distroName, string packageName)
+        return true;
+    }
+
+    public async Task<IPlatformDependentPackageManager.PackageInfo> GetInstalledPackageInfo(
+        string distroName,
+        string packageName
+    )
+    {
+        var result = await _wslCommands.ExecuteCommandAsync(
+            distroName,
+            "rpm",
+            new[] { "-q", packageName, "--queryformat", "%{version}" },
+            true
+        );
+
+        if (result == $"package {packageName} is not installed")
         {
-            var result = await _wslCommands.ExecuteCommandAsync(
-                distroName,
-                "rpm",
-                new[] { "-q", packageName },
-                true
-            );
-
-            if (result == $"package {packageName} is not installed")
-            {
-                return false;
-            }
-
-            return true;
+            throw new Exception($"Package '{packageName}' is not installed!");
         }
 
-        public async Task<IPlatformDependentPackageManager.PackageInfo> GetInstalledPackageInfo(
-            string distroName,
-            string packageName
-        )
+        return new IPlatformDependentPackageManager.PackageInfo()
         {
-            var result = await _wslCommands.ExecuteCommandAsync(
-                distroName,
-                "rpm",
-                new[] { "-q", packageName, "--queryformat", "%{version}" },
-                true
-            );
+            Name = packageName,
+            Version = result
+        };
+    }
 
-            if (result == $"package {packageName} is not installed")
-            {
-                throw new Exception($"Package '{packageName}' is not installed!");
-            }
+    public async Task<IPlatformDependentPackageManager.PackageMetaData> ExtractPackageMetaData(
+        FileSystemPath filePath
+    )
+    {
+        var reader = new RpmArchiveReader();
+        await using var stream = File.OpenRead(filePath.WindowsPath);
+        var md = await reader.GetMetaData(stream);
 
-            return new IPlatformDependentPackageManager.PackageInfo()
-            {
-                Name = packageName,
-                Version = result
-            };
-        }
+        return new IPlatformDependentPackageManager.PackageMetaData()
+        {
+            Package = md.Package,
+            Architecture = md.Architecture,
+            Description = md.Description,
+            Version = md.Version,
+            AllFields = md.AllFields,
+            IconName = null,
+        };
+    }
 
-        public async Task<IPlatformDependentPackageManager.PackageMetaData> ExtractPackageMetaData(
-            FileSystemPath filePath
-        )
+    public async Task<(bool isSupported, string? reason)> IsPackageSupported(
+        FileSystemPath filePath
+    )
+    {
+        try
         {
             var reader = new RpmArchiveReader();
             await using var stream = File.OpenRead(filePath.WindowsPath);
-            var md = await reader.GetMetaData(stream);
+            _ = await reader.GetMetaData(stream);
 
-            return new IPlatformDependentPackageManager.PackageMetaData()
-            {
-                Package = md.Package,
-                Architecture = md.Architecture,
-                Description = md.Description,
-                Version = md.Version,
-                AllFields = md.AllFields,
-                IconName = null,
-            };
+            return (true, null);
         }
-
-        public async Task<(bool isSupported, string? reason)> IsPackageSupported(FileSystemPath filePath)
+        catch (Exception e)
         {
-            try
-            {
-                var reader = new RpmArchiveReader();
-                await using var stream = File.OpenRead(filePath.WindowsPath);
-                _ = await reader.GetMetaData(stream);
-
-                return (true, null);
-            }
-            catch (Exception e)
-            {
-                return (false, e.Message);
-            }
+            return (false, e.Message);
         }
+    }
 
-        public IPlatformDependentPackageManager.PackageInstallationStatus CompareVersions(
-            string baseVersion,
-            string otherVersion
-        )
+    public IPlatformDependentPackageManager.PackageInstallationStatus CompareVersions(
+        string baseVersion,
+        string otherVersion
+    )
+    {
+        var cmp = RpmVersion.Compare(baseVersion, otherVersion);
+        if (cmp == 0)
         {
-            throw new NotImplementedException();
+            return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion;
         }
 
-        public Task<(bool success, string logs)> Install(string distroName, FileSystemPath filePath)
+        if (cmp < 0)
         {
-            throw new NotImplementedException();
+            return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion;
         }
 
-        public Task<(bool success, string logs)> Uninstall(string distroName, string packageName)
-        {
-            throw new NotImplementedException();
-        }
+        return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion;
+    }
 
-        public Task<(bool success, string logs)> Upgrade(string distroName, FileSystemPath filePath)
-        {
-            throw new NotImplementedException();
-        }
+    public Task<(bool success, string logs)> Install(string distroName, FileSystemPath filePath)
+    {
+        throw new NotImplementedException();
+    }
 
-        public Task<(bool success, string logs)> Downgrade(
-            string distroName,
-            FileSystemPath filePath
-        )
-        {
-            throw new NotImplementedException();
-        }
+    public Task<(bool success, string logs)> Uninstall(string distroName, string packageName)
+    {
+        throw new NotImplementedException();
+    }
 
-        public async Task<bool> IsSupportedByDistribution(string distroName)
-        {
-            var pathToRpm = await _wslCommands.ExecuteCommandAsync(
-                distroName,
-                "which",
-                new[] { "rpm" },
-                ignoreExitCode: true
-            );
+    public Task<(bool success, string logs)> Upgrade(string distroName, FileSystemPath filePath)
+    {
+        throw new NotImplementedException();
+    }
 
-            return pathToRpm.Trim().Length > 0;
-        }
+    public Task<(bool success, string logs)> Downgrade(string distroName, FileSystemPath filePath)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> IsSupportedByDistribution(string distroName)
+    {
+        return _wslCommands.CheckCommandExists(distroName, "rpm");
     }
 }

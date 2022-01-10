@@ -42,6 +42,7 @@
         </controls:ScrollViewer>
         <controls:Image
             MaxWidth="100"
+            Margin="40,0,0,0"
             VerticalAlignment="Top"
             controls:Grid.Column="1"
             controls:Grid.Row="0"

@@ -13,33 +13,28 @@
 // limitations under the License.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Community.Archives.Rpm
 {
-    public class RpmVersion
+    public static class RpmVersion
     {
-        public static Regex R_NONALNUMTILDE = new Regex(@"^([^a-zA-Z0-9~\^]*)(.*)$");
-        public static Regex R_NUM = new Regex(@"^([\d]+)(.*)$");
-        public static Regex R_ALPHA = new Regex(@"^([a-zA-Z]+)(.*)$");
+        private static Regex FindNonAlphaNumericPrefix = new Regex(@"^([^a-zA-Z0-9~\^]*)(.*)$");
+        private static Regex IsNumeric = new Regex(@"^([\d]+)(.*)$");
+        private static Regex IsAlpha = new Regex(@"^([a-zA-Z]+)(.*)$");
 
-        public static int compare(string first, string second)
+        public static int Compare(string first, string second)
         {
             bool isnum;
             while (!string.IsNullOrEmpty(first) || !string.IsNullOrEmpty(second))
             {
-                var m1 = R_NONALNUMTILDE.Match(first);
-                var m2 = R_NONALNUMTILDE.Match(second);
-                var m1_head = m1.Groups[1].Value;
-                first = m1.Groups[2].Value;
-                var m2_head = m2.Groups[1].Value;
-                second = m2.Groups[2].Value;
-                if (!string.IsNullOrEmpty(m1_head) || !string.IsNullOrEmpty(m2_head))
+                var m1 = FindNonAlphaNumericPrefix.Match(first);
+                var m2 = FindNonAlphaNumericPrefix.Match(second);
+                var m1Head = m1.Groups[1].Value;
+                first = m1.Groups[2].Value; // tail
+                var m2Head = m2.Groups[1].Value;
+                second = m2.Groups[2].Value; // tail
+                if (!string.IsNullOrEmpty(m1Head) || !string.IsNullOrEmpty(m2Head))
                 {
                     // Ignore junk at the beginning
                     continue;
@@ -106,10 +101,10 @@ namespace Community.Archives.Rpm
                 }
 
                 // grab first completely alpha or completely numeric segment
-                m1 = R_NUM.Match(first);
+                m1 = IsNumeric.Match(first);
                 if (m1.Success)
                 {
-                    m2 = R_NUM.Match(second);
+                    m2 = IsNumeric.Match(second);
                     if (!m2.Success)
                     {
                         // numeric segments are always newer than alpha segments
@@ -120,8 +115,8 @@ namespace Community.Archives.Rpm
                 }
                 else
                 {
-                    m1 = R_ALPHA.Match(first);
-                    m2 = R_ALPHA.Match(second);
+                    m1 = IsAlpha.Match(first);
+                    m2 = IsAlpha.Match(second);
                     if (!m2.Success)
                     {
                         return -1;
@@ -130,16 +125,16 @@ namespace Community.Archives.Rpm
                     isnum = false;
                 }
 
-                m1_head = m1.Groups[1].Value;
-                first = m1.Groups[2].Value;
-                m2_head = m2.Groups[1].Value;
-                second = m2.Groups[2].Value;
+                m1Head = m1.Groups[1].Value;
+                first = m1.Groups[2].Value; // tail
+                m2Head = m2.Groups[1].Value;
+                second = m2.Groups[2].Value; // tail
                 if (isnum)
                 {
-                    var m1_num = Int32.Parse(m1_head);
-                    var m2_num = Int32.Parse(m2_head);
+                    var m1Num = Int32.Parse(m1Head);
+                    var m2Num = Int32.Parse(m2Head);
 
-                    var cmp = m1_num.CompareTo(m2_num);
+                    var cmp = m1Num.CompareTo(m2Num);
 
                     if (cmp < 0)
                     {
@@ -152,58 +147,56 @@ namespace Community.Archives.Rpm
                     }
 
                     // throw away any leading zeros - it's a number, right?
-                    m1_head = m1_head.TrimStart('0');
-                    m2_head = m2_head.TrimStart('0');
+                    m1Head = m1Head.TrimStart('0');
+                    m2Head = m2Head.TrimStart('0');
+
                     // whichever number has more digits wins
-                    var m1hlen = m1_head.Length;
-                    var m2hlen = m2_head.Length;
-                    if (m1hlen < m2hlen)
+                    if (m1Head.Length < m2Head.Length)
                     {
                         return -1;
                     }
 
-                    if (m1hlen > m2hlen)
+                    if (m1Head.Length > m2Head.Length)
                     {
                         return 1;
                     }
                 }
                 else
                 {
-                    var head_cmp = String.Compare(m1_head, m2_head, StringComparison.Ordinal);
+                    var headCmp = String.Compare(m1Head, m2Head, StringComparison.Ordinal);
 
-                    if (head_cmp < 0)
+                    if (headCmp < 0)
                     {
                         return -1;
                     }
 
-                    if (head_cmp > 0)
+                    if (headCmp > 0)
                     {
                         return 1;
                     }
                 }
 
                 // Same number of chars
-                if (m1_head.Length < m2_head.Length)
+                if (m1Head.Length < m2Head.Length)
                 {
                     return -1;
                 }
 
-                if (m1_head.Length > m2_head.Length)
+                if (m1Head.Length > m2Head.Length)
                 {
                     return 1;
                 }
+
                 // Both segments equal
-                continue;
+                // continue with next segment
             }
 
-            var m1len = first.Length;
-            var m2len = second.Length;
-            if (m1len == 0 && m2len == 0)
+            if (first.Length == 0 && second.Length == 0)
             {
                 return 0;
             }
 
-            if (m1len != 0)
+            if (first.Length != 0)
             {
                 return 1;
             }

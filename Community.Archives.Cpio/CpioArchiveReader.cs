@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using Community.Archives.Core;
+﻿using Community.Archives.Core;
 
 namespace Community.Archives.Cpio;
 

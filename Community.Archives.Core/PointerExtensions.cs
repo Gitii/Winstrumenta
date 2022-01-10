@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Community.Archives.Core
+﻿namespace Community.Archives.Core
 {
     public static class PointerExtensions
     {

@@ -25,7 +25,7 @@
             x:Name="TitleBar"
             Height="30"
             controls:Grid.Row="0"
-            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+            Background="Transparent"
             FlowDirection="RightToLeft"
             Orientation="Horizontal"
             PointerPressed="TitleBar_OnPointerPressed">
@@ -69,7 +69,8 @@
             VerticalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
             VerticalContentAlignment="Stretch"
-            controls:Grid.Row="1" />
+            controls:Grid.Row="1"
+            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" />
     </controls:Grid>
 
 </xaml:DesktopWindow>
