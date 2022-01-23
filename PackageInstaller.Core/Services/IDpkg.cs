@@ -1,6 +1,5 @@
-﻿namespace PackageInstaller.Core.Services
+﻿namespace PackageInstaller.Core.Services;
+
+public interface IDpkg : IPlatformDependentPackageManager
 {
-    public interface IDpkg : IPlatformDependentPackageManager
-    {
-    }
 }

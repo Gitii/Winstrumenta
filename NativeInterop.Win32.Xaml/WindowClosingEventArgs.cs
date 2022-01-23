@@ -1,14 +1,13 @@
 ﻿using System;
 
-namespace NativeInterop.Win32.Xaml
-{
-    public class WindowClosingEventArgs : EventArgs
-    {
-        public DesktopWindow Window { get; private set; }
+namespace NativeInterop.Win32.Xaml;
 
-        public WindowClosingEventArgs(DesktopWindow window)
-        {
-            Window = window;
-        }
+public class WindowClosingEventArgs : EventArgs
+{
+    public DesktopWindow Window { get; private set; }
+
+    public WindowClosingEventArgs(DesktopWindow window)
+    {
+        Window = window;
     }
 }

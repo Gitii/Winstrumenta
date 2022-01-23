@@ -11,6 +11,11 @@ using Sextant;
 
 namespace PackageInstaller.Core.ModelViews;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Usage",
+    "MA0004:Use Task.ConfigureAwait(false)",
+    Justification = "ModelView should care about thread context."
+)]
 public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
@@ -20,10 +25,11 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     private IEnumerable<IPlatformDependentPackageManager> _packageManagers;
     bool _inProgress;
     string _progressStatusMessage;
-    FileSystemPath _packageFilePath;
+    FileSystemPath? _packageFilePath;
     private readonly IParameterViewStackService _viewStackService;
     private IPath _path;
     Stream? _packageIconStream;
+    private IThreadHelpers _threadHelpers;
     private IIconThemeManager _iconThemeManager;
 
     public Stream? PackageIconStream
@@ -32,7 +38,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         set { this.RaiseAndSetIfChanged(ref _packageIconStream, value); }
     }
 
-    public FileSystemPath PackageFilePath
+    public FileSystemPath? PackageFilePath
     {
         get { return _packageFilePath; }
         set { this.RaiseAndSetIfChanged(ref _packageFilePath, value); }
@@ -63,7 +69,8 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         IParameterViewStackService viewStackService,
         IEnumerable<IPlatformDependentPackageManager> packageManagers,
         IPath path,
-        IIconThemeManager iconThemeManager
+        IIconThemeManager iconThemeManager,
+        IThreadHelpers threadHelpers
     )
     {
         _applicationLifetime = applicationLifetime;
@@ -72,6 +79,10 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         _packageManagers = packageManagers;
         _path = path;
         _iconThemeManager = iconThemeManager;
+        _threadHelpers = threadHelpers;
+
+        _progressStatusMessage = String.Empty;
+        ProgressStatusMessage = String.Empty;
 
         _distroSourceList = new SourceList<WslDistributionModelView>();
         _distroSourceList
@@ -92,35 +103,35 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
         this.WhenAnyValue((vm) => vm.SelectedWslDistribution)
             .ObserveOn(RxApp.MainThreadScheduler)
-            .SelectMany(OnSelectedDistributionChanged)
+            .SelectMany(OnSelectedDistributionChangedAsync)
             .Subscribe();
 
-        PrimaryPackageCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryCommand);
+        PrimaryPackageCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryCommandAsync);
 
-        InstallCommand = ReactiveCommand.CreateFromTask(Install);
-        ReInstallCommand = ReactiveCommand.CreateFromTask(ReInstall);
-        UpgradeCommand = ReactiveCommand.CreateFromTask(Upgrade);
-        DowngradeCommand = ReactiveCommand.CreateFromTask(Downgrade);
-        UninstallCommand = ReactiveCommand.CreateFromTask(Uninstall);
+        InstallCommand = ReactiveCommand.CreateFromTask(InstallAsync);
+        ReInstallCommand = ReactiveCommand.CreateFromTask(ReInstallAsync);
+        UpgradeCommand = ReactiveCommand.CreateFromTask(UpgradeAsync);
+        DowngradeCommand = ReactiveCommand.CreateFromTask(DowngradeAsync);
+        UninstallCommand = ReactiveCommand.CreateFromTask(UninstallAsync);
     }
 
-    private Task Uninstall()
+    private Task UninstallAsync()
     {
         return Task.CompletedTask;
     }
 
-    private Task ExecutePrimaryCommand()
+    private Task ExecutePrimaryCommandAsync()
     {
         switch (PackageInstallationStatus)
         {
             case IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled:
-                return Install();
+                return InstallAsync();
             case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion:
-                return ReInstall();
+                return ReInstallAsync();
             case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion:
-                return Upgrade();
+                return UpgradeAsync();
             case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion:
-                return Downgrade();
+                return DowngradeAsync();
             default:
                 throw new ArgumentOutOfRangeException(
                     nameof(PackageInstallationStatus),
@@ -129,7 +140,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
     }
 
-    private async Task Downgrade()
+    private async Task DowngradeAsync()
     {
         try
         {
@@ -140,12 +151,12 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
             var distroName = SelectedWslDistribution!.Name;
 
-            var packageManager = await _packageManagers.GetSupportedManager(
-                PackageFilePath,
+            var packageManager = await _packageManagers.GetSupportedManagerAsync(
+                PackageFilePath ?? throw new Exception("Package file path is null"),
                 distroName
             );
 
-            var (success, log) = await packageManager.Downgrade(distroName, PackageFilePath);
+            var (success, log) = await packageManager.DowngradeAsync(distroName, PackageFilePath);
 
             if (!success)
             {
@@ -181,7 +192,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
     }
 
-    private async Task Upgrade()
+    private async Task UpgradeAsync()
     {
         try
         {
@@ -192,12 +203,12 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
             var distroName = SelectedWslDistribution!.Name;
 
-            var packageManager = await _packageManagers.GetSupportedManager(
-                PackageFilePath,
+            var packageManager = await _packageManagers.GetSupportedManagerAsync(
+                PackageFilePath ?? throw new Exception("Package file path is null"),
                 distroName
             );
 
-            var (success, log) = await packageManager.Upgrade(distroName, PackageFilePath);
+            var (success, log) = await packageManager.UpgradeAsync(distroName, PackageFilePath);
 
             if (!success)
             {
@@ -233,12 +244,12 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
     }
 
-    private Task ReInstall()
+    private Task ReInstallAsync()
     {
-        return Install();
+        return InstallAsync();
     }
 
-    private async Task Install()
+    private async Task InstallAsync()
     {
         try
         {
@@ -249,12 +260,12 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
             var distroName = SelectedWslDistribution!.Name;
 
-            var packageManager = await _packageManagers.GetSupportedManager(
-                PackageFilePath,
+            var packageManager = await _packageManagers.GetSupportedManagerAsync(
+                PackageFilePath ?? throw new Exception("Package file path is null"),
                 distroName
             );
 
-            var (success, log) = await packageManager.Install(distroName, PackageFilePath);
+            var (success, log) = await packageManager.InstallAsync(distroName, PackageFilePath);
 
             if (!success)
             {
@@ -290,7 +301,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
     }
 
-    private async Task<WslDistributionModelView?> OnSelectedDistributionChanged(
+    private async Task<WslDistributionModelView?> OnSelectedDistributionChangedAsync(
         WslDistributionModelView? arg
     )
     {
@@ -298,12 +309,12 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         {
             var distroName = SelectedWslDistribution!.Name;
 
-            var packageManager = await _packageManagers.GetSupportedManager(
-                PackageFilePath,
+            var packageManager = await _packageManagers.GetSupportedManagerAsync(
+                PackageFilePath ?? throw new Exception("Package file path is null"),
                 distroName
             );
 
-            var isInstalled = await packageManager.IsPackageInstalled(
+            var isInstalled = await packageManager.IsPackageInstalledAsync(
                 distroName,
                 PackageMetaData.Package
             );
@@ -316,7 +327,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             }
             else
             {
-                var installedPackageInfo = await packageManager.GetInstalledPackageInfo(
+                var installedPackageInfo = await packageManager.GetInstalledPackageInfoAsync(
                     distroName,
                     PackageMetaData.Package
                 );
@@ -350,7 +361,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         set { this.RaiseAndSetIfChanged(ref _packageMetaData, value); }
     }
 
-    WslDistributionModelView _selectedWslDistribution;
+    WslDistributionModelView? _selectedWslDistribution;
 
     public WslDistributionModelView? SelectedWslDistribution
     {
@@ -374,29 +385,15 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         set { this.RaiseAndSetIfChanged(ref _installedPackageVersion, value); }
     }
 
-    private async Task ProcessPackage()
+    private async Task ProcessPackageAsync()
     {
         InProgress = true;
 
-        var distros = await _wsl.GetAllInstalledDistributions();
+        await Task.Delay(10);
 
-        var supportedDistros = await distros
-            .Where((d) => d.IsRunning && d.Name is not ("docker-desktop-data" or "docker-desktop"))
-            .WhereAsync(
-                async (d) =>
-                {
-                    foreach (var packageManager in _packageManagers)
-                    {
-                        if (await packageManager.IsSupportedByDistribution(d.Name)
-                            && (await packageManager.IsPackageSupported(PackageFilePath)).isSupported)
-                        {
-                            return true;
-                        }
-                    }
+        var distros = await _wsl.GetAllInstalledDistributionsAsync();
 
-                    return false;
-                }
-            );
+        var supportedDistros = await GetSupportDistrosAsync(distros);
 
         _distroSourceList.Edit(
             (list) =>
@@ -406,9 +403,12 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             }
         );
 
+        await _threadHelpers.UiThread;
+
         if (SelectedWslDistribution == null && _distroSourceList.Count > 0)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            await Task.Delay(TimeSpan.FromMilliseconds(0));
+
             SelectedWslDistribution = _distroSourceList.Items.First();
         }
 
@@ -418,12 +418,40 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
         else
         {
-            PackageIconStream = await _iconThemeManager.ActiveIconTheme.GetSvgIconByName(
+            PackageIconStream = await _iconThemeManager.ActiveIconTheme.GetSvgIconByNameAsync(
                 PackageMetaData.IconName
             );
         }
 
         InProgress = false;
+    }
+
+    private Task<IList<WslDistribution>> GetSupportDistrosAsync(WslDistribution[] distros)
+    {
+        return distros
+            .Where((d) => d.IsRunning && d.Name is not ("docker-desktop-data" or "docker-desktop"))
+            .WhereAsync(
+                async (d) =>
+                {
+                    foreach (var packageManager in _packageManagers)
+                    {
+                        if (
+                            await packageManager.IsSupportedByDistributionAsync(d.Name)
+                            && (
+                                await packageManager.IsPackageSupportedAsync(
+                                    PackageFilePath
+                                        ?? throw new Exception("Package file path is null")
+                                )
+                            ).isSupported
+                        )
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            );
     }
 
     public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
@@ -443,7 +471,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         PackageMetaData = navParms.PackageMetaData;
         PackageFilePath = navParms.PackageFilePath;
 
-        return ObservableAsync.FromAsync(ProcessPackage);
+        return ObservableAsync.From(ProcessPackageAsync, RxApp.MainThreadScheduler);
     }
 
     public ReactiveCommand<Unit, Unit> Close { get; }

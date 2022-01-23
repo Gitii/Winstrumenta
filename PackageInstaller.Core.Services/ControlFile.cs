@@ -50,7 +50,7 @@ public class ControlFile
 
         foreach (string line in lines)
         {
-            if (line.StartsWith(" "))
+            if (line.StartsWith(" ", StringComparison.InvariantCulture))
             {
                 if (key.Length == 0)
                 {
@@ -59,7 +59,7 @@ public class ControlFile
 
                 content += "\n" + line.TrimStart();
             }
-            else if (line.Contains(":"))
+            else if (line.Contains(":", StringComparison.InvariantCulture))
             {
                 if (key.Length > 0)
                 {

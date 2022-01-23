@@ -2,13 +2,12 @@
 
 using Microsoft.UI.Xaml.Controls;
 
-namespace PackageInstaller.Controls
+namespace PackageInstaller.Controls;
+
+public sealed partial class Shimmer : UserControl
 {
-    public sealed partial class Shimmer : UserControl
+    public Shimmer()
     {
-        public Shimmer()
-        {
-            this.InitializeComponent();
-        }
+        this.InitializeComponent();
     }
 }

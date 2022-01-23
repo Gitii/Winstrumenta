@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
 using Community.Wsl.Sdk.Strategies.Api;
@@ -15,86 +16,98 @@ using Sextant.WinUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 
-namespace PackageInstaller
+
+namespace PackageInstaller;
+
+public static class Program
 {
-    public static class Program
+    [STAThread]
+    public static Task Main(string[] args)
     {
-        [STAThread]
-        public static Task Main(string[] args)
-        {
-            var builder = new WindowsAppSdkHostBuilder<App>();
+        var builder = new WindowsAppSdkHostBuilder<App>();
 
-            builder.ConfigureServices(
-                (context, collection) =>
-                {
-                    collection.UseMicrosoftDependencyResolver();
-                    var resolver = Locator.CurrentMutable;
-                    resolver.InitializeSplat();
-                    resolver.InitializeReactiveUI(RegistrationNamespace.WinUI);
+        ConfigureServices(builder);
 
-                    Locator.CurrentMutable.RegisterViewsForViewModels(
-                        Assembly.GetCallingAssembly()
-                    );
-                    Locator.CurrentMutable
-                        .RegisterWinUIViewLocator()
-                        .RegisterNavigationView(
-                            () =>
-                                new NavigationView(
-                                    RxApp.MainThreadScheduler,
-                                    RxApp.TaskpoolScheduler,
-                                    ViewLocator.Current
-                                )
-                        )
-                        .RegisterParameterViewStackService()
-                        .RegisterViewWinUI<PackageActions, PackageActionsViewModel>()
-                        .RegisterViewWinUI<Error, ErrorViewModel>()
-                        .RegisterViewWinUI<Result, ResultViewModel>()
-                        .RegisterViewWinUI<Preparation, PreparationViewModel>();
+        var app = builder.Build();
 
-                    collection.AddSingleton<MainWindow>();
-                    //collection.AddTransient<InstallViewModel>();
-                    //collection.AddTransient<ErrorViewModel>();
-                    //collection.AddTransient<PackageActionsViewModel>();
-                    //collection.AddTransient<PreparationViewModel>();
-                    //collection.AddTransient<IDebianPackageReader, DebianPackageReader>();
-                    //collection.AddTransient<IPackageReader, PackageReader>();
-                    //collection.AddTransient<IWsl, WslImpl>();
-                    var themeManager = new ThemeManager();
-                    collection.AddSingleton<IThemeManager, ThemeManager>(provider => themeManager);
-                    collection.AddSingleton<ThemeManager>(provider => themeManager);
-                    collection.AddTransient<IWslApi, ManagedWslApi>();
-                    collection.AddSingleton<IIconThemeManager, IconThemeManager>();
-                    //collection.AddTransient<IPackageManager, PackageManager>();
-                    //collection.AddTransient<IDpkg, Dpkg>();
-                    collection.Scan(
-                        scan =>
-                            scan
-                            // We start out with all types in the assembly of ITransientService
-                            .FromAssembliesOf(typeof(IWsl), typeof(WslImpl))
-                                .AddClasses(true)
-                                .AsImplementedInterfaces()
-                                .WithTransientLifetime()
-                                .AddClasses((classes) => classes.AssignableTo<ReactiveObject>())
-                                .AsSelf()
-                    );
-                    //collection.RemoveAll<IActivationForViewFetcher>();
-                    //collection.AddTransient<IActivationForViewFetcher, ActivationForViewFetcher>();
-                }
-            );
+        app.Services.UseMicrosoftDependencyResolver();
 
-            var app = builder.Build();
+        return app.StartAsync();
+    }
 
-            Container = app.Services;
-            Container.UseMicrosoftDependencyResolver();
+    private static void ConfigureServices(WindowsAppSdkHostBuilder<App> builder)
+    {
+        builder.ConfigureServices(
+            (context, collection) =>
+            {
+                ConfigureSplatIntegration(collection);
+                ConfigureModelViews(Locator.CurrentMutable);
+                ConfigureComplexServices(collection);
+                ConfigureServiceDiscovery(collection);
+            }
+        );
+    }
 
-            return app.StartAsync();
-        }
+    private static void ConfigureServiceDiscovery(IServiceCollection collection)
+    {
+        collection.Scan(
+            scan =>
+                scan
+                    // We start out with all types in the assembly of ITransientService
+                    .FromAssembliesOf(typeof(IWsl), typeof(WslImpl))
+                    .AddClasses(true)
+                    .AsImplementedInterfaces()
+                    .WithTransientLifetime()
+                    .AddClasses((classes) => classes.AssignableTo<ReactiveObject>())
+                    .AsSelf()
+        );
+    }
 
-        public static IServiceProvider Container { get; private set; }
+    private static void ConfigureComplexServices(IServiceCollection collection)
+    {
+        collection.AddSingleton<MainWindow>();
+        var themeManager = new ThemeManager();
+        collection.AddSingleton<IThemeManager, ThemeManager>(provider => themeManager);
+        collection.AddSingleton<ThemeManager>(provider => themeManager);
+        collection.AddTransient<IWslApi, ManagedWslApi>();
+        collection.AddSingleton<IIconThemeManager, IconThemeManager>();
+        collection.AddSingleton<IThreadHelpers>(
+            (provider) =>
+            {
+                var mw = provider.GetRequiredService<MainWindow>();
 
-        public static MainWindow? MainWindow
-        {
-            get => Container.GetService<MainWindow>();
-        }
+                return new ThreadHelpers(mw.DispatcherQueue);
+            }
+        );
+    }
+
+    private static void ConfigureModelViews(IMutableDependencyResolver currentMutable)
+    {
+        currentMutable.RegisterViewsForViewModels(
+            Assembly.GetCallingAssembly()
+        );
+        currentMutable
+            .RegisterWinUIViewLocator()
+            .RegisterNavigationView(
+                () =>
+                    new NavigationView(
+                        RxApp.MainThreadScheduler,
+                        RxApp.TaskpoolScheduler,
+                        ViewLocator.Current
+                    )
+            )
+            .RegisterParameterViewStackService()
+            .RegisterViewWinUI<PackageActions, PackageActionsViewModel>()
+            .RegisterViewWinUI<Error, ErrorViewModel>()
+            .RegisterViewWinUI<Result, ResultViewModel>()
+            .RegisterViewWinUI<Preparation, PreparationViewModel>();
+    }
+
+    private static void ConfigureSplatIntegration(IServiceCollection collection)
+    {
+        collection.UseMicrosoftDependencyResolver();
+        var resolver = Locator.CurrentMutable;
+        resolver.InitializeSplat();
+        resolver.InitializeReactiveUI(RegistrationNamespace.WinUI);
     }
 }

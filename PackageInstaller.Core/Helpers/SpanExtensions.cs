@@ -6,7 +6,7 @@ public static class SpanExtensions
 {
     public static SplittedSpanEntry Split(this ReadOnlySpan<char> span, char separator)
     {
-        ReadOnlySpan<char> part1 = ReadOnlySpan<char>.Empty;
+        ReadOnlySpan<char> part1;
         ReadOnlySpan<char> part2 = ReadOnlySpan<char>.Empty;
         ReadOnlySpan<char> part3 = ReadOnlySpan<char>.Empty;
         ReadOnlySpan<char> part4 = ReadOnlySpan<char>.Empty;
@@ -20,15 +20,15 @@ public static class SpanExtensions
         var offset = 0;
 
         _ =
-            FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part1)
-            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part2)
-            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part3)
-            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part4)
-            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part5)
-            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part6)
-            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part7)
-            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part8)
-            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part9);
+            FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part1, separator)
+            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part2, separator)
+            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part3, separator)
+            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part4, separator)
+            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part5, separator)
+            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part6, separator)
+            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part7, separator)
+            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part8, separator)
+            && FindSeparatorAndSplit(ref offset, ref hitCounter, span, out part9, separator);
 
         return new SplittedSpanEntry(
             part1,
@@ -42,38 +42,42 @@ public static class SpanExtensions
             part9,
             hitCounter + 1 // +1 because n hits == (n+1) parts
         );
+    }
 
-        bool FindSeparatorAndSplit(
-            ref int offset,
-            ref int hitCounter,
-            ReadOnlySpan<char> completeSpan,
-            out ReadOnlySpan<char> part
-        )
+    private static bool FindSeparatorAndSplit(
+        ref int offset,
+        ref int hitCounter,
+        ReadOnlySpan<char> completeSpan,
+        out ReadOnlySpan<char> part,
+        char separator
+    )
+    {
+        if (offset >= completeSpan.Length)
         {
-            if (offset >= completeSpan.Length)
-            {
-                part = ReadOnlySpan<char>.Empty;
+            part = ReadOnlySpan<char>.Empty;
 
-                return false;
-            }
+            return false;
+        }
 
-            var searchedSpan = completeSpan.Slice(offset);
-            var foundIndex = searchedSpan.IndexOf(separator);
-            if (foundIndex >= 0)
-            {
-                part = searchedSpan.Slice(0, foundIndex);
-                offset += foundIndex + 1; // +1 for separator
-                hitCounter += 1;
-                return true;
-            }
-            else
-            {
-                part = searchedSpan;
-                return false;
-            }
+        var searchedSpan = completeSpan.Slice(offset);
+        var foundIndex = searchedSpan.IndexOf(separator);
+        if (foundIndex >= 0)
+        {
+            part = searchedSpan.Slice(0, foundIndex);
+            offset += foundIndex + 1; // +1 for separator
+            hitCounter += 1;
+            return true;
+        }
+        else
+        {
+            part = searchedSpan;
+            return false;
         }
     }
 
+    [System.Runtime.InteropServices.StructLayout(
+        System.Runtime.InteropServices.LayoutKind.Sequential
+    )]
     public readonly ref struct SplittedSpanEntry
     {
         public readonly int NumberOfParts;
@@ -117,7 +121,7 @@ public static class SpanExtensions
         {
             if (NumberOfParts < minHits)
             {
-                throw new ArgumentException($"Found only {minHits} parts!");
+                throw new ArgumentException(nameof(minHits), $"Found only {minHits} parts!");
             }
         }
 
@@ -275,6 +279,7 @@ public static class SpanExtensions
     }
 
     // Must be a ref struct as it contains a ReadOnlySpan<char>
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     public ref struct LineSplittingEnumerator
     {
         private ReadOnlySpan<char> _str;
@@ -292,7 +297,9 @@ public static class SpanExtensions
         {
             var span = _str;
             if (span.Length == 0) // Reach the end of the string
+            {
                 return false;
+            }
 
             var index = span.IndexOfAny('\r', '\n');
             if (index == -1) // The string is composed of only one line
@@ -322,6 +329,7 @@ public static class SpanExtensions
         public LineEntry Current { get; private set; }
     }
 
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     public readonly ref struct LineEntry
     {
         public LineEntry(ReadOnlySpan<char> line, ReadOnlySpan<char> separator)

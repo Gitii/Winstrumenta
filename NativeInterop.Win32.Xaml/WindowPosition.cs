@@ -1,13 +1,13 @@
-﻿namespace NativeInterop.Win32.Xaml
+﻿namespace NativeInterop.Win32.Xaml;
+
+public class WindowPosition
 {
-    public class WindowPosition
+    public int Top { get; private set; }
+    public int Left { get; private set; }
+
+    public WindowPosition(int top, int left)
     {
-        public int Top { get; private set; }
-        public int Left { get; private set; }
-        public WindowPosition(int top, int left)
-        {
-            this.Top = top;
-            this.Left = left;
-        }
+        this.Top = top;
+        this.Left = left;
     }
 }

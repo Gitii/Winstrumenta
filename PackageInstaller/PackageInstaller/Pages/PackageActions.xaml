@@ -134,7 +134,7 @@
                 controls:Grid.RowSpan="2"
                 Source="ms-appx:///Assets/parcel.png" />
 
-            <controls1:SKElement
+            <controls1:SvgImageView
                 x:Name="PackageIcon"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"

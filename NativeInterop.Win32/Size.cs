@@ -1,9 +1,9 @@
-﻿namespace NativeInterop.Win32
-{
-    public struct Size
-    {
-        public int Width { get; set; }
+﻿namespace NativeInterop.Win32;
 
-        public int Height { get; set; }
-    }
+[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+public struct Size
+{
+    public int Width { get; set; }
+
+    public int Height { get; set; }
 }

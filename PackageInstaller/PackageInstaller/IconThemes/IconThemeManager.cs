@@ -8,54 +8,56 @@ using Windows.ApplicationModel;
 using PackageInstaller.Core.Services;
 using PackageInstaller.Core.Helpers;
 
-namespace PackageInstaller.IconThemes
+namespace PackageInstaller.IconThemes;
+
+class IconThemeManager : IIconThemeManager
 {
-    class IconThemeManager : IIconThemeManager
+    private List<IconTheme> _themes;
+    private IReadOnlyList<IIconTheme> _themesRo;
+
+    public IconThemeManager()
     {
-        private List<IconTheme> _themes;
-        private IReadOnlyList<IIconTheme> _themesRo;
+        _themes = new List<IconTheme>();
+        _themesRo = new ReadOnlyCollection<IIconTheme>(
+            _themes.WrapAs<IconTheme, IIconTheme>(theme => theme)
+        );
+        ActiveIconTheme = new NullIconTheme();
+    }
 
-        public IconThemeManager()
+    public IReadOnlyList<IIconTheme> AvailableThemes => _themesRo;
+    public IIconTheme ActiveIconTheme { get; set; }
+
+    public async Task LoadThemesAsync()
+    {
+        Package package = Package.Current;
+        var optionalThemes = package.Dependencies.Where((d) => d.IsOptional).ToList();
+
+        foreach (var theme in optionalThemes)
         {
-            _themes = new List<IconTheme>();
-            _themesRo = new ReadOnlyCollection<IIconTheme>(
-                _themes.WrapAs<IconTheme, IIconTheme>(theme => theme)
-            );
-        }
+            var rootFolder = theme.InstalledLocation;
+            var assetFolder = await rootFolder.GetFolderAsync("Assets");
+            var mappingFile = await assetFolder.GetFileAsync("mapping.csv");
+            var licenseFile = await rootFolder.GetFileAsync("LICENSE");
 
-        public IReadOnlyList<IIconTheme> AvailableThemes => _themesRo;
-        public IIconTheme ActiveIconTheme { get; set; }
+            var mappingFileStream = await mappingFile.OpenStreamForReadAsync().ConfigureAwait(false);
+            await using var _ = mappingFileStream.ConfigureAwait(false);
+            var licenseFileStream = await licenseFile.OpenStreamForReadAsync().ConfigureAwait(false);
+            await using var __ = licenseFileStream.ConfigureAwait(false);
 
-        public async Task LoadThemes()
-        {
-            Package package = Package.Current;
-            var optionalThemes = package.Dependencies.Where((d) => d.IsOptional).ToList();
-
-            foreach (var theme in optionalThemes)
+            var iconsFactory = async () =>
             {
-                var rootFolder = theme.InstalledLocation;
-                var assetFolder = await rootFolder.GetFolderAsync("Assets");
-                var mappingFile = await assetFolder.GetFileAsync("mapping.csv");
-                var licenseFile = await rootFolder.GetFileAsync("LICENSE");
+                var iconFile = await assetFolder.GetFileAsync("icons.zip");
+                return await iconFile.OpenStreamForReadAsync().ConfigureAwait(false);
+            };
 
-                await using var mappingFileStream = await mappingFile.OpenStreamForReadAsync();
-                await using var licenseFileStream = await licenseFile.OpenStreamForReadAsync();
+            var iconTheme = new IconTheme(theme.DisplayName, theme.Description ?? String.Empty, iconsFactory);
+            await iconTheme.LoadFromStreamAsync(
+                mappingFileStream,
+                licenseFileStream).ConfigureAwait(false);
 
-                var iconsFactory = async () =>
-                {
-                    var iconFile = await assetFolder.GetFileAsync("icons.zip");
-                    return await iconFile.OpenStreamForReadAsync();
-                };
-
-                var iconTheme = new IconTheme(theme.DisplayName, theme.Description ?? String.Empty, iconsFactory);
-                await iconTheme.LoadFromStream(
-                    mappingFileStream,
-                    licenseFileStream);
-
-                _themes.Add(iconTheme);
-            }
-
-            ActiveIconTheme = AvailableThemes.FirstOrDefault() ?? new NullIconTheme();
+            _themes.Add(iconTheme);
         }
+
+        ActiveIconTheme = AvailableThemes.FirstOrDefault() ?? new NullIconTheme();
     }
 }

@@ -10,25 +10,30 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using PackageInstaller.Core.Services;
 
-namespace PackageInstaller.Themes
+namespace PackageInstaller.Themes;
+
+public class ThemeManager : IThemeManager
 {
-    public class ThemeManager : IThemeManager
+    private Panel? _titleBar;
+
+    public void SetPanel(Panel titleBar)
     {
-        private Panel? _titleBar;
+        _titleBar = titleBar;
+    }
 
-        public void SetPanel(Panel titleBar)
+    public void SetTitleBarColor(byte a, byte r, byte g, byte b)
+    {
+        if (_titleBar != null)
         {
-            _titleBar = titleBar;
+            _titleBar.Background = new SolidColorBrush(Color.FromArgb(a, r, g, b));
         }
+    }
 
-        public void SetTitleBarColor(byte a, byte r, byte g, byte b)
+    public void ResetTitleBarColor()
+    {
+        if (_titleBar != null)
         {
-            if (_titleBar != null) _titleBar.Background = new SolidColorBrush(Color.FromArgb(a, r, g, b));
-        }
-
-        public void ResetTitleBarColor()
-        {
-            if (_titleBar != null) _titleBar.Background = new SolidColorBrush(Colors.Transparent);
+            _titleBar.Background = new SolidColorBrush(Colors.Transparent);
         }
     }
 }

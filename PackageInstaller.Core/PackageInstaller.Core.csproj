@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Community.Wsl.Sdk" Version="0.1.4" />
     <PackageReference Include="DynamicData" Version="7.4.9" />
+    <PackageReference Include="JetBrains.Profiler.Api" Version="1.1.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
     <PackageReference Include="ReactiveUI" Version="17.1.9" />
     <PackageReference Include="Sextant" Version="2.12.4" />

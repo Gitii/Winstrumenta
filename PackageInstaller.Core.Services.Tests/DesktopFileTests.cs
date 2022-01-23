@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
-using PackageInstaller.Core.Services.Tests.ControlFileFixtures;
+using PackageInstaller.Core.Services.Tests.Fixtures;
 
 namespace PackageInstaller.Core.Services.Tests;
 

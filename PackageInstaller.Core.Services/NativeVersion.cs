@@ -1,3 +1,4 @@
+﻿using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -10,13 +11,13 @@ namespace PackageInstaller.Core.Services;
 /// </summary>
 public class NativeVersion : BaseVersion
 {
-    public Regex re_all_digits_or_not = new Regex(@"\d+|\D+");
+    public Regex re_all_digits_or_not = new Regex(@"\d+|\D+", RegexOptions.None, TimeSpan.FromSeconds(1));
 
-    public Regex re_digits = new Regex(@"\d+");
+    public Regex re_digits = new Regex(@"\d+", RegexOptions.None, TimeSpan.FromSeconds(1));
 
-    public Regex re_digit = new Regex(@"\d");
+    public Regex re_digit = new Regex(@"\d", RegexOptions.None, TimeSpan.FromSeconds(1));
 
-    public Regex re_alpha = new Regex("[A-Za-z]");
+    public Regex re_alpha = new Regex("[A-Za-z]", RegexOptions.None, TimeSpan.FromSeconds(1));
 
     public override int CompareTo(BaseVersion? other)
     {
@@ -140,8 +141,8 @@ public class NativeVersion : BaseVersion
 
             if (re_digits.IsMatch(a) && re_digits.IsMatch(b))
             {
-                var aval = Convert.ToInt32(a);
-                var bval = Convert.ToInt32(b);
+                var aval = Convert.ToInt32(a, CultureInfo.InvariantCulture);
+                var bval = Convert.ToInt32(b, CultureInfo.InvariantCulture);
                 if (aval < bval)
                 {
                     return -1;
@@ -179,6 +180,6 @@ public class NativeVersion : BaseVersion
 
     private static int ParseString(string strValue, string alternative)
     {
-        return Convert.ToInt32(FirstNotEmpty(strValue, alternative));
+        return Convert.ToInt32(FirstNotEmpty(strValue, alternative), CultureInfo.InvariantCulture);
     }
 }

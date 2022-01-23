@@ -1,15 +1,18 @@
-﻿using Windows.UI;
+﻿#region
 
-namespace NativeInterop.Win32
+using Windows.UI;
+
+#endregion
+
+namespace NativeInterop.Win32;
+
+public interface INativeWindowListener
 {
-    public interface INativeWindowListener
-    {
-        void Activated(NativeWindow nativeWindow);
-        void Closing(NativeWindow nativeWindow);
-        void Moving(NativeWindow nativeWindow);
-        void Sizing(NativeWindow nativeWindow);
-        void DpiChanged(NativeWindow nativeWindow, uint dpi);
+    void OnActivated(NativeWindow nativeWindow);
+    void Closing(NativeWindow nativeWindow);
+    void Moving(NativeWindow nativeWindow);
+    void Sizing(NativeWindow nativeWindow);
+    void DpiChanged(NativeWindow nativeWindow, uint dpi);
 
-        void OnSystemThemeChanged(NativeWindow nativeWindow, Color foreground, Color Background);
-    }
+    void OnSystemThemeChanged(NativeWindow nativeWindow, Color foreground, Color Background);
 }

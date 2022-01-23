@@ -1,11 +1,10 @@
-﻿namespace PackageInstaller.Core.Services
+﻿namespace PackageInstaller.Core.Services;
+
+public interface IIconThemeManager
 {
-    public interface IIconThemeManager
-    {
-        public IReadOnlyList<IIconTheme> AvailableThemes { get; }
+    public IReadOnlyList<IIconTheme> AvailableThemes { get; }
 
-        public IIconTheme ActiveIconTheme { get; set; }
+    public IIconTheme ActiveIconTheme { get; set; }
 
-        public Task LoadThemes();
-    }
+    public Task LoadThemesAsync();
 }

@@ -10,7 +10,7 @@ class NullIconTheme : IIconTheme
     public string Description { get; } = "A fake icon theme that doesn't return any icons.";
     public string License { get; } = "MIT";
 
-    public Task<Stream?> GetSvgIconByName(string packageThemeName)
+    public Task<Stream?> GetSvgIconByNameAsync(string packageThemeName)
     {
         return Task.FromResult<Stream?>(null);
     }

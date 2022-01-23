@@ -13,7 +13,7 @@ public class WslImpl : IWsl
         _wslCommands = wslCommands;
     }
 
-    public async Task<WslDistribution[]> GetAllInstalledDistributions()
+    public Task<WslDistribution[]> GetAllInstalledDistributionsAsync()
     {
         var distros = _wsl.GetDistroList();
 
@@ -38,7 +38,7 @@ public class WslImpl : IWsl
             );
         }
 
-        return distributions.ToArray();
+        return Task.FromResult(distributions.ToArray());
     }
 
     private WslDistributionType GuessTypeFromName(string distroName)

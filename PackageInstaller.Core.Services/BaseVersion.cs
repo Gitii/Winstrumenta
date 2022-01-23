@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace PackageInstaller.Core.Services;
 
@@ -21,13 +21,21 @@ public abstract class BaseVersion : IComparable<BaseVersion>, IComparable
     public int CompareTo(object? obj)
     {
         if (ReferenceEquals(null, obj))
+        {
             return 1;
+        }
+
         if (ReferenceEquals(this, obj))
+        {
             return 0;
+        }
 
         return obj is BaseVersion other
-          ? CompareTo(other)
-          : throw new ArgumentException($"Object must be of type {nameof(BaseVersion)}");
+            ? CompareTo(other)
+            : throw new ArgumentException(
+                $"Object must be of type {nameof(BaseVersion)}",
+                nameof(obj)
+            );
     }
 
     public static bool operator <(BaseVersion? left, BaseVersion? right)
@@ -52,27 +60,28 @@ public abstract class BaseVersion : IComparable<BaseVersion>, IComparable
 
     public readonly Regex re_valid_version = new Regex(
         @"^((?<epoch>\d+):)?(?<upstream_version>[A-Za-z0-9.+:~-]+?)(-(?<debian_revision>[A-Za-z0-9+.~]+))?$",
-        RegexOptions.Compiled
+        RegexOptions.Compiled,
+        TimeSpan.FromSeconds(1)
     );
 
-    public BaseVersion(string version)
+    protected BaseVersion(string version)
     {
         var m = re_valid_version.Match(version);
         if (!m.Success)
         {
-            throw new ArgumentException(string.Format("Invalid version string %r", version));
+            throw new ArgumentException($"Invalid version string {version}", nameof(version));
         }
 
         // If there no epoch ("1:..."), then the upstream version can not
         // contain a :.
         if (
             m.Groups["epoch"].Value == string.Empty
-            && m.Groups["upstream_version"].Value.Contains(":")
+            && m.Groups["upstream_version"].Value.Contains(":", StringComparison.InvariantCulture)
         )
         {
-            throw new ParseError(string.Format("Invalid version string %r", version));
+            throw new ParseError($"Invalid version string {version}");
         }
-        
+
         FullVersion = version;
         Epoch = m.Groups["epoch"].Value;
         UpstreamVersion = m.Groups["upstream_version"].Value;

@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PackageInstaller.Core.Services
+namespace PackageInstaller.Core.Services;
+
+public interface IThemeManager
 {
-    public interface IThemeManager
-    {
-        void SetTitleBarColor(byte a, byte r, byte g, byte b);
-        void ResetTitleBarColor();
-    }
+    void SetTitleBarColor(byte a, byte r, byte g, byte b);
+    void ResetTitleBarColor();
 }

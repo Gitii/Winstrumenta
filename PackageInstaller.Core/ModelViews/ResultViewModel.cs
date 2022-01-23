@@ -7,6 +7,11 @@ using Sextant;
 
 namespace PackageInstaller.Core.ModelViews;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Usage",
+    "MA0004:Use Task.ConfigureAwait(false)",
+    Justification = "ModelView should care about thread context."
+)]
 public class ResultViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
@@ -31,6 +36,15 @@ public class ResultViewModel : ReactiveObject, IViewModel, INavigable
     {
         _applicationLifetime = applicationLifetime;
 
+        _title = String.Empty;
+        Title = string.Empty;
+
+        _description = String.Empty;
+        Description = String.Empty;
+
+        _details = String.Empty;
+        Details = String.Empty;
+
         CloseCommand = ReactiveCommand.Create(
             () =>
             {
@@ -40,7 +54,10 @@ public class ResultViewModel : ReactiveObject, IViewModel, INavigable
         );
 
         ToggleDetailsCommand = ReactiveCommand.Create(
-            () => { AreDetailsVisible = !AreDetailsVisible; }
+            () =>
+            {
+                AreDetailsVisible = !AreDetailsVisible;
+            }
         );
     }
 

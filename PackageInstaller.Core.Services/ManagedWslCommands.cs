@@ -48,18 +48,18 @@ public class ManagedWslCommands : IWslCommands
         return (stdOut + stdErr).Trim();
     }
 
-    public async Task<bool> CheckCommandExists(string distroName, string command)
+    public async Task<bool> CheckCommandExistsAsync(string distroName, string command)
     {
-        if (await CheckCommandExistsUsingWhich(distroName, "which"))
+        if (await CheckCommandExistsUsingWhichAsync(distroName, "which").ConfigureAwait(false))
         {
             // distro supports which
-            return await CheckCommandExistsUsingWhich(distroName, command);
+            return await CheckCommandExistsUsingWhichAsync(distroName, command).ConfigureAwait(false);
         }
 
-        if (await CheckCommandExistsUsingWhereis(distroName, "whereis"))
+        if (await CheckCommandExistsUsingWhereisAsync(distroName, "whereis").ConfigureAwait(false))
         {
             // distro supports whereis
-            return await CheckCommandExistsUsingWhereis(distroName, command);
+            return await CheckCommandExistsUsingWhereisAsync(distroName, command).ConfigureAwait(false);
         }
 
         throw new Exception(
@@ -67,26 +67,26 @@ public class ManagedWslCommands : IWslCommands
         );
     }
 
-    public async Task<bool> CheckCommandExistsUsingWhich(string distroName, string command)
+    public async Task<bool> CheckCommandExistsUsingWhichAsync(string distroName, string command)
     {
         var pathToDpkg = await ExecuteCommandAsync(
             distroName,
             "which",
             new string[] { command },
             ignoreExitCode: true
-        );
+        ).ConfigureAwait(false);
 
         return pathToDpkg.Trim().Length > 0;
     }
 
-    public async Task<bool> CheckCommandExistsUsingWhereis(string distroName, string command)
+    public async Task<bool> CheckCommandExistsUsingWhereisAsync(string distroName, string command)
     {
         var whereisOutput = await ExecuteCommandAsync(
             distroName,
             "whereis",
             new string[] { "-b", command },
             ignoreExitCode: true
-        );
+        ).ConfigureAwait(false);
 
         if (whereisOutput.Length > 0 && !whereisOutput.StartsWith(command + ":"))
         {

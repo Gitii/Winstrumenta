@@ -14,6 +14,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\DistroIcons\README.md" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Assets\DistroIcons\128_alpine.png" />
     <None Remove="Assets\DistroIcons\128_debian.png" />
     <None Remove="Assets\DistroIcons\128_fedora_newlogo.png" />

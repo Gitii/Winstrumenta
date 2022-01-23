@@ -12,13 +12,9 @@ public class DebianPackageReader : IDebianPackageReader
         "!<arch>\n"
     );
 
-    private static readonly Regex _relativePathMatcher = new Regex(
-        @"^control[.]tar[.][\w]{0,2}(\\control[.]tar)?\\control$"
-    );
-
-    public async Task<DebianPackageMetaData> ReadMetaData(FileSystemPath filePath)
+    public async Task<DebianPackageMetaData> ReadMetaDataAsync(FileSystemPath filePath)
     {
-        if (await IsDebFile(filePath.WindowsPath) is false)
+        if (await IsDebFileAsync(filePath.WindowsPath).ConfigureAwait(false) is false)
         {
             throw new ArgumentException("File is not a deb package file");
         }
@@ -31,31 +27,33 @@ public class DebianPackageReader : IDebianPackageReader
 
         var stream = File.OpenRead(filePath.WindowsPath);
         await foreach (
-            var arEntry in arExtractor.GetFileEntriesAsync(stream, IArchiveReader.MATCH_ALL_FILES)
+            var arEntry in arExtractor
+                .GetFileEntriesAsync(stream, IArchiveReader.MATCH_ALL_FILES)
+                .ConfigureAwait(false)
         )
         {
             if (arEntry.Name.StartsWith("control.", StringComparison.OrdinalIgnoreCase))
             {
                 await foreach (
-                    var controlEntry in tarExtractor.GetFileEntriesAsync(
-                        arEntry.Content,
-                        "^./control$"
-                    )
+                    var controlEntry in tarExtractor
+                        .GetFileEntriesAsync(arEntry.Content, "^./control$")
+                        .ConfigureAwait(false)
                 )
                 {
-                    metaData = await ReadFromControlFile(controlEntry.Content);
+                    metaData = await ReadFromControlFileAsync(controlEntry.Content)
+                        .ConfigureAwait(false);
                 }
             }
             else if (arEntry.Name.StartsWith("data.", StringComparison.OrdinalIgnoreCase))
             {
                 await foreach (
-                    var desktopEntry in tarExtractor.GetFileEntriesAsync(
-                        arEntry.Content,
-                        "[.]desktop$"
-                    )
+                    var desktopEntry in tarExtractor
+                        .GetFileEntriesAsync(arEntry.Content, "[.]desktop$")
+                        .ConfigureAwait(false)
                 )
                 {
-                    iconName = await ReadIconNameFromDesktopFile(desktopEntry.Content);
+                    iconName = await ReadIconNameFromDesktopFileAsync(desktopEntry.Content)
+                        .ConfigureAwait(false);
                 }
             }
         }
@@ -76,10 +74,10 @@ public class DebianPackageReader : IDebianPackageReader
         throw new Exception("Deb package file is malformed");
     }
 
-    private async Task<string?> ReadIconNameFromDesktopFile(Stream stream)
+    private async Task<string?> ReadIconNameFromDesktopFileAsync(Stream stream)
     {
         StreamReader reader = new StreamReader(stream);
-        var desktopFile = await reader.ReadToEndAsync();
+        var desktopFile = await reader.ReadToEndAsync().ConfigureAwait(false);
 
         DesktopFile cf = new DesktopFile();
         cf.Parse(desktopFile);
@@ -93,9 +91,9 @@ public class DebianPackageReader : IDebianPackageReader
         return null;
     }
 
-    public async Task<(bool isSupported, string? reason)> IsSupported(FileSystemPath filePath)
+    public async Task<(bool isSupported, string? reason)> IsSupportedAsync(FileSystemPath filePath)
     {
-        if (await IsDebFile(filePath.WindowsPath))
+        if (await IsDebFileAsync(filePath.WindowsPath).ConfigureAwait(false))
         {
             return (true, null);
         }
@@ -105,10 +103,10 @@ public class DebianPackageReader : IDebianPackageReader
         }
     }
 
-    private async Task<DebianPackageMetaData> ReadFromControlFile(Stream stream)
+    private async Task<DebianPackageMetaData> ReadFromControlFileAsync(Stream stream)
     {
         StreamReader reader = new StreamReader(stream);
-        var controlFile = await reader.ReadToEndAsync();
+        var controlFile = await reader.ReadToEndAsync().ConfigureAwait(false);
 
         ControlFile cf = new ControlFile();
         cf.Parse(controlFile);
@@ -123,9 +121,10 @@ public class DebianPackageReader : IDebianPackageReader
         };
     }
 
-    public async Task<bool> IsDebFile(string path)
+    public async Task<bool> IsDebFileAsync(string path)
     {
-        await using FileStream fs = File.OpenRead(path);
+        FileStream fs = File.OpenRead(path);
+        await using var __ = fs.ConfigureAwait(false);
 
         if (fs.Length < 8)
         {
@@ -133,7 +132,7 @@ public class DebianPackageReader : IDebianPackageReader
         }
 
         byte[] header = new byte[8];
-        await fs.ReadAsync(header, 0, 8);
+        _ = await fs.ReadAsync(header, 0, 8).ConfigureAwait(false);
 
         return header.SequenceEqual(DEB_FILE_HEADER);
     }

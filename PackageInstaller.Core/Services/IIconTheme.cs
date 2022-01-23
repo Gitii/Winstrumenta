@@ -8,5 +8,5 @@ public interface IIconTheme
 
     public string License { get; }
 
-    public Task<Stream?> GetSvgIconByName(string packageThemeName);
+    public Task<Stream?> GetSvgIconByNameAsync(string packageThemeName);
 }
