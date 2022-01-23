@@ -5,4 +5,10 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "IDE0161:Convert to file-scoped namespace", Justification = "<Pending>", Scope = "namespace", Target = "~N:PackageInstaller")]
+[assembly: SuppressMessage(
+    "Style",
+    "IDE0161:Convert to file-scoped namespace",
+    Justification = "<Pending>",
+    Scope = "namespace",
+    Target = "~N:PackageInstaller"
+)]

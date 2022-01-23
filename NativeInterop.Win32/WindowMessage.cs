@@ -287,7 +287,8 @@ public enum WindowMessage
     WM_COMPACTING = 0x0041,
 
     /// <summary>WM_COMMNOTIFY is Obsolete for Win32-Based Applications</summary>
-    [Obsolete] WM_COMMNOTIFY = 0x0044,
+    [Obsolete]
+    WM_COMMNOTIFY = 0x0044,
 
     /// <summary>
     /// The WM_WINDOWPOSCHANGING message is sent to a window whose size, position, or place in the Z order is about to change as a
@@ -305,7 +306,8 @@ public enum WindowMessage
     /// Notifies applications that the system, typically a battery-powered personal computer, is about to enter a suspended mode.
     /// Use: POWERBROADCAST
     /// </summary>
-    [Obsolete] WM_POWER = 0x0048,
+    [Obsolete]
+    WM_POWER = 0x0048,
 
     /// <summary>An application sends the WM_COPYDATA message to pass data to another application.</summary>
     WM_COPYDATA = 0x004A,

@@ -16,7 +16,6 @@ using Sextant.WinUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 
-
 namespace PackageInstaller;
 
 public static class Program
@@ -53,8 +52,8 @@ public static class Program
         collection.Scan(
             scan =>
                 scan
-                    // We start out with all types in the assembly of ITransientService
-                    .FromAssembliesOf(typeof(IWsl), typeof(WslImpl))
+                // We start out with all types in the assembly of ITransientService
+                .FromAssembliesOf(typeof(IWsl), typeof(WslImpl))
                     .AddClasses(true)
                     .AsImplementedInterfaces()
                     .WithTransientLifetime()
@@ -83,9 +82,7 @@ public static class Program
 
     private static void ConfigureModelViews(IMutableDependencyResolver currentMutable)
     {
-        currentMutable.RegisterViewsForViewModels(
-            Assembly.GetCallingAssembly()
-        );
+        currentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
         currentMutable
             .RegisterWinUIViewLocator()
             .RegisterNavigationView(

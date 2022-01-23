@@ -7,8 +7,7 @@ namespace PackageInstaller.Core.Helpers;
 
 public static class NavigationParameterHelpers
 {
-    public static INavigationParameter ToNavigationParameter<T>(this T structure)
-        where T : struct
+    public static INavigationParameter ToNavigationParameter<T>(this T structure) where T : struct
     {
         var navParms = new NavigationParameter();
         foreach (
@@ -24,11 +23,7 @@ public static class NavigationParameterHelpers
     }
 
     public static bool IsNullable(PropertyInfo property) =>
-        IsNullableHelper(
-            property.PropertyType,
-            property.DeclaringType,
-            property.CustomAttributes
-        );
+        IsNullableHelper(property.PropertyType, property.DeclaringType, property.CustomAttributes);
 
     public static bool IsNullable(FieldInfo field) =>
         IsNullableHelper(field.FieldType, field.DeclaringType, field.CustomAttributes);
@@ -89,8 +84,7 @@ public static class NavigationParameterHelpers
         return false;
     }
 
-    public static T FromNavigationParameter<T>(this INavigationParameter navParms)
-        where T : struct
+    public static T FromNavigationParameter<T>(this INavigationParameter navParms) where T : struct
     {
         var structure = new T();
         var boxedStructure = RuntimeHelpers.GetObjectValue(structure);

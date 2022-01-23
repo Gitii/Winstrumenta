@@ -7,11 +7,12 @@ using Splat;
 
 namespace PackageInstaller.Pages;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0048:File name must match type name",
-    Justification = "Workaround: Xaml doesn't support generic types.")]
-public class ReactivePageError : ReactivePage<ErrorViewModel>
-{
-}
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Design",
+    "MA0048:File name must match type name",
+    Justification = "Workaround: Xaml doesn't support generic types."
+)]
+public class ReactivePageError : ReactivePage<ErrorViewModel> { }
 
 public sealed partial class Error
 {
@@ -24,11 +25,7 @@ public sealed partial class Error
             {
                 this.OneWayBind(ViewModel, (vm) => vm.ErrorTitle, (v) => v.Title.Text)
                     .DisposeWith(disposable);
-                this.OneWayBind(
-                        ViewModel,
-                        (vm) => vm.ErrorDescription,
-                        (v) => v.Description.Text
-                    )
+                this.OneWayBind(ViewModel, (vm) => vm.ErrorDescription, (v) => v.Description.Text)
                     .DisposeWith(disposable);
                 this.OneWayBind(ViewModel, (vm) => vm.ErrorDetails, (v) => v.ErrorDetails.Text)
                     .DisposeWith(disposable);
@@ -36,8 +33,7 @@ public sealed partial class Error
                         ViewModel,
                         (vm) => vm.ErrorDetailsVisible,
                         (v) => v.ErrorDetails.Visibility,
-                        (bool isVisible) =>
-                            isVisible ? Visibility.Visible : Visibility.Collapsed
+                        (bool isVisible) => isVisible ? Visibility.Visible : Visibility.Collapsed
                     )
                     .DisposeWith(disposable);
                 this.OneWayBind(

@@ -80,7 +80,11 @@ public class Dpkg : IDpkg
             ControlFile cf = new ControlFile();
             cf.Parse(output);
 
-            return new IDpkg.PackageInfo() { Name = packageName, Version = cf.GetEntryContent("Version") };
+            return new IDpkg.PackageInfo()
+            {
+                Name = packageName,
+                Version = cf.GetEntryContent("Version")
+            };
         }
     }
 
@@ -127,7 +131,10 @@ public class Dpkg : IDpkg
         return (results.ExitCode == 0, String.Join(Environment.NewLine, output));
     }
 
-    public Task<(bool success, string logs)> InstallAsync(string distroName, FileSystemPath filePath)
+    public Task<(bool success, string logs)> InstallAsync(
+        string distroName,
+        FileSystemPath filePath
+    )
     {
         return ExecuteDpkgAsync(
             distroName,
@@ -143,12 +150,18 @@ public class Dpkg : IDpkg
         return ExecuteDpkgAsync(distroName, "-r", packageName);
     }
 
-    public Task<(bool success, string logs)> UpgradeAsync(string distroName, FileSystemPath filePath)
+    public Task<(bool success, string logs)> UpgradeAsync(
+        string distroName,
+        FileSystemPath filePath
+    )
     {
         return InstallAsync(distroName, filePath);
     }
 
-    public Task<(bool success, string logs)> DowngradeAsync(string distroName, FileSystemPath filePath)
+    public Task<(bool success, string logs)> DowngradeAsync(
+        string distroName,
+        FileSystemPath filePath
+    )
     {
         return ExecuteDpkgAsync(
             distroName,

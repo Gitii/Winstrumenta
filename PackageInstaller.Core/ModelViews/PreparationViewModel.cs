@@ -86,7 +86,8 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
 
             var navParms = new PackageActionsViewModel.NavigationParameter()
             {
-                PackageFilePath = packageFilePath, PackageMetaData = data
+                PackageFilePath = packageFilePath,
+                PackageMetaData = data
             };
 
             _viewStackService

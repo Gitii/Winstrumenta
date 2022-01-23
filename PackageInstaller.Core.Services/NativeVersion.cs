@@ -11,7 +11,11 @@ namespace PackageInstaller.Core.Services;
 /// </summary>
 public class NativeVersion : BaseVersion
 {
-    public Regex re_all_digits_or_not = new Regex(@"\d+|\D+", RegexOptions.None, TimeSpan.FromSeconds(1));
+    public Regex re_all_digits_or_not = new Regex(
+        @"\d+|\D+",
+        RegexOptions.None,
+        TimeSpan.FromSeconds(1)
+    );
 
     public Regex re_digits = new Regex(@"\d+", RegexOptions.None, TimeSpan.FromSeconds(1));
 

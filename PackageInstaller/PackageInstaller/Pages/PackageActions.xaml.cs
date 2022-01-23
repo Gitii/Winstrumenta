@@ -14,9 +14,7 @@ namespace PackageInstaller.Pages;
     "MA0048:File name must match type name",
     Justification = "Workaround: Xaml doesn't support generic types."
 )]
-public class ReactivePagePackageActions : ReactivePage<PackageActionsViewModel>
-{
-}
+public class ReactivePagePackageActions : ReactivePage<PackageActionsViewModel> { }
 
 public sealed partial class PackageActions
 {
@@ -79,11 +77,7 @@ public sealed partial class PackageActions
                     )
                     .DisposeWith(disposable);
 
-                this.OneWayBind(
-                        ViewModel,
-                        (vm) => vm.DistroList,
-                        (v) => v.DistroList.ItemsSource
-                    )
+                this.OneWayBind(ViewModel, (vm) => vm.DistroList, (v) => v.DistroList.ItemsSource)
                     .DisposeWith(disposable);
 
                 this.Bind(

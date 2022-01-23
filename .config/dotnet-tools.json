@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "csharpier": {
+      "version": "0.14.0",
+      "commands": ["dotnet-csharpier"]
+    },
+    "packedprettier": {
+      "version": "2.5.1.10",
+      "commands": ["pprettier"]
+    }
+  }
+}

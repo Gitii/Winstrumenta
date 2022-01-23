@@ -3,8 +3,11 @@ using System.Collections.Generic;
 
 namespace PackageInstaller.Core.Services.Tests.Fixtures;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0069:Non-constant static fields should not be visible",
-    Justification = "<Pending>")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Design",
+    "MA0069:Non-constant static fields should not be visible",
+    Justification = "<Pending>"
+)]
 public class DesktopFileFixtures
 {
     public static string SingleGroupNoEntriesRaw = "[groupname]";

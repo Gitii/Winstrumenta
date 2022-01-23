@@ -42,10 +42,7 @@ public class ImageExtensions : DependencyObject
             new PropertyMetadata(default(string), OnSourceUriChanged)
         );
 
-    private static void OnSourceUriChanged(
-        DependencyObject d,
-        DependencyPropertyChangedEventArgs e
-    )
+    private static void OnSourceUriChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is Image image)
         {

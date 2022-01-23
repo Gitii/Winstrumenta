@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -57,7 +58,13 @@ public class NativeWindow
             RECT rect;
             PInvoke.GetWindowRect(new HWND(_hwnd), out rect);
 
-            return new Rectangle { Bottom = rect.bottom, Left = rect.left, Right = rect.right, Top = rect.top };
+            return new Rectangle
+            {
+                Bottom = rect.bottom,
+                Left = rect.left,
+                Right = rect.right,
+                Top = rect.top
+            };
         }
     }
 
@@ -139,11 +146,7 @@ public class NativeWindow
         }
         set
         {
-            PInvoke.SetWindowLong(
-                new HWND(_hwnd),
-                WINDOW_LONG_PTR_INDEX.GWL_STYLE,
-                (int)(value)
-            );
+            PInvoke.SetWindowLong(new HWND(_hwnd), WINDOW_LONG_PTR_INDEX.GWL_STYLE, (int)(value));
         }
     }
 
@@ -226,7 +229,6 @@ public class NativeWindow
                 {
                     _dragWindow = false;
                 }
-
                 break;
             }
             case WindowMessage.WM_MOUSEMOVE:
@@ -253,7 +255,6 @@ public class NativeWindow
 
                     _lastPosition = location;
                 }
-
                 break;
             }
             case WindowMessage.WM_ACTIVATE:
@@ -261,7 +262,6 @@ public class NativeWindow
                 {
                     listener.OnActivated(this);
                 }
-
                 break;
 
             case WindowMessage.WM_GETMINMAXINFO:
@@ -277,7 +277,6 @@ public class NativeWindow
                         listener.Closing(this);
                     }
                 }
-
                 break;
 
             case WindowMessage.WM_MOVE:
@@ -285,21 +284,18 @@ public class NativeWindow
                 {
                     listener.Moving(this);
                 }
-
                 break;
             case WindowMessage.WM_SIZING:
                 foreach (var listener in _listeners)
                 {
                     listener.Sizing(this);
                 }
-
                 break;
             case WindowMessage.WM_DPICHANGED:
                 foreach (var listener in _listeners)
                 {
                     listener.DpiChanged(this, HiWord(wParam));
                 }
-
                 break;
             case WindowMessage.WM_SETTINGCHANGE:
                 var ptrToStringAuto = Marshal.PtrToStringAnsi(lParam);
@@ -308,7 +304,6 @@ public class NativeWindow
                 {
                     SettingsOnColorValuesChanged(_uiSettings, this);
                 }
-
                 break;
         }
 
@@ -318,14 +313,8 @@ public class NativeWindow
     private void UpdateMinMax(IntPtr hWnd, IntPtr lParam)
     {
         MINMAXINFO minMaxInfo = Marshal.PtrToStructure<MINMAXINFO>(lParam);
-        minMaxInfo.ptMinTrackSize.x = (short)DisplayInformation.ConvertEpxToPixel(
-            hWnd,
-            MinWidth
-        );
-        minMaxInfo.ptMinTrackSize.y = (short)DisplayInformation.ConvertEpxToPixel(
-            hWnd,
-            MinHeight
-        );
+        minMaxInfo.ptMinTrackSize.x = (short)DisplayInformation.ConvertEpxToPixel(hWnd, MinWidth);
+        minMaxInfo.ptMinTrackSize.y = (short)DisplayInformation.ConvertEpxToPixel(hWnd, MinHeight);
         if (MaxWidth > 0)
         {
             minMaxInfo.ptMaxTrackSize.x = (short)DisplayInformation.ConvertEpxToPixel(
@@ -438,25 +427,49 @@ public class NativeWindow
         }
     }
 
-    public void LoadIcon(string iconName)
+    public void LoadIcon(string iconFilePath)
     {
-        SafeFileHandle hIcon = PInvoke.LoadImage(
-            new SafeFileHandle(IntPtr.Zero, false),
-            iconName,
-            GDI_IMAGE_TYPE.IMAGE_ICON,
-            16,
-            16,
-            IMAGE_FLAGS.LR_LOADFROMFILE
-        );
+        if (!File.Exists(iconFilePath))
+        {
+            throw new FileNotFoundException("Icon file not found", iconFilePath);
+        }
 
-        PInvoke.SendMessage(
-            new HWND(_hwnd),
-            (uint)WindowMessage.WM_SETICON,
-            0,
-            hIcon.DangerousGetHandle()
-        );
+        const nuint ICON_SMALL = 0;
+        const nuint ICON_BIG = 1;
 
-        hIcon.SetHandleAsInvalid();
+        SetWindowIcon(16, ICON_SMALL);
+        SetWindowIcon(32, ICON_BIG);
+
+        void SetWindowIcon(int size, nuint iconSize)
+        {
+            SafeFileHandle hIcon = PInvoke.LoadImage(
+                new SafeFileHandle(IntPtr.Zero, false),
+                iconFilePath,
+                GDI_IMAGE_TYPE.IMAGE_ICON,
+                size,
+                size,
+                IMAGE_FLAGS.LR_LOADFROMFILE
+            );
+
+            if (hIcon.IsInvalid)
+            {
+                throw new Exception($"Failed to load icon from file {iconFilePath}");
+            }
+
+            var previousIconhandle = PInvoke.SendMessage(
+                new HWND(_hwnd),
+                (uint)WindowMessage.WM_SETICON,
+                iconSize,
+                hIcon.DangerousGetHandle()
+            );
+
+            hIcon.SetHandleAsInvalid();
+
+            if (previousIconhandle.Value > 0)
+            {
+                PInvoke.DestroyIcon(new HICON(previousIconhandle));
+            }
+        }
     }
 
     public void Maximize()

@@ -39,9 +39,13 @@ class IconThemeManager : IIconThemeManager
             var mappingFile = await assetFolder.GetFileAsync("mapping.csv");
             var licenseFile = await rootFolder.GetFileAsync("LICENSE");
 
-            var mappingFileStream = await mappingFile.OpenStreamForReadAsync().ConfigureAwait(false);
+            var mappingFileStream = await mappingFile
+                .OpenStreamForReadAsync()
+                .ConfigureAwait(false);
             await using var _ = mappingFileStream.ConfigureAwait(false);
-            var licenseFileStream = await licenseFile.OpenStreamForReadAsync().ConfigureAwait(false);
+            var licenseFileStream = await licenseFile
+                .OpenStreamForReadAsync()
+                .ConfigureAwait(false);
             await using var __ = licenseFileStream.ConfigureAwait(false);
 
             var iconsFactory = async () =>
@@ -50,10 +54,14 @@ class IconThemeManager : IIconThemeManager
                 return await iconFile.OpenStreamForReadAsync().ConfigureAwait(false);
             };
 
-            var iconTheme = new IconTheme(theme.DisplayName, theme.Description ?? String.Empty, iconsFactory);
-            await iconTheme.LoadFromStreamAsync(
-                mappingFileStream,
-                licenseFileStream).ConfigureAwait(false);
+            var iconTheme = new IconTheme(
+                theme.DisplayName,
+                theme.Description ?? String.Empty,
+                iconsFactory
+            );
+            await iconTheme
+                .LoadFromStreamAsync(mappingFileStream, licenseFileStream)
+                .ConfigureAwait(false);
 
             _themes.Add(iconTheme);
         }

@@ -1,4 +1,15 @@
-# run dotnet csharpier on C# files, whenever they're saved.
 [*.cs]
 command = dotnet
 arguments = csharpier "{file}"
+
+[*.{js,ts,css,less,scss,vue,json,gql,md,yml,yaml,html,htm}]
+command = dotnet
+arguments = pprettier --write "{file}"
+
+[*.{xml,csproj,xaml}]
+command = dotnet
+arguments = pprettier --write "{file}" --plugin "<NodeModulesPath>/@prettier/plugin-xml"
+
+[*.sh]
+command = dotnet
+arguments = pprettier --write "{file}" --plugin "<NodeModulesPath>/prettier-plugin-sh"

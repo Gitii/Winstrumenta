@@ -36,8 +36,6 @@ public class ControlFileTests
     {
         ControlFile cf = new ControlFile();
         cf.Parse(ControlFileFixtures.SingleMultilineEntry2Raw);
-        cf.Entries
-            .Should()
-            .Equal(ControlFileFixtures.SingleMultiline2Entry);
+        cf.Entries.Should().Equal(ControlFileFixtures.SingleMultiline2Entry);
     }
 }

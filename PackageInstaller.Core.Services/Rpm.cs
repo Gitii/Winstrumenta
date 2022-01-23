@@ -53,7 +53,11 @@ public class Rpm : IRpm
             throw new Exception($"Package '{packageName}' is not installed!");
         }
 
-        return new IPlatformDependentPackageManager.PackageInfo() { Name = packageName, Version = result };
+        return new IPlatformDependentPackageManager.PackageInfo()
+        {
+            Name = packageName,
+            Version = result
+        };
     }
 
     public async Task<IPlatformDependentPackageManager.PackageMetaData> ExtractPackageMetaDataAsync(

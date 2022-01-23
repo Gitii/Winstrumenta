@@ -53,13 +53,15 @@ public class ManagedWslCommands : IWslCommands
         if (await CheckCommandExistsUsingWhichAsync(distroName, "which").ConfigureAwait(false))
         {
             // distro supports which
-            return await CheckCommandExistsUsingWhichAsync(distroName, command).ConfigureAwait(false);
+            return await CheckCommandExistsUsingWhichAsync(distroName, command)
+                .ConfigureAwait(false);
         }
 
         if (await CheckCommandExistsUsingWhereisAsync(distroName, "whereis").ConfigureAwait(false))
         {
             // distro supports whereis
-            return await CheckCommandExistsUsingWhereisAsync(distroName, command).ConfigureAwait(false);
+            return await CheckCommandExistsUsingWhereisAsync(distroName, command)
+                .ConfigureAwait(false);
         }
 
         throw new Exception(
@@ -70,11 +72,12 @@ public class ManagedWslCommands : IWslCommands
     public async Task<bool> CheckCommandExistsUsingWhichAsync(string distroName, string command)
     {
         var pathToDpkg = await ExecuteCommandAsync(
-            distroName,
-            "which",
-            new string[] { command },
-            ignoreExitCode: true
-        ).ConfigureAwait(false);
+                distroName,
+                "which",
+                new string[] { command },
+                ignoreExitCode: true
+            )
+            .ConfigureAwait(false);
 
         return pathToDpkg.Trim().Length > 0;
     }
@@ -82,11 +85,12 @@ public class ManagedWslCommands : IWslCommands
     public async Task<bool> CheckCommandExistsUsingWhereisAsync(string distroName, string command)
     {
         var whereisOutput = await ExecuteCommandAsync(
-            distroName,
-            "whereis",
-            new string[] { "-b", command },
-            ignoreExitCode: true
-        ).ConfigureAwait(false);
+                distroName,
+                "whereis",
+                new string[] { "-b", command },
+                ignoreExitCode: true
+            )
+            .ConfigureAwait(false);
 
         if (whereisOutput.Length > 0 && !whereisOutput.StartsWith(command + ":"))
         {

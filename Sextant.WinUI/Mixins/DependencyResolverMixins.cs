@@ -53,12 +53,7 @@ public static class DependencyResolverMixins
     )
     {
         dependencyResolver.RegisterLazySingleton(
-            () =>
-                new NavigationView(
-                    mainThreadScheduler,
-                    backgroundScheduler,
-                    ViewLocator.Current
-                ),
+            () => new NavigationView(mainThreadScheduler, backgroundScheduler, ViewLocator.Current),
             typeof(IView),
             NavigationView
         );

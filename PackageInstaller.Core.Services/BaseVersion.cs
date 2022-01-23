@@ -31,8 +31,8 @@ public abstract class BaseVersion : IComparable<BaseVersion>, IComparable
         }
 
         return obj is BaseVersion other
-            ? CompareTo(other)
-            : throw new ArgumentException(
+          ? CompareTo(other)
+          : throw new ArgumentException(
                 $"Object must be of type {nameof(BaseVersion)}",
                 nameof(obj)
             );

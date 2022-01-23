@@ -1,9 +1,5 @@
-﻿#region
-
-using System.Drawing;
+﻿using System.Drawing;
 using System.Runtime.InteropServices;
-
-#endregion
 
 // ReSharper disable once CheckNamespace
 namespace Windows.Win32;

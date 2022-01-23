@@ -51,7 +51,10 @@ public sealed partial class MainWindow : DesktopWindow
                     uiContext.Post(
                         (_) =>
                         {
-                            var navParms = new ErrorViewModel.NavigationParameter() { Exception = ex };
+                            var navParms = new ErrorViewModel.NavigationParameter()
+                            {
+                                Exception = ex
+                            };
 
                             stackService
                                 .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
@@ -85,9 +88,7 @@ public sealed partial class MainWindow : DesktopWindow
 
         var navParams = new PreparationViewModel.NavigationParameter() { Arguments = arguments, };
 
-        stackService
-            .PushPage<PreparationViewModel>(navParams.ToNavigationParameter())
-            .Subscribe();
+        stackService.PushPage<PreparationViewModel>(navParams.ToNavigationParameter()).Subscribe();
     }
 
     private void CloseButton_OnClick(object sender, RoutedEventArgs e)

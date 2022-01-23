@@ -1,4 +1,5 @@
 ﻿namespace PackageInstaller.Core.Services;
+
 #pragma warning disable MA0015 // Specify the parameter name in ArgumentException
 public record class FileSystemPath(string UnixPath, string WindowsPath)
 {

@@ -5,4 +5,10 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Usage", "MA0004:Use Task.ConfigureAwait(false)", Justification = "<Pending>", Scope = "member", Target = "~M:PackageInstaller.Core.ModelViews.PackageActionsViewModel.ProcessPackageAsync~System.Threading.Tasks.Task")]
+[assembly: SuppressMessage(
+    "Usage",
+    "MA0004:Use Task.ConfigureAwait(false)",
+    Justification = "<Pending>",
+    Scope = "member",
+    Target = "~M:PackageInstaller.Core.ModelViews.PackageActionsViewModel.ProcessPackageAsync~System.Threading.Tasks.Task"
+)]

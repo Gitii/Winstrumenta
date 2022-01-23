@@ -1,5 +1,3 @@
 ﻿namespace PackageInstaller.Core.Services;
 
-public interface IRpm : IPlatformDependentPackageManager
-{
-}
+public interface IRpm : IPlatformDependentPackageManager { }

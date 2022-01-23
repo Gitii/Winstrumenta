@@ -7,4 +7,3 @@ public class ParseError : Exception
 {
     public ParseError(string message = "Failed to parse") : base(message) { }
 }
-

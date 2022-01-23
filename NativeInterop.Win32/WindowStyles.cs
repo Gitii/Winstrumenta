@@ -1,8 +1,4 @@
-﻿#region
-
-using System;
-
-#endregion
+﻿using System;
 
 namespace NativeInterop.Win32;
 
@@ -25,12 +21,7 @@ public enum WindowStyles : uint
     WS_OVERLAPPED = 0x0,
 
     WS_OVERLAPPEDWINDOW =
-        WS_OVERLAPPED
-        | WS_CAPTION
-        | WS_SYSMENU
-        | WS_SIZEFRAME
-        | WS_MINIMIZEBOX
-        | WS_MAXIMIZEBOX,
+        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_SIZEFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
     WS_POPUP = 0x80000000u,
     WS_POPUPWINDOW = WS_POPUP | WS_BORDER | WS_SYSMENU,
     WS_SIZEFRAME = 0x40000,

@@ -10,10 +10,7 @@ public class PathImplTests
     [TestCase(null, "Only fully qualified paths are supported: null")]
     [TestCase("", "Only fully qualified paths are supported: ")]
     [TestCase(".", "Only fully qualified paths are supported: .")]
-    [TestCase(
-        ".\\relative\\path",
-        "Only fully qualified paths are supported: .\\relative\\path"
-    )]
+    [TestCase(".\\relative\\path", "Only fully qualified paths are supported: .\\relative\\path")]
     [TestCase("/", "Only fully qualified paths are supported: /")]
     [TestCase("\\", "Only fully qualified paths are supported: \\")]
     [TestCase(
@@ -42,10 +39,7 @@ public class PathImplTests
     }
 
     [Test]
-    [TestCase(
-        "C:\\dir\\adawd/awdawd/////awdawd\\file",
-        "/mnt/c/dir/adawd/awdawd/////awdawd/file"
-    )]
+    [TestCase("C:\\dir\\adawd/awdawd/////awdawd\\file", "/mnt/c/dir/adawd/awdawd/////awdawd/file")]
     [TestCase("C://adawd.awdawd", "/mnt/c/adawd.awdawd")]
     public void Test_ToUnixPath_convert_longer_paths(string path, string convertedPath)
     {

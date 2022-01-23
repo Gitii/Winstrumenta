@@ -1,10 +1,6 @@
-﻿#region
-
-using System;
+﻿using System;
 using Windows.Win32;
 using Windows.Win32.Foundation;
-
-#endregion
 
 namespace NativeInterop.Win32;
 

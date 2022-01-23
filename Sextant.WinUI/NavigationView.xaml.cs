@@ -54,9 +54,7 @@ public partial class NavigationView : IView, IEnableLogger
     /// Initializes a new instance of the <see cref="NavigationView"/> class.
     /// </summary>
     public NavigationView()
-        : this(RxApp.MainThreadScheduler, RxApp.TaskpoolScheduler, ViewLocator.Current)
-    {
-    }
+        : this(RxApp.MainThreadScheduler, RxApp.TaskpoolScheduler, ViewLocator.Current) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NavigationView"/> class.
@@ -122,9 +120,7 @@ public partial class NavigationView : IView, IEnableLogger
             )
             .Subscribe(
                 (isVisible) =>
-                    backButton.Visibility = isVisible
-                        ? Visibility.Visible
-                        : Visibility.Collapsed
+                    backButton.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed
             );
     }
 
@@ -385,11 +381,7 @@ public partial class NavigationView : IView, IEnableLogger
                         _mirroredPageStack.Clear();
                         _mirroredPageStack.Push(viewModel);
 
-                        mainFrame.Navigate(
-                            pageType,
-                            null,
-                            new SuppressNavigationTransitionInfo()
-                        );
+                        mainFrame.Navigate(pageType, null, new SuppressNavigationTransitionInfo());
                         if (mainFrame.Content is IViewFor viewForReset)
                         {
                             viewForReset.ViewModel = viewModel;

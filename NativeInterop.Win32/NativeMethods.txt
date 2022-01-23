@@ -1,4 +1,4 @@
-﻿GetDpiForWindow
+GetDpiForWindow
 SetWindowLong
 CallWindowProc
 SendMessage
@@ -13,5 +13,5 @@ DwmSetWindowAttribute
 DwmGetWindowAttribute
 LoadImage
 SendMessage
-
+DestroyIcon
 MINMAXINFO

@@ -55,7 +55,9 @@ public interface IPlatformDependentPackageManager
 
     public Task<PackageMetaData> ExtractPackageMetaDataAsync(FileSystemPath filePath);
 
-    public Task<(bool isSupported, string? reason)> IsPackageSupportedAsync(FileSystemPath filePath);
+    public Task<(bool isSupported, string? reason)> IsPackageSupportedAsync(
+        FileSystemPath filePath
+    );
 
     /// <summary>
     /// Compares two versions and returns the status (same version, newer or older version).

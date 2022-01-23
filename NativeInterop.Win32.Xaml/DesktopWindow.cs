@@ -195,11 +195,7 @@ public class DesktopWindow : Window, INativeWindowListener
         OnWindowDpiChanged(dpi);
     }
 
-    public void OnSystemThemeChanged(
-        NativeWindow nativeWindow,
-        Color foreground,
-        Color Background
-    )
+    public void OnSystemThemeChanged(NativeWindow nativeWindow, Color foreground, Color Background)
     {
         if (RequestedTheme == DynamicApplicationTheme.Auto)
         {

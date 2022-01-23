@@ -13,9 +13,7 @@ namespace PackageInstaller.Pages;
     "MA0048:File name must match type name",
     Justification = "Workaround: Xaml doesn't support generic types."
 )]
-public class ReactivePageResult : ReactivePage<ResultViewModel>
-{
-}
+public class ReactivePageResult : ReactivePage<ResultViewModel> { }
 
 public sealed partial class Result
 {
@@ -36,8 +34,7 @@ public sealed partial class Result
                         ViewModel,
                         (vm) => vm.AreDetailsVisible,
                         (v) => v.DetailsContainer.Visibility,
-                        (bool isVisible) =>
-                            isVisible ? Visibility.Visible : Visibility.Collapsed
+                        (bool isVisible) => isVisible ? Visibility.Visible : Visibility.Collapsed
                     )
                     .DisposeWith(disposable);
                 this.OneWayBind(
@@ -56,11 +53,7 @@ public sealed partial class Result
 
                 this.BindCommand(ViewModel, (vm) => vm.CloseCommand, (v) => v.Button)
                     .DisposeWith(disposable);
-                this.BindCommand(
-                        ViewModel,
-                        (vm) => vm.ToggleDetailsCommand,
-                        (v) => v.ToggleDetails
-                    )
+                this.BindCommand(ViewModel, (vm) => vm.ToggleDetailsCommand, (v) => v.ToggleDetails)
                     .DisposeWith(disposable);
             }
         );

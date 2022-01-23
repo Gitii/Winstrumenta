@@ -1,8 +1,4 @@
-﻿#region
-
-using Windows.UI;
-
-#endregion
+﻿using Windows.UI;
 
 namespace NativeInterop.Win32;
 

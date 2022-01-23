@@ -24,12 +24,12 @@ public static class ListWrapper
             list,
             forwardConverter,
             backwardConverter
-            ?? (
-                _ =>
-                    throw new NotSupportedException(
-                        $"Conversion from {typeof(TTo).FullName} to {typeof(TFrom).FullName} is not supported."
-                    )
-            )
+                ?? (
+                    _ =>
+                        throw new NotSupportedException(
+                            $"Conversion from {typeof(TTo).FullName} to {typeof(TFrom).FullName} is not supported."
+                        )
+                )
         );
     }
 

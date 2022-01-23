@@ -30,10 +30,7 @@ public class ViewTypeResolver
             throw new Exception("Type already registered.");
         }
 
-        _typeDictionary.Add(
-            (typeof(TViewModel).AssemblyQualifiedName!, contract),
-            typeof(TView)
-        );
+        _typeDictionary.Add((typeof(TViewModel).AssemblyQualifiedName!, contract), typeof(TView));
     }
 
     /// <summary>
