@@ -8,6 +8,7 @@ public interface INativeWindowListener
     void Closing(NativeWindow nativeWindow);
     void Moving(NativeWindow nativeWindow);
     void Sizing(NativeWindow nativeWindow);
+
     void DpiChanged(NativeWindow nativeWindow, uint dpi);
 
     void OnSystemThemeChanged(NativeWindow nativeWindow, Color foreground, Color Background);

@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
 using Community.Archives.Ar;
 using Community.Archives.Core;
 using Community.Archives.Tar;

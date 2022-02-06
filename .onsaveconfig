@@ -6,9 +6,9 @@ arguments = csharpier "{file}"
 command = dotnet
 arguments = pprettier --write "{file}"
 
-[*.{xml,csproj,xaml}]
+[*.{xml,csproj,xaml,appxmanifest,props,wapproj}]
 command = dotnet
-arguments = pprettier --write "{file}" --plugin "<NodeModulesPath>/@prettier/plugin-xml"
+arguments = pprettier --write "{file}" --plugin "<NodeModulesPath>/@prettier/plugin-xml" --parser "xml" --print-width 120 --xml-whitespace-sensitivity "ignore" --tab-width 4
 
 [*.sh]
 command = dotnet
