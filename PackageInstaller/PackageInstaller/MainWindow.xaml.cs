@@ -4,32 +4,39 @@ using System;
 using System.Linq;
 using System.Reactive;
 using System.Threading;
+using Community.Sextant.WinUI;
+using Community.Sextant.WinUI.Adapters;
 using NativeInterop.Win32.Xaml;
 using ReactiveUI;
-using Microsoft.Extensions.DependencyInjection;
-using Splat;
-using Sextant.WinUI;
+using Microsoft.UI.Xaml.Controls;
 using Sextant;
 using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.ModelViews;
-using PackageInstaller.Core.Services;
 using PackageInstaller.Themes;
 
 namespace PackageInstaller;
 
 public sealed partial class MainWindow : DesktopWindow
 {
-    private readonly IServiceProvider services;
+    private readonly IParameterViewStackService _viewStackService;
+    private readonly INavigationService _navigationService;
+    private readonly ThemeManager _themeManager;
     private string args = string.Empty;
 
-    public MainWindow(IServiceProvider services)
+    public MainWindow(
+        IParameterViewStackService viewStackService,
+        INavigationService navigationService,
+        ThemeManager themeManager
+    )
     {
+        _viewStackService = viewStackService;
+        _navigationService = navigationService;
+        _themeManager = themeManager;
+
         this.InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
         // SetTitleBar(TitleBar); // do not set the title bar to use a 100% custom one.
-
-        this.services = services;
     }
 
     public void SetLaunchArgs(string arguments)
@@ -41,8 +48,6 @@ public sealed partial class MainWindow : DesktopWindow
     {
         var uiContext =
             SynchronizationContext.Current ?? throw new Exception("UI Context is null!");
-
-        var stackService = this.services.GetRequiredService<IParameterViewStackService>();
 
         RxApp.DefaultExceptionHandler = Observer
             .Create<Exception>(
@@ -56,7 +61,7 @@ public sealed partial class MainWindow : DesktopWindow
                                 Exception = ex
                             };
 
-                            stackService
+                            _viewStackService
                                 .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
                                 .Subscribe();
                         },
@@ -66,13 +71,13 @@ public sealed partial class MainWindow : DesktopWindow
             )
             .NotifyOn(RxApp.MainThreadScheduler);
 
-        Sextant.WinUI.NavigationView navigationView = Locator.Current.GetNavigationView(
-            "NavigationView"
-        )!;
-        navigationView.ShowDefaultBackButton = false;
-        ContentControl.Content = navigationView;
+        var content = new Frame();
 
-        Locator.Current.GetService<ThemeManager>()!.SetPanel(TitleBar);
+        _navigationService.SetAdapter(new FrameNavigationViewAdapter(content, this));
+
+        ContentControl.Content = content;
+
+        _themeManager.SetPanel(TitleBar);
 
         ForceUpdateTheme();
 
@@ -88,7 +93,9 @@ public sealed partial class MainWindow : DesktopWindow
 
         var navParams = new PreparationViewModel.NavigationParameter() { Arguments = arguments, };
 
-        stackService.PushPage<PreparationViewModel>(navParams.ToNavigationParameter()).Subscribe();
+        _viewStackService
+            .PushPage<PreparationViewModel>(navParams.ToNavigationParameter())
+            .Subscribe();
     }
 
     private void CloseButton_OnClick(object sender, RoutedEventArgs e)

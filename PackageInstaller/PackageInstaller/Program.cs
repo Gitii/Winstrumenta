@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Drawing.Design;
 using System.Reflection;
 using System.Threading.Tasks;
+using Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection;
 using Community.Wsl.Sdk.Strategies.Api;
 using CommunityToolkit.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +12,6 @@ using PackageInstaller.IconThemes;
 using PackageInstaller.Pages;
 using PackageInstaller.Themes;
 using ReactiveUI;
-using Sextant;
-using Sextant.WinUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 
@@ -40,7 +39,7 @@ public static class Program
             (context, collection) =>
             {
                 ConfigureSplatIntegration(collection);
-                ConfigureModelViews(Locator.CurrentMutable);
+                ConfigureModelViews(collection);
                 ConfigureComplexServices(collection);
                 ConfigureServiceDiscovery(collection);
             }
@@ -65,9 +64,10 @@ public static class Program
     private static void ConfigureComplexServices(IServiceCollection collection)
     {
         collection.AddSingleton<MainWindow>();
-        var themeManager = new ThemeManager();
-        collection.AddSingleton<IThemeManager, ThemeManager>(provider => themeManager);
-        collection.AddSingleton<ThemeManager>(provider => themeManager);
+        collection.AddSingleton<ThemeManager>();
+        collection.AddSingleton<IThemeManager, ThemeManager>(
+            provider => provider.GetRequiredService<ThemeManager>()
+        );
         collection.AddTransient<IWslApi, ManagedWslApi>();
         collection.AddSingleton<IIconThemeManager, IconThemeManager>();
         collection.AddSingleton<IThreadHelpers>(
@@ -80,24 +80,24 @@ public static class Program
         );
     }
 
-    private static void ConfigureModelViews(IMutableDependencyResolver currentMutable)
+    private static void ConfigureModelViews(IServiceCollection collection)
     {
-        currentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
-        currentMutable
-            .RegisterWinUIViewLocator()
-            .RegisterNavigationView(
-                () =>
-                    new NavigationView(
-                        RxApp.MainThreadScheduler,
-                        RxApp.TaskpoolScheduler,
-                        ViewLocator.Current
-                    )
-            )
-            .RegisterParameterViewStackService()
-            .RegisterViewWinUI<PackageActions, PackageActionsViewModel>()
-            .RegisterViewWinUI<Error, ErrorViewModel>()
-            .RegisterViewWinUI<Result, ResultViewModel>()
-            .RegisterViewWinUI<Preparation, PreparationViewModel>();
+        collection.UseSextant(
+            builder =>
+            {
+                builder.ConfigureDefaults();
+                builder.ConfigureViews(
+                    viewBuilder =>
+                    {
+                        viewBuilder
+                            .RegisterViewAndViewModel<PackageActions, PackageActionsViewModel>()
+                            .RegisterViewAndViewModel<Error, ErrorViewModel>()
+                            .RegisterViewAndViewModel<Result, ResultViewModel>()
+                            .RegisterViewAndViewModel<Preparation, PreparationViewModel>();
+                    }
+                );
+            }
+        );
     }
 
     private static void ConfigureSplatIntegration(IServiceCollection collection)
