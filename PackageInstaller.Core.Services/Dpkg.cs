@@ -80,11 +80,7 @@ public class Dpkg : IDpkg
             ControlFile cf = new ControlFile();
             cf.Parse(output);
 
-            return new IDpkg.PackageInfo()
-            {
-                Name = packageName,
-                Version = cf.GetEntryContent("Version")
-            };
+            return new IDpkg.PackageInfo() { Name = packageName, Version = cf.GetEntryContent("Version") };
         }
     }
 
@@ -93,10 +89,31 @@ public class Dpkg : IDpkg
         string versionB
     )
     {
-        var pva = new NativeVersion(versionA);
-        var pvb = new NativeVersion(versionB);
+        var pva = new DebianVersion(versionA);
+        var pvb = new DebianVersion(versionB);
 
-        return pva.GetInstallationStatusFromComparison(pvb);
+        return GetInstallationStatusFromComparison(pva, pvb);
+    }
+
+    public IPlatformDependentPackageManager.PackageInstallationStatus GetInstallationStatusFromComparison(
+        DebianVersion left,
+        DebianVersion right
+    )
+    {
+        var versionComparison = left.CompareTo(right);
+
+        if (versionComparison < 0)
+        {
+            return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion;
+        }
+        else if (versionComparison > 0)
+        {
+            return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion;
+        }
+        else
+        {
+            return IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion;
+        }
     }
 
     private async Task<(bool success, string logs)> ExecuteDpkgAsync(
