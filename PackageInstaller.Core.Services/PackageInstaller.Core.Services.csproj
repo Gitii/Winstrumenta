@@ -17,6 +17,7 @@
     <PackageReference Include="Community.Archives.Tar" Version="1.0.1" />
     <PackageReference Include="Community.Wsl.Sdk" Version="0.1.4" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="WindowsHook" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>

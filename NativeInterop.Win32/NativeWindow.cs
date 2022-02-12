@@ -26,9 +26,7 @@ public class NativeWindow
 
     private static readonly Color Black = Color.FromArgb(255, 0, 0, 0);
 
-    private bool _dragWindow = false;
     private IntPtr _hwnd;
-    private POINT _lastPosition = new POINT() { x = 0, y = 0 };
     private IList<INativeWindowListener> _listeners = new List<INativeWindowListener>();
     private UISettings _uiSettings;
     private bool _visible = true;
@@ -58,13 +56,7 @@ public class NativeWindow
             RECT rect;
             PInvoke.GetWindowRect(new HWND(_hwnd), out rect);
 
-            return new Rectangle
-            {
-                Bottom = rect.bottom,
-                Left = rect.left,
-                Right = rect.right,
-                Top = rect.top
-            };
+            return new Rectangle { Bottom = rect.bottom, Left = rect.left, Right = rect.right, Top = rect.top };
         }
     }
 
@@ -85,6 +77,45 @@ public class NativeWindow
                 Width = DisplayInformation.ConvertPixelToEpx(_hwnd, rs.Width),
                 Height = DisplayInformation.ConvertPixelToEpx(_hwnd, rs.Height)
             };
+        }
+
+        set
+        {
+            RawSize = new Size(
+                DisplayInformation.ConvertEpxToPixel(_hwnd, value.Width),
+                DisplayInformation.ConvertEpxToPixel(_hwnd, value.Height)
+            );
+        }
+    }
+
+    public Point RawPosition
+    {
+        get
+        {
+            var bounds = RawBounds;
+            return new Point() { X = bounds.Left, Y = bounds.Top, };
+        }
+        set
+        {
+            SetRawPosition(value.X, value.Y);
+        }
+    }
+
+    public Point Position
+    {
+        get
+        {
+            var position = RawPosition;
+            return new Point()
+            {
+                X = DisplayInformation.ConvertEpxToPixel(_hwnd, position.X),
+                Y = DisplayInformation.ConvertEpxToPixel(_hwnd, position.Y),
+            };
+        }
+        set
+        {
+            SetRawPosition(DisplayInformation.ConvertEpxToPixel(_hwnd, value.X),
+                DisplayInformation.ConvertEpxToPixel(_hwnd, value.Y));
         }
     }
 
@@ -207,13 +238,6 @@ public class NativeWindow
         );
     }
 
-    public void StartDragging()
-    {
-        _dragWindow = true;
-        PInvoke.ReleaseCapture();
-        PInvoke.SendMessage(new HWND(_hwnd), PInvoke.WM_NCLBUTTONDOWN, PInvoke.HT_CAPTION, 0);
-    }
-
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Design",
         "MA0051:Method is too long",
@@ -223,45 +247,12 @@ public class NativeWindow
     {
         switch (Msg)
         {
-            case WindowMessage.WM_LBUTTONUP:
-            {
-                if (_dragWindow)
-                {
-                    _dragWindow = false;
-                }
-                break;
-            }
-            case WindowMessage.WM_MOUSEMOVE:
-            {
-                if (_dragWindow)
-                {
-                    RECT windowRect;
-                    PInvoke.GetWindowRect(new HWND(_hwnd), out windowRect);
-
-                    POINT location;
-                    PInvoke.GetCursorPos(out location);
-
-                    int x = location.x - _lastPosition.x;
-                    int y = location.y - _lastPosition.y;
-
-                    PInvoke.MoveWindow(
-                        new HWND(_hwnd),
-                        x,
-                        y,
-                        windowRect.right - windowRect.left,
-                        windowRect.bottom - windowRect.top,
-                        false
-                    );
-
-                    _lastPosition = location;
-                }
-                break;
-            }
             case WindowMessage.WM_ACTIVATE:
                 foreach (var listener in _listeners)
                 {
                     listener.OnActivated(this);
                 }
+
                 break;
 
             case WindowMessage.WM_GETMINMAXINFO:
@@ -277,6 +268,7 @@ public class NativeWindow
                         listener.Closing(this);
                     }
                 }
+
                 break;
 
             case WindowMessage.WM_MOVE:
@@ -284,18 +276,21 @@ public class NativeWindow
                 {
                     listener.Moving(this);
                 }
+
                 break;
             case WindowMessage.WM_SIZING:
                 foreach (var listener in _listeners)
                 {
                     listener.Sizing(this);
                 }
+
                 break;
             case WindowMessage.WM_DPICHANGED:
                 foreach (var listener in _listeners)
                 {
                     listener.DpiChanged(this, HiWord(wParam));
                 }
+
                 break;
             case WindowMessage.WM_SETTINGCHANGE:
                 var ptrToStringAuto = Marshal.PtrToStringAnsi(lParam);
@@ -304,6 +299,7 @@ public class NativeWindow
                 {
                     SettingsOnColorValuesChanged(_uiSettings, this);
                 }
+
                 break;
         }
 
@@ -352,6 +348,13 @@ public class NativeWindow
         var bounds = RawBounds;
 
         PInvoke.MoveWindow(new HWND(_hwnd), bounds.Left, bounds.Top, width, height, true);
+    }
+
+    private void SetRawPosition(int x, int y)
+    {
+        var bounds = RawBounds;
+
+        PInvoke.MoveWindow(new HWND(_hwnd), x, y, bounds.Width, bounds.Height, false);
     }
 
     public void HideMinimizeAndMaximizeButtons()

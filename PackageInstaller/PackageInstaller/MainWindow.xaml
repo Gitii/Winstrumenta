@@ -30,7 +30,6 @@
       Background="Transparent"
       FlowDirection="RightToLeft"
       Orientation="Horizontal"
-      PointerPressed="TitleBar_OnPointerPressed"
     >
             <controls:Button
         x:Name="CloseButton"

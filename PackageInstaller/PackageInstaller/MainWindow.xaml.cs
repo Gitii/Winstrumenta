@@ -36,7 +36,7 @@ public sealed partial class MainWindow : DesktopWindow
         this.InitializeComponent();
 
         ExtendsContentIntoTitleBar = true;
-        // SetTitleBar(TitleBar); // do not set the title bar to use a 100% custom one.
+        SetTitleBar(TitleBar); // do not set the title bar to use a 100% custom one.
     }
 
     public void SetLaunchArgs(string arguments)
@@ -56,10 +56,7 @@ public sealed partial class MainWindow : DesktopWindow
                     uiContext.Post(
                         (_) =>
                         {
-                            var navParms = new ErrorViewModel.NavigationParameter()
-                            {
-                                Exception = ex
-                            };
+                            var navParms = new ErrorViewModel.NavigationParameter() { Exception = ex };
 
                             _viewStackService
                                 .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
@@ -101,11 +98,5 @@ public sealed partial class MainWindow : DesktopWindow
     private void CloseButton_OnClick(object sender, RoutedEventArgs e)
     {
         Environment.Exit(0);
-    }
-
-    private void TitleBar_OnPointerPressed(object sender, PointerRoutedEventArgs e)
-    {
-        _nativeWindow.StartDragging();
-        e.Handled = true;
     }
 }
