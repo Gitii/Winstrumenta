@@ -220,12 +220,17 @@ public class SvgImageView : Grid
         else
         {
             // width & height set
-            imageSize = new Size(svgDocument.Width, svgDocument.Height);
+            imageSize = new Size(svgDocument.Width.Value, svgDocument.Height.Value);
         }
 
         if (!hasViewBox && hasWidthAndHeight)
         {
-            svgDocument.ViewBox = new SvgViewBox(0, 0, svgDocument.Width, svgDocument.Height);
+            svgDocument.ViewBox = new SvgViewBox(
+                0,
+                0,
+                svgDocument.Width.Value,
+                svgDocument.Height.Value
+            );
         }
 
         Size optimalSize = FitInBounds(imageSize, bounds.Width, bounds.Height);

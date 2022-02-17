@@ -40,15 +40,15 @@
         <PackageReference Include="CommunityToolkit.Extensions.Hosting.WindowsAppSdk" Version="1.0.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.196" />
-        <PackageReference Include="ReactiveUI" Version="17.1.9" />
-        <PackageReference Include="ReactiveUI.WinUI" Version="17.1.9" />
-        <PackageReference Include="Scrutor" Version="3.3.0" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
+        <PackageReference Include="ReactiveUI" Version="17.1.50" />
+        <PackageReference Include="ReactiveUI.WinUI" Version="17.1.50" />
+        <PackageReference Include="Scrutor" Version="4.0.0" />
         <PackageReference Include="Sextant" Version="2.12.4" />
-        <PackageReference Include="Splat" Version="14.1.17" />
-        <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.17" />
-        <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.1.17" />
-        <PackageReference Include="Svg.Skia" Version="0.5.11" />
+        <PackageReference Include="Splat" Version="14.1.45" />
+        <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.45" />
+        <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.1.45" />
+        <PackageReference Include="Svg.Skia" Version="0.5.12" />
         <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
         <Manifest Include="$(ApplicationManifest)" />
     </ItemGroup>
