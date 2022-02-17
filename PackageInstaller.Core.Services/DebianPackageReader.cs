@@ -125,13 +125,13 @@ public class DebianPackageReader : IDebianPackageReader
         FileStream fs = File.OpenRead(path);
         await using var __ = fs.ConfigureAwait(false);
 
-        if (fs.Length < 8)
+        if (fs.Length < DEB_FILE_HEADER.Count)
         {
             return false; // file is too small
         }
 
-        byte[] header = new byte[8];
-        _ = await fs.ReadAsync(header, 0, 8).ConfigureAwait(false);
+        byte[] header = new byte[DEB_FILE_HEADER.Count];
+        _ = await fs.ReadAsync(header, 0, DEB_FILE_HEADER.Count).ConfigureAwait(false);
 
         return header.SequenceEqual(DEB_FILE_HEADER);
     }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Package
     xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
     xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
@@ -15,7 +15,7 @@
     <Properties>
         <DisplayName>Winstrumenta</DisplayName>
         <PublisherDisplayName>Germi</PublisherDisplayName>
-        <Logo>Images\PackageInstaller\StoreLogo.png</Logo>
+        <Logo>Images\StoreLogo.png</Logo>
     </Properties>
     <Dependencies>
         <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
@@ -30,13 +30,13 @@
                 DisplayName="Package Installer"
                 Description="Package Installer which is part of the Winstrumenta toolset. It allows users to install any supported linux package to be installed, without using command line tools."
                 BackgroundColor="transparent"
-                Square150x150Logo="Images\PackageInstaller\Square150x150Logo.png"
-                Square44x44Logo="Images\PackageInstaller\Square44x44Logo.png"
+                Square150x150Logo="Images\Square150x150Logo.png"
+                Square44x44Logo="Images\Square44x44Logo.png"
             >
                 <uap:DefaultTile
-                    Wide310x150Logo="Images\PackageInstaller\Wide310x150Logo.png"
-                    Square71x71Logo="Images\PackageInstaller\SmallTile.png"
-                    Square310x310Logo="Images\PackageInstaller\LargeTile.png"
+                    Wide310x150Logo="Images\Wide310x150Logo.png"
+                    Square71x71Logo="Images\SmallTile.png"
+                    Square310x310Logo="Images\LargeTile.png"
                 >
                     <uap:ShowNameOnTiles>
                         <uap:ShowOn Tile="square310x310Logo" />
@@ -44,7 +44,7 @@
                         <uap:ShowOn Tile="square150x150Logo" />
                     </uap:ShowNameOnTiles>
                 </uap:DefaultTile>
-                <uap:SplashScreen Image="Images\PackageInstaller\SplashScreen.png" />
+                <uap:SplashScreen Image="Images\SplashScreen.png" />
                 <uap:InitialRotationPreference>
                     <uap:Rotation Preference="landscape" />
                     <uap:Rotation Preference="landscapeFlipped" />
@@ -62,7 +62,7 @@
                         <uap:InfoTip>Software package for the Debian Linux distribution and its derivatives.</uap:InfoTip>
                         <!-- prettier-ignore-end -->
                         <uap:DisplayName>Debian Package</uap:DisplayName>
-                        <uap:Logo>package_closed.png</uap:Logo>
+                        <uap:Logo>closed-package.png</uap:Logo>
                     </uap3:FileTypeAssociation>
                 </uap:Extension>
                 <uap:Extension Category="windows.fileTypeAssociation">
@@ -71,7 +71,7 @@
                             <uap:FileType ContentType="application/x-rpm">.rpm</uap:FileType>
                         </uap:SupportedFileTypes>
                         <uap:DisplayName>Rpm Package</uap:DisplayName>
-                        <uap:Logo>package_closed.png</uap:Logo>
+                        <uap:Logo>closed-package.png</uap:Logo>
                         <!-- prettier-ignore-start -->
                         <uap:InfoTip>Software package used in many Linux distributions such as Fedora Linux, AlmaLinux, CentOS and openSUSE an its derivatives.</uap:InfoTip>
                         <!-- prettier-ignore-end -->
