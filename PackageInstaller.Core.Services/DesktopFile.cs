@@ -119,7 +119,7 @@ public class DesktopFile
 
         foreach (var line in lines)
         {
-            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#", StringComparison.Ordinal))
             {
                 // skip comments and empty lines
                 continue;
@@ -131,7 +131,7 @@ public class DesktopFile
 
                 currentGroupKey = line.Substring(1, line.Length - 2);
             }
-            else if (line.Contains('='))
+            else if (line.Contains('=', StringComparison.Ordinal))
             {
                 var (key, value) = line.Split('=');
 

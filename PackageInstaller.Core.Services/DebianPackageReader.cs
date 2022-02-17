@@ -15,7 +15,7 @@ public class DebianPackageReader : IDebianPackageReader
     {
         if (await IsDebFileAsync(filePath.WindowsPath).ConfigureAwait(false) is false)
         {
-            throw new ArgumentException("File is not a deb package file");
+            throw new ArgumentException("File is not a deb package file", nameof(filePath));
         }
 
         var arExtractor = new ArArchiveReader();
@@ -116,7 +116,7 @@ public class DebianPackageReader : IDebianPackageReader
             Architecture = cf.GetEntryContent("Architecture"),
             Version = cf.GetEntryContent("Version", ""),
             Description = cf.GetEntryContent("Description"),
-            AllFields = cf.Entries.ToDictionary(entry => entry.Key, entry => entry.Content)
+            AllFields = cf.Entries.ToDictionary(entry => entry.Key, entry => entry.Content, StringComparer.Ordinal)
         };
     }
 

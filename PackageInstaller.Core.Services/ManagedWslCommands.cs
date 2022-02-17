@@ -92,11 +92,11 @@ public class ManagedWslCommands : IWslCommands
             )
             .ConfigureAwait(false);
 
-        if (whereisOutput.Length > 0 && !whereisOutput.StartsWith(command + ":"))
+        if (whereisOutput.Length > 0 && !whereisOutput.StartsWith(command + ":", StringComparison.Ordinal))
         {
             throw new Exception("Unexpected return value from whereis: " + whereisOutput);
         }
 
-        return whereisOutput.Contains('/'); // assume that any path to a binary starts with /
+        return whereisOutput.Contains('/', StringComparison.Ordinal); // assume that any path to a binary starts with /
     }
 }

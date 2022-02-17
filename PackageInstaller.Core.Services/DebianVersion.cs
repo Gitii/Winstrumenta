@@ -71,7 +71,7 @@ public readonly record struct DebianVersion : IComparable<DebianVersion>, ICompa
     {
         if (strValue != null)
         {
-            Regex reg = new Regex(format);
+            Regex reg = new Regex(format, RegexOptions.None, TimeSpan.FromSeconds(1));
 
             if (!reg.IsMatch(strValue))
             {
@@ -211,7 +211,7 @@ public readonly record struct DebianVersion : IComparable<DebianVersion>, ICompa
 
     private uint GetNumericPart(ref string value)
     {
-        Regex reg = new Regex("^([0-9]+)");
+        Regex reg = new Regex("^([0-9]+)", RegexOptions.None, TimeSpan.FromSeconds(1));
 
         var match = reg.Match(value);
         if (match.Success)
@@ -226,7 +226,7 @@ public readonly record struct DebianVersion : IComparable<DebianVersion>, ICompa
 
     private string GetAlphaNumericPart(ref string value)
     {
-        Regex reg = new Regex("^([A-Za-z.+:~-]+)");
+        Regex reg = new Regex("^([A-Za-z.+:~-]+)", RegexOptions.None, TimeSpan.FromSeconds(1));
 
         var match = reg.Match(value);
         if (match.Success)
@@ -237,5 +237,25 @@ public readonly record struct DebianVersion : IComparable<DebianVersion>, ICompa
         }
 
         return String.Empty;
+    }
+
+    public static bool operator <(DebianVersion left, DebianVersion right)
+    {
+        return left.CompareTo(right) < 0;
+    }
+
+    public static bool operator <=(DebianVersion left, DebianVersion right)
+    {
+        return left.CompareTo(right) <= 0;
+    }
+
+    public static bool operator >(DebianVersion left, DebianVersion right)
+    {
+        return left.CompareTo(right) > 0;
+    }
+
+    public static bool operator >=(DebianVersion left, DebianVersion right)
+    {
+        return left.CompareTo(right) >= 0;
     }
 }

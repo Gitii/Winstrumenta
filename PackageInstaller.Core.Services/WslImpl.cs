@@ -45,7 +45,7 @@ public class WslImpl : IWsl
     {
         foreach (var name in Enum.GetNames<WslDistributionType>())
         {
-            if (distroName.Contains(name))
+            if (distroName.Contains(name, StringComparison.Ordinal))
             {
                 return Enum.Parse<WslDistributionType>(name);
             }

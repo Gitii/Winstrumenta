@@ -68,11 +68,11 @@ public class ControlFile
                     content = string.Empty;
                 }
 
-                var index = line.IndexOf(":");
+                var index = line.IndexOf(":", StringComparison.Ordinal);
                 key = line.Substring(0, index);
                 content = line.Substring(index + 1).TrimStart();
             }
-            else if (line.StartsWith("#"))
+            else if (line.StartsWith("#", StringComparison.Ordinal))
             {
                 // ignore, comment
             }

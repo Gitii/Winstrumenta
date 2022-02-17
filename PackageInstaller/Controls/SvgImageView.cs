@@ -75,7 +75,7 @@ public class SvgImageView : Grid
         }
         else if (Source is string svg)
         {
-            if (svg.StartsWith("<"))
+            if (svg.StartsWith("<", StringComparison.Ordinal))
             {
                 // is svg document
                 _svg = svg;

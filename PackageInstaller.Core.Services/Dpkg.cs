@@ -28,7 +28,7 @@ public class Dpkg : IDpkg
             )
             .ConfigureAwait(false);
 
-        return !output.Contains($"dpkg-query: package '{packageName}' is not installed");
+        return !output.Contains($"dpkg-query: package '{packageName}' is not installed", StringComparison.Ordinal);
     }
 
     public async Task<IPlatformDependentPackageManager.PackageMetaData> ExtractPackageMetaDataAsync(
@@ -67,11 +67,11 @@ public class Dpkg : IDpkg
             )
             .ConfigureAwait(false);
 
-        if (output.Contains($"dpkg-query: package '{packageName}' is not installed"))
+        if (output.Contains($"dpkg-query: package '{packageName}' is not installed", StringComparison.Ordinal))
         {
             throw new Exception($"Package '{packageName}' is not installed!");
         }
-        else if (!output.Contains($"Package: {packageName}\n"))
+        else if (!output.Contains($"Package: {packageName}\n", StringComparison.Ordinal))
         {
             throw new Exception($"dpkg returned malformed or wrong package details.");
         }
@@ -204,7 +204,7 @@ public class Dpkg : IDpkg
                     .FromAsync(r.ReadLineAsync, RxApp.TaskpoolScheduler)
                     .Repeat()
                     .TakeWhile(line => line != null)
-                    .Select((line) => (line ?? String.Empty).Replace("\0", ""))
+                    .Select((line) => (line ?? String.Empty).Replace("\0", "", StringComparison.Ordinal))
                     .Where((line) => line.Length != 0)
         );
     }
