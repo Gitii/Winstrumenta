@@ -59,4 +59,8 @@
         <ProjectReference Include="..\PackageInstaller.Core.Services\PackageInstaller.Core.Services.csproj" />
         <ProjectReference Include="..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Properties\" />
+    </ItemGroup>
 </Project>

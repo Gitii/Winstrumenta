@@ -1,0 +1,76 @@
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  test:
+    runs-on: windows-2022
+    steps:
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+          include-prerelease: true
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
+          vs-version: 17
+          vs-prerelease: true
+      - name: Setup VSTest Path
+        uses: darenm/Setup-VSTest@v1
+      - name: Build
+        run: msbuild /t:build -restore /p:Configuration=Release /p:Version="$env:TAG_NAME" -m:4 Winstrumenta.sln
+        env:
+          TAG_NAME: ${{ steps.tagName.outputs.tag }}
+      - name: Test
+        run: Get-ChildItem -Recurse -Filter "*.Tests.dll" | ? { $_.FullName -Match "bin[\\/]Release" -and $_.FullName -notmatch "ref" } | % { vstest.console.exe $_.FullName }
+
+  publish:
+    runs-on: windows-2022
+    needs: test
+    strategy:
+      matrix:
+        packaging-project: ["Winstrumenta.Package/Winstrumenta.Package.wapproj"]
+    steps:
+      - uses: olegtarasov/get-tag@v2.1
+        id: tagName
+        with:
+          tagRegex: "v(.*)"
+          tagRegexGroup: 1
+      - uses: actions/checkout@v2
+      - name: Extract release notes
+        run: |
+          git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' > ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+          include-prerelease: true
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
+          vs-version: 17
+          vs-prerelease: true
+      - name: Package msix
+        run: msbuild "$env:PROJ_PATH" /t:Build /p:Configuration=Release /p:Platform=x64 /p:OutputPath="$env:OUTPUT_PATH" /p:UapAppxPackageBuildMode=StoreUpload /p:Version="$env:TAG_NAME" /p:AppxBundle=Always /p:AppxBundlePlatforms="x64" /p:AppxAutoIncrementPackageRevision=false
+        env:
+          TAG_NAME: ${{ steps.tagName.outputs.tag }}
+          PROJ_PATH: ${{ matrix.packaging-project }}
+          OUTPUT_PATH: C:\AppPackage
+      - name: Prepare release files
+        run: |
+          $Folder = $(Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*_Test").FullName
+          7z a -mx9 -tzip "$env:OUTPUT_PATH/${env:TAG_NAME}-Sideload.zip" "$Folder/*"
+          Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*.msixupload" | Copy-Item -Destination $env:OUTPUT_PATH
+        env:
+          TAG_NAME: ${{ steps.tagName.outputs.tag }}
+          OUTPUT_PATH: C:\Release
+          ARTIFACT_PATH: C:\AppPackage
+      - name: Attach files to Github releases
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "C:/Release/*"
+          body_path: "./RELEASE-NOTES.txt"
