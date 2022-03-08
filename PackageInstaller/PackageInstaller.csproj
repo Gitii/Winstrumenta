@@ -37,7 +37,6 @@
         </PackageReference>
         <PackageReference Include="Community.Sextant.WinUI" Version="0.5.0" />
         <PackageReference Include="Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection" Version="0.5.0" />
-        <PackageReference Include="CommunityToolkit.Extensions.Hosting.WindowsAppSdk" Version="1.0.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
@@ -45,6 +44,7 @@
         <PackageReference Include="ReactiveUI.WinUI" Version="17.1.50" />
         <PackageReference Include="Scrutor" Version="4.0.0" />
         <PackageReference Include="Sextant" Version="2.12.4" />
+        <PackageReference Include="SharpNinja.Extensions.WindowsAppSdkHost" Version="1.0.7" />
         <PackageReference Include="Splat" Version="14.1.45" />
         <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.45" />
         <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.1.45" />
