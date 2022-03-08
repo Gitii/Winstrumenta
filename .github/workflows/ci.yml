@@ -25,6 +25,6 @@ jobs:
       - name: Setup VSTest Path
         uses: darenm/Setup-VSTest@v1
       - name: Build
-        run: msbuild /t:build -restore /p:Configuration=Release /p:Platform="Any CPU" -m:4 Winstrumenta.sln
+        run: msbuild /t:build -restore /p:Configuration=Release /p:Platform=x64 /p:Platform=x86 /p:Platform=arm64 -m:4 Winstrumenta.sln
       - name: Test
         run: Get-ChildItem -Recurse -Filter "*.Tests.dll" | ? { $_.FullName -Match "bin[\\/]Release" -and $_.FullName -notmatch "ref" } | % { vstest.console.exe $_.FullName }
