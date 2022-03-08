@@ -55,7 +55,7 @@ jobs:
           vs-version: 17
           vs-prerelease: true
       - name: Package msix
-        run: msbuild "$env:PROJ_PATH" /t:Build /p:Configuration=Release /p:Platform=x64 /p:OutputPath="$env:OUTPUT_PATH" /p:UapAppxPackageBuildMode=StoreUpload /p:Version="$env:TAG_NAME" /p:AppxBundle=Always /p:AppxBundlePlatforms="x64" /p:AppxAutoIncrementPackageRevision=false
+        run: msbuild "$env:PROJ_PATH" /t:Build /p:Configuration=Release /p:Platform=x86 /p:Platform=arm64 /p:Platform=x64 /p:OutputPath="$env:OUTPUT_PATH" /p:UapAppxPackageBuildMode=StoreUpload /p:Version="$env:TAG_NAME" /p:AppxBundle=Always /p:AppxBundlePlatforms="x86|x64|arm64" /p:AppxAutoIncrementPackageRevision=false
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
           PROJ_PATH: ${{ matrix.packaging-project }}
