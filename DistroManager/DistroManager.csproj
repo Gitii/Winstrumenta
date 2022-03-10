@@ -1,16 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net6.0-windows10.0.20348.0</TargetFramework>
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
-        <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64;win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
         <Platforms>x86;x64;arm64</Platforms>
         <RootNamespace>DistroManager</RootNamespace>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
         <UseWinUI>true</UseWinUI>
-        <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
+        <EnablePreviewMsixTooling>false</EnablePreviewMsixTooling>
     </PropertyGroup>
 
     <ItemGroup>
