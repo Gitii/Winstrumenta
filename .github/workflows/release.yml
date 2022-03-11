@@ -51,14 +51,14 @@ jobs:
           PROJ_PATH: ${{ matrix.packaging-project }}
       - name: Extract certificate
         shell: bash
-        run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > {{ env.CERTIFICATE_PATH }}
+        run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
       - name: Package msix
         run: |
             msbuild "$env:PROJ_PATH" /t:Build /p:Configuration=Release /p:Platform=x86 /p:Platform=arm64
             /p:Platform=x64 /p:OutputPath="$env:ARTIFACT_PATH" /p:UapAppxPackageBuildMode=StoreUpload
             /p:Version="$env:TAG_NAME" /p:AppxBundle=Always /p:AppxBundlePlatforms="x86|x64|arm64"
-            /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="{{ env.CERTIFICATE_PATH }}"
-            /p:PackageCertificatePassword="{{ secrets.APPX_CERTIFICATE_PASSWORD }}"
+            /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}"
+            /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}"
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
           PROJ_PATH: ${{ matrix.packaging-project }}
@@ -72,5 +72,5 @@ jobs:
       - name: Attach files to Github releases
         uses: softprops/action-gh-release@v1
         with:
-          files: "{{ env.OUTPUT_PATH }}/*"
+          files: "${{ env.OUTPUT_PATH }}/*"
           body_path: "./RELEASE-NOTES.txt"
