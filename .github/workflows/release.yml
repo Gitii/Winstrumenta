@@ -33,6 +33,9 @@ jobs:
     strategy:
       matrix:
         packaging-project: ["Winstrumenta.Package/Winstrumenta.Package.wapproj"]
+    env:
+       ARTIFACT_PATH: C:\AppPackage
+       OUTPUT_PATH: C:\Release
     steps:
       - uses: olegtarasov/get-tag@v2.1
         id: tagName
@@ -54,12 +57,22 @@ jobs:
           msbuild-architecture: x64
           vs-version: 17
           vs-prerelease: true
-      - name: Package msix
-        run: msbuild "$env:PROJ_PATH" /t:Build /p:Configuration=Release /p:Platform=x86 /p:Platform=arm64 /p:Platform=x64 /p:OutputPath="$env:OUTPUT_PATH" /p:UapAppxPackageBuildMode=StoreUpload /p:Version="$env:TAG_NAME" /p:AppxBundle=Always /p:AppxBundlePlatforms="x86|x64|arm64" /p:AppxAutoIncrementPackageRevision=false
+      - name: Update Manifest version string
+        shell: powershell
+        run: |
+             # Update appxmanifest. This must be done before the build.
+             $manifestPath = "$env:PROJ_PATH\..\Package.appxmanifest"
+             [xml]$manifest = Get-Content $manifestPath
+             $manifest.Package.Identity.Version = "$env:TAG_NAME.0"    
+             $manifest.save($manifestPath)
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
           PROJ_PATH: ${{ matrix.packaging-project }}
-          OUTPUT_PATH: C:\AppPackage
+      - name: Package msix
+        run: msbuild "$env:PROJ_PATH" /t:Build /p:Configuration=Release /p:Platform=x86 /p:Platform=arm64 /p:Platform=x64 /p:OutputPath="$env:ARTIFACT_PATH" /p:UapAppxPackageBuildMode=StoreUpload /p:Version="$env:TAG_NAME" /p:AppxBundle=Always /p:AppxBundlePlatforms="x86|x64|arm64" /p:AppxAutoIncrementPackageRevision=false
+        env:
+          TAG_NAME: ${{ steps.tagName.outputs.tag }}
+          PROJ_PATH: ${{ matrix.packaging-project }}
       - name: Prepare release files
         run: |
           $Folder = $(Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*_Test").FullName
@@ -67,10 +80,8 @@ jobs:
           Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*.msixupload" | Copy-Item -Destination $env:OUTPUT_PATH
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
-          OUTPUT_PATH: C:\Release
-          ARTIFACT_PATH: C:\AppPackage
       - name: Attach files to Github releases
         uses: softprops/action-gh-release@v1
         with:
-          files: "C:/Release/*"
+          files: "{{ env.OUTPUT_PATH }}/*"
           body_path: "./RELEASE-NOTES.txt"
