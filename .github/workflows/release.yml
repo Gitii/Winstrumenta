@@ -5,9 +5,7 @@ on:
 
 jobs:
   test:
-    runs-on: windows-2022
-    steps:
-      - uses: ./.github/workflows/ci
+    uses: ./.github/workflows/ci.yml
 
   publish:
     runs-on: windows-2022
