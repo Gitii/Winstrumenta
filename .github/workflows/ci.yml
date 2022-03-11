@@ -27,4 +27,4 @@ jobs:
       - name: Build
         run: msbuild /t:build /restore /p:Configuration=Release /p:Platform=x64 /p:Platform=x86 /p:Platform=arm64 /p:AppxPackage=false /m Winstrumenta.sln
       - name: Test
-        run: Get-ChildItem -Recurse -Filter "*.Tests.dll" | ? { $_.FullName -Match "bin[\\/]Release" -and $_.FullName -notmatch "ref" } | % { vstest.console.exe $_.FullName }
+        run: Get-ChildItem -Recurse -Filter "*.Tests.dll" | ? { $_.FullName -Match "bin.[^.]+.Release" -and $_.FullName -notmatch "ref" } | % { vstest.console.exe $_.FullName }
