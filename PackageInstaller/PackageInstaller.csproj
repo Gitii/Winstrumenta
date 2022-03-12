@@ -3,13 +3,13 @@
         <OutputType>WinExe</OutputType>
         <TargetFramework>net6.0-windows10.0.20348.0</TargetFramework>
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+        <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+        <Platforms>x86;x64;arm64</Platforms>
         <RootNamespace>PackageInstaller</RootNamespace>
         <ApplicationManifest>app.manifest</ApplicationManifest>
-        <Platforms>x86;x64;arm64</Platforms>
-        <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
         <UseWinUI>true</UseWinUI>
         <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-        <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
         <StartupObject>PackageInstaller.Program</StartupObject>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -37,7 +37,6 @@
         </PackageReference>
         <PackageReference Include="Community.Sextant.WinUI" Version="0.5.0" />
         <PackageReference Include="Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection" Version="0.5.0" />
-        <PackageReference Include="CommunityToolkit.Extensions.Hosting.WindowsAppSdk" Version="1.0.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
@@ -45,6 +44,7 @@
         <PackageReference Include="ReactiveUI.WinUI" Version="17.1.50" />
         <PackageReference Include="Scrutor" Version="4.0.0" />
         <PackageReference Include="Sextant" Version="2.12.4" />
+        <PackageReference Include="SharpNinja.Extensions.WindowsAppSdkHost" Version="1.0.7" />
         <PackageReference Include="Splat" Version="14.1.45" />
         <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.1.45" />
         <PackageReference Include="Splat.Microsoft.Extensions.Logging" Version="14.1.45" />
@@ -58,5 +58,9 @@
         <ProjectReference Include="..\NativeInterop.Win32\NativeInterop.Win32.csproj" />
         <ProjectReference Include="..\PackageInstaller.Core.Services\PackageInstaller.Core.Services.csproj" />
         <ProjectReference Include="..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Properties\" />
     </ItemGroup>
 </Project>
