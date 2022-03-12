@@ -54,10 +54,10 @@ jobs:
         run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
       - name: Package msix
         run: |
-          msbuild "$env:PROJ_PATH" /t:Build /restore /m /p:Configuration=Release /p:OutputPath="$env:ARTIFACT_PATH" /p:UapAppxPackageBuildMode=StoreUpload `
+          msbuild "$env:PROJ_PATH" /t:Build /restore /m /p:Configuration=Release /p:AppxPackageDir="$env:ARTIFACT_PATH" /p:UapAppxPackageBuildMode=StoreUpload `
           /p:Version="$env:TAG_NAME" /p:AppxBundle=Always /p:AppxBundlePlatforms="x86|x64|arm64" `
           /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}" `
-          /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}"
+          /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}" /p:UseSubFolderForOutputDirDuringMultiPlatformBuild=false
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
           PROJ_PATH: ${{ matrix.packaging-project }}
