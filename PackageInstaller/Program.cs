@@ -3,6 +3,8 @@ using System.Drawing.Design;
 using System.Reflection;
 using System.Threading.Tasks;
 using Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection;
+using Community.Wsa.Sdk.Strategies.Api;
+using Community.Wsa.Sdk.Strategies.Packages;
 using Community.Wsl.Sdk.Strategies.Api;
 using CommunityToolkit.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,7 +54,7 @@ public static class Program
             scan =>
                 scan
                 // We start out with all types in the assembly of ITransientService
-                .FromAssembliesOf(typeof(IWsl), typeof(WslImpl))
+                .FromAssembliesOf(typeof(IDistributionProvider), typeof(WslProvider))
                     .AddClasses(true)
                     .AsImplementedInterfaces()
                     .WithTransientLifetime()
@@ -69,6 +71,8 @@ public static class Program
             provider => provider.GetRequiredService<ThemeManager>()
         );
         collection.AddTransient<IWslApi, ManagedWslApi>();
+        collection.AddTransient<IWsaApi, WsaApi>();
+        collection.AddTransient<IPackageManager, ManagedPackageManager>();
         collection.AddSingleton<IIconThemeManager, IconThemeManager>();
         collection.AddSingleton<IThreadHelpers>(
             (provider) =>

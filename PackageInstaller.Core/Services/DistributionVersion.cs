@@ -1,6 +1,6 @@
 ﻿namespace PackageInstaller.Core.Services;
 
-public enum WslDistributionVersion
+public enum DistributionVersion
 {
     One,
     Two

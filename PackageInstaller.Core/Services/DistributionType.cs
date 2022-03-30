@@ -1,7 +1,8 @@
 ﻿namespace PackageInstaller.Core.Services;
 
-public enum WslDistributionType
+public enum DistributionType
 {
+    Android,
     Ubuntu,
     Debian,
     Fedora,

@@ -28,7 +28,10 @@ public class Dpkg : IDpkg
             )
             .ConfigureAwait(false);
 
-        return !output.Contains($"dpkg-query: package '{packageName}' is not installed", StringComparison.Ordinal);
+        return !output.Contains(
+            $"dpkg-query: package '{packageName}' is not installed",
+            StringComparison.Ordinal
+        );
     }
 
     public async Task<IPlatformDependentPackageManager.PackageMetaData> ExtractPackageMetaDataAsync(
@@ -37,11 +40,27 @@ public class Dpkg : IDpkg
     {
         var data = await _debianPackageReader.ReadMetaDataAsync(filePath).ConfigureAwait(false);
 
+        string label;
+        string description;
+        if (data.Description.Contains("\n\n", StringComparison.Ordinal))
+        {
+            var labelLength = data.Description.IndexOf("\n\n", StringComparison.Ordinal);
+            label = data.Description.Substring(0, labelLength);
+            description = data.Description.Substring(labelLength + 2);
+        }
+        else
+        {
+            label = data.Package;
+            description = data.Description;
+        }
+
         return new IPlatformDependentPackageManager.PackageMetaData()
         {
-            Package = data.Package,
-            Description = data.Description,
-            Version = data.Version,
+            PackageName = data.Package,
+            PackageLabel = label,
+            Description = description,
+            VersionCode = data.Version,
+            VersionLabel = data.Version,
             Architecture = data.Architecture,
             IconName = data.IconName,
             AllFields = data.AllFields
@@ -67,7 +86,12 @@ public class Dpkg : IDpkg
             )
             .ConfigureAwait(false);
 
-        if (output.Contains($"dpkg-query: package '{packageName}' is not installed", StringComparison.Ordinal))
+        if (
+            output.Contains(
+                $"dpkg-query: package '{packageName}' is not installed",
+                StringComparison.Ordinal
+            )
+        )
         {
             throw new Exception($"Package '{packageName}' is not installed!");
         }
@@ -80,7 +104,11 @@ public class Dpkg : IDpkg
             ControlFile cf = new ControlFile();
             cf.Parse(output);
 
-            return new IDpkg.PackageInfo() { Name = packageName, Version = cf.GetEntryContent("Version") };
+            return new IDpkg.PackageInfo()
+            {
+                Name = packageName,
+                VersionCode = cf.GetEntryContent("Version")
+            };
         }
     }
 
@@ -190,9 +218,10 @@ public class Dpkg : IDpkg
         );
     }
 
-    public Task<bool> IsSupportedByDistributionAsync(string distroName)
+    public async Task<bool> IsSupportedByDistributionAsync(string distroName, string distroOrigin)
     {
-        return _wslCommands.CheckCommandExistsAsync(distroName, "dpkg");
+        return distroOrigin == WslProvider.ORIGIN_WSL
+            && await _wslCommands.CheckCommandExistsAsync(distroName, "dpkg");
     }
 
     public static IObservable<string> ReadLines(StreamReader reader)
@@ -204,7 +233,9 @@ public class Dpkg : IDpkg
                     .FromAsync(r.ReadLineAsync, RxApp.TaskpoolScheduler)
                     .Repeat()
                     .TakeWhile(line => line != null)
-                    .Select((line) => (line ?? String.Empty).Replace("\0", "", StringComparison.Ordinal))
+                    .Select(
+                        (line) => (line ?? String.Empty).Replace("\0", "", StringComparison.Ordinal)
+                    )
                     .Where((line) => line.Length != 0)
         );
     }
