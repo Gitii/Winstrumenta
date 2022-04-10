@@ -1,15 +1,19 @@
 [*.cs]
 command = dotnet
 arguments = csharpier "{file}"
+always_run = true
 
 [*.{js,ts,css,less,scss,vue,json,gql,md,yml,yaml,html,htm}]
 command = dotnet
 arguments = pprettier --write "{file}"
+always_run = true
 
 [*.{xml,csproj,xaml,appxmanifest,props,wapproj}]
 command = dotnet
 arguments = pprettier --write "{file}" --plugin "<NodeModulesPath>/@prettier/plugin-xml" --parser "xml" --print-width 120 --xml-whitespace-sensitivity "ignore" --tab-width 4
+always_run = true
 
 [*.sh]
 command = dotnet
 arguments = pprettier --write "{file}" --plugin "<NodeModulesPath>/prettier-plugin-sh"
+always_run = true

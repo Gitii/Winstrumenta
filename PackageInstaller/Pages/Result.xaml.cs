@@ -39,6 +39,16 @@ public sealed partial class Result
                     .DisposeWith(disposable);
                 this.OneWayBind(
                         ViewModel,
+                        (vm) => vm.Details,
+                        (v) => v.ToggleDetails.Visibility,
+                        (string details) =>
+                            string.IsNullOrWhiteSpace(details)
+                              ? Visibility.Collapsed
+                              : Visibility.Visible
+                    )
+                    .DisposeWith(disposable);
+                this.OneWayBind(
+                        ViewModel,
                         (vm) => vm.AreDetailsVisible,
                         (v) => v.ToggleDetails.Content,
                         (bool isVisible) => isVisible ? "Hide details" : "Show details"

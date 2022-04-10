@@ -92,7 +92,10 @@ public class ManagedWslCommands : IWslCommands
             )
             .ConfigureAwait(false);
 
-        if (whereisOutput.Length > 0 && !whereisOutput.StartsWith(command + ":", StringComparison.Ordinal))
+        if (
+            whereisOutput.Length > 0
+            && !whereisOutput.StartsWith(command + ":", StringComparison.Ordinal)
+        )
         {
             throw new Exception("Unexpected return value from whereis: " + whereisOutput);
         }

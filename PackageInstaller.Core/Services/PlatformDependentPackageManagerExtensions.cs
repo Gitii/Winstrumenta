@@ -33,13 +33,19 @@ public static class PlatformDependentPackageManagerExtensions
     public static async Task<IPlatformDependentPackageManager> GetSupportedManagerAsync(
         this IEnumerable<IPlatformDependentPackageManager> managers,
         FileSystemPath packageFilePath,
-        string distroName, string distroOrigin)
+        string distroName,
+        string distroOrigin
+    )
     {
         IList<string> rejectionReasons = new List<string>();
 
         foreach (var manager in managers)
         {
-            if (!await manager.IsSupportedByDistributionAsync(distroName, distroOrigin).ConfigureAwait(false))
+            if (
+                !await manager
+                    .IsSupportedByDistributionAsync(distroName, distroOrigin)
+                    .ConfigureAwait(false)
+            )
             {
                 continue;
             }

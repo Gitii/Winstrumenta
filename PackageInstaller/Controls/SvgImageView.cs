@@ -12,7 +12,6 @@ using SkiaSharp;
 using Svg;
 using Svg.Skia;
 using Windows.Foundation;
-using Windows.UI.Core;
 using Microsoft.UI.Dispatching;
 using DependencyProperty = Microsoft.UI.Xaml.DependencyProperty;
 using Image = Microsoft.UI.Xaml.Controls.Image;
@@ -93,8 +92,10 @@ public class SvgImageView : Grid
             {
                 try
                 {
+#pragma warning disable AsyncFixer03 // Fire-and-forget async-void methods or delegates
                     _image.DispatcherQueue.TryEnqueue(
                         DispatcherQueuePriority.Normal,
+                        // ReSharper disable once AsyncVoidLambda
                         async () =>
                         {
                             stream.Seek(0, SeekOrigin.Begin);
@@ -102,6 +103,7 @@ public class SvgImageView : Grid
                             await image.SetSourceAsync(stream.AsRandomAccessStream());
                             _image.Source = image;
                         }
+#pragma warning restore AsyncFixer03 // Fire-and-forget async-void methods or delegates
                     );
                 }
                 catch (Exception e)

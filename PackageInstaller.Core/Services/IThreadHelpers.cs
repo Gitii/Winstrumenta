@@ -18,4 +18,6 @@ public interface IThreadHelpers
 
         public abstract BaseDispatcherAwaiter GetAwaiter();
     }
+
+    void Schedule(Action action);
 }

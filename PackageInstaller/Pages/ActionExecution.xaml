@@ -1,0 +1,116 @@
+<local:ReactivePageActionExecution
+    x:Class="PackageInstaller.Pages.ActionExecution"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:PackageInstaller.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:modelViews="using:PackageInstaller.Core.ModelViews"
+    xmlns:xaml="using:Microsoft.UI.Xaml"
+    xmlns:b="using:Microsoft.UI.Xaml.Data"
+    xmlns:services="using:PackageInstaller.Core.Services"
+    mc:Ignorable="d"
+>
+    <local:ReactivePageActionExecution.Resources>
+        <local:EmptyListToVisibilityConverter x:Key="EmptyListToVisibilityConverter" />
+        <xaml:DataTemplate
+            x:Key="RunningOpTemplate"
+            d:DataContext="{d:DesignInstance modelViews:OperationProgressModelView, IsDesignTimeCreatable=False}"
+            x:DataType="modelViews:OperationProgressModelView"
+        >
+            <controls:StackPanel Padding="0,8">
+                <controls:TextBlock FontSize="15" Text="{b:Binding OperationTitle}" Padding="0,8" />
+                <controls:ProgressBar
+                    Value="{b:Binding CurrentProgress}"
+                    Maximum="{b:Binding MaximumProgress}"
+                    IsIndeterminate="{b:Binding IsIndeterminate}"
+                />
+                <controls:TextBlock FontSize="10" Text="{b:Binding StatusText}" Padding="0,8" />
+            </controls:StackPanel>
+        </xaml:DataTemplate>
+        <xaml:DataTemplate
+            x:Key="FinishedOpTemplate"
+            d:DataContext="{d:DesignInstance modelViews:OperationProgressModelView, IsDesignTimeCreatable=False}"
+            x:DataType="modelViews:OperationProgressModelView"
+        >
+            <controls:StackPanel Orientation="Horizontal" Padding="0,8" VerticalAlignment="Top">
+                <SymbolIcon Symbol="Accept" Margin="8,8" Foreground="Green" VerticalAlignment="Top" />
+                <controls:TextBlock FontSize="15" Text="{b:Binding OperationTitle}" Padding="0,8,0,0" />
+            </controls:StackPanel>
+        </xaml:DataTemplate>
+        <xaml:DataTemplate
+            x:Key="FailedOpTemplate"
+            d:DataContext="{d:DesignInstance modelViews:OperationProgressModelView, IsDesignTimeCreatable=False}"
+            x:DataType="modelViews:OperationProgressModelView"
+        >
+            <controls:StackPanel Orientation="Horizontal" Padding="0,8" VerticalAlignment="Top">
+                <SymbolIcon Symbol="Cancel" Margin="8,8" Foreground="Red" VerticalAlignment="Top" />
+                <controls:StackPanel>
+                    <controls:TextBlock FontSize="15" Text="{b:Binding OperationTitle}" Padding="0,8,0,8" />
+                    <controls:TextBlock FontSize="10" Text="{b:Binding StatusText}" />
+                    <controls:TextBlock FontSize="10" Visibility="{b:Binding RecoveryActions, Converter={StaticResource EmptyListToVisibilityConverter}}" Text="Try these actions to recover:" Padding="0,0,0,8" />
+                    <controls:ItemsControl ItemsSource="{b:Binding RecoveryActions}">
+                        <controls:ItemsControl.ItemTemplate>
+                            <xaml:DataTemplate
+                                d:DataContext="{d:DesignInstance services:RecoveryAction, IsDesignTimeCreatable=False}"
+                                x:DataType="services:RecoveryAction"
+                            >
+                                <controls:Button Command="{b:Binding Command}">
+                                    <controls:StackPanel Orientation="Vertical">
+                                        <controls:TextBlock Text="{b:Binding InstructionText}" Padding="0,0,0,4" />
+                                        <controls:TextBlock FontSize="10" Text="{b:Binding InstructionDetails}" />
+                                    </controls:StackPanel>
+                                </controls:Button>
+                            </xaml:DataTemplate>
+                        </controls:ItemsControl.ItemTemplate>
+                    </controls:ItemsControl>
+                </controls:StackPanel>
+            </controls:StackPanel>
+        </xaml:DataTemplate>
+        <local:OperationTemplateSelector
+            x:Key="Selector"
+            FinishedOperationTemplate="{StaticResource FinishedOpTemplate}"
+            RunningOperationTemplate="{StaticResource RunningOpTemplate}"
+            FailedOperationTemplate="{StaticResource FailedOpTemplate}"
+        />
+    </local:ReactivePageActionExecution.Resources>
+    <controls:Grid Padding="30,0,30,30">
+        <controls:Grid.RowDefinitions>
+            <controls:RowDefinition Height="Auto" />
+            <controls:RowDefinition Height="*" />
+            <controls:RowDefinition Height="Auto" />
+        </controls:Grid.RowDefinitions>
+        <controls:TextBlock
+            x:Name="PackageLabel"
+            Margin="0,0,0,5"
+            controls:Grid.Column="0"
+            controls:Grid.Row="0"
+            FontSize="24"
+            FontWeight="Bold"
+            TextWrapping="Wrap"
+        />
+        <controls:ItemsControl
+            x:Name="OperationList"
+            ItemTemplateSelector="{StaticResource Selector}"
+            controls:Grid.Column="0"
+            controls:Grid.Row="1"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Top"
+        />
+
+        <controls:StackPanel
+            HorizontalAlignment="Right"
+            controls:Grid.Column="0"
+            controls:Grid.Row="2"
+            Orientation="Horizontal"
+            Spacing="5"
+            x:Name="ErrorActionPanel"
+        >
+            <controls:Button x:Name="ShowErrorDetailsButton" Content="Show error details" />
+            <controls:Button x:Name="RetryButton" Content="Retry" />
+            <controls:Button x:Name="CloseButton" Content="Close" />
+        </controls:StackPanel>
+    </controls:Grid>
+</local:ReactivePageActionExecution>

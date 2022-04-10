@@ -27,6 +27,7 @@ public class WsaProvider : IDistributionProvider
                         Version = new Version(1, 0),
                         Origin = ORIGIN_WSA,
                         Name = "Windows Subsystem for Android",
+                        Id = IWsaApi.ADB_WSA_DEVICE_SERIAL_NUMBER,
                         Type = DistributionType.Android
                     }
                 }

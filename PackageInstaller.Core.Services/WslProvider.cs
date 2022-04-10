@@ -35,6 +35,7 @@ public class WslProvider : IDistributionProvider
                 {
                     IsRunning = true,
                     Name = distroInfo.DistroName,
+                    Id = distroInfo.DistroName,
                     Origin = ORIGIN_WSL,
                     Version = distroInfo.WslVersion <= 1 ? new Version(1, 0) : new Version(2, 0),
                     Type = type,

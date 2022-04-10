@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Drawing.Design;
-using System.Reflection;
 using System.Threading.Tasks;
 using Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection;
 using Community.Wsa.Sdk.Strategies.Api;
@@ -10,9 +8,8 @@ using CommunityToolkit.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services;
-using PackageInstaller.IconThemes;
+using PackageInstaller.Core.Services.WinUI;
 using PackageInstaller.Pages;
-using PackageInstaller.Themes;
 using ReactiveUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
@@ -54,26 +51,38 @@ public static class Program
             scan =>
                 scan
                 // We start out with all types in the assembly of ITransientService
-                .FromAssembliesOf(typeof(IDistributionProvider), typeof(WslProvider))
+                .FromAssembliesOf(
+                        typeof(IDistributionProvider),
+                        typeof(WslProvider),
+                        typeof(IconThemeManager)
+                    )
                     .AddClasses(true)
                     .AsImplementedInterfaces()
+                    .AsSelf()
                     .WithTransientLifetime()
                     .AddClasses((classes) => classes.AssignableTo<ReactiveObject>())
                     .AsSelf()
+        );
+
+        collection.Scan(
+            scan =>
+                scan
+                // We start out with all types in the assembly of ITransientService
+                .FromAssembliesOf(typeof(IWsaApi), typeof(IWslApi))
+                    .AddClasses(true)
+                    .AsImplementedInterfaces()
+                    .AsSelf()
+                    .WithTransientLifetime()
         );
     }
 
     private static void ConfigureComplexServices(IServiceCollection collection)
     {
         collection.AddSingleton<MainWindow>();
-        collection.AddSingleton<ThemeManager>();
-        collection.AddSingleton<IThemeManager, ThemeManager>(
-            provider => provider.GetRequiredService<ThemeManager>()
-        );
-        collection.AddTransient<IWslApi, ManagedWslApi>();
-        collection.AddTransient<IWsaApi, WsaApi>();
-        collection.AddTransient<IPackageManager, ManagedPackageManager>();
-        collection.AddSingleton<IIconThemeManager, IconThemeManager>();
+        //collection.AddSingleton<ThemeManager>();
+        //collection.AddSingleton<IThemeManager, ThemeManager>(
+        //    provider => provider.GetRequiredService<ThemeManager>()
+        //);
         collection.AddSingleton<IThreadHelpers>(
             (provider) =>
             {
@@ -97,6 +106,7 @@ public static class Program
                             .RegisterViewAndViewModel<PackageActions, PackageActionsViewModel>()
                             .RegisterViewAndViewModel<Error, ErrorViewModel>()
                             .RegisterViewAndViewModel<Result, ResultViewModel>()
+                            .RegisterViewAndViewModel<ActionExecution, ActionExecutionViewModel>()
                             .RegisterViewAndViewModel<Preparation, PreparationViewModel>();
                     }
                 );

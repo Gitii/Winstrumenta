@@ -56,6 +56,7 @@
     <ItemGroup>
         <ProjectReference Include="..\NativeInterop.Win32.Xaml\NativeInterop.Win32.Xaml.csproj" />
         <ProjectReference Include="..\NativeInterop.Win32\NativeInterop.Win32.csproj" />
+        <ProjectReference Include="..\PackageInstaller.Core.Services.WinUI\PackageInstaller.Core.Services.WinUI.csproj" />
         <ProjectReference Include="..\PackageInstaller.Core.Services\PackageInstaller.Core.Services.csproj" />
         <ProjectReference Include="..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
     </ItemGroup>

@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using DynamicData;
 using DynamicData.Binding;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using PackageInstaller.AttachedProperties;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
@@ -14,9 +18,7 @@ namespace PackageInstaller.Pages;
     "MA0048:File name must match type name",
     Justification = "Workaround: Xaml doesn't support generic types."
 )]
-public class ReactivePagePackageActions : ReactivePage<PackageActionsViewModel>
-{
-}
+public class ReactivePagePackageActions : ReactivePage<PackageActionsViewModel> { }
 
 public sealed partial class PackageActions
 {
@@ -61,7 +63,7 @@ public sealed partial class PackageActions
                 this.OneWayBind(
                         ViewModel,
                         (vm) => vm.InProgress,
-                        (v) => v.PrimaryActionButton.IsEnabled,
+                        (v) => v.ActionButton.IsEnabled,
                         (isInProgress) => !isInProgress
                     )
                     .DisposeWith(disposable);
@@ -97,9 +99,8 @@ public sealed partial class PackageActions
 
                 this.OneWayBind(
                         ViewModel,
-                        (vm) => vm.PackageInstallationStatus,
-                        (v) => v.PrimaryActionButtonText.Text,
-                        selector: StatusToText
+                        (vm) => vm.PrimaryAction!.Title,
+                        (v) => v.PrimaryActionButtonText.Text
                     )
                     .DisposeWith(disposable);
 
@@ -109,7 +110,8 @@ public sealed partial class PackageActions
                     .BindTo(this, (v) => v.PackageIcon.Source)
                     .DisposeWith(disposable);
 
-                ViewModel.PrimaryPackageCommand.IsExecuting
+                this.ViewModel
+                    .WhenAnyObservable((vm) => vm.PrimaryAction!.ActionCommand.IsExecuting)
                     .Select(
                         (isExecuting) =>
                             isExecuting
@@ -121,6 +123,7 @@ public sealed partial class PackageActions
 
                 this.ViewModel
                     .WhenAnyValue(
+                        (vm) => vm.InProgress,
                         (vm) => vm.PackageInstallationStatus,
                         (vm) => vm.InstalledPackageVersion
                     )
@@ -130,8 +133,37 @@ public sealed partial class PackageActions
 
                 this.BindCommand(
                         ViewModel,
-                        (vm) => vm.PrimaryPackageCommand,
-                        (v) => v.PrimaryActionButton
+                        (vm) => vm.PrimaryAction!.ActionCommand,
+                        (v) => v.ActionButton
+                    )
+                    .DisposeWith(disposable);
+
+                this.OneWayBind(
+                        ViewModel,
+                        (vm) => vm.PrimaryAction!.Title,
+                        (v) => v.PrimaryActionButtonText.Text
+                    )
+                    .DisposeWith(disposable);
+
+                this.ViewModel
+                    .WhenAnyValue((vm) => vm.SecondaryActions)
+                    .Subscribe(
+                        (list) =>
+                        {
+                            SecondaryActions.Items.Clear();
+                            SecondaryActions.Items.AddRange(
+                                list.Select(
+                                    (a) =>
+                                        (
+                                            new MenuFlyoutItem()
+                                            {
+                                                Text = a.Title,
+                                                Command = a.ActionCommand,
+                                            }
+                                        )
+                                )
+                            );
+                        }
                     )
                     .DisposeWith(disposable);
 
@@ -152,9 +184,14 @@ public sealed partial class PackageActions
     }
 
     private string StatusToRemarks(
-        (IPlatformDependentPackageManager.PackageInstallationStatus? status, string? version) arg
+        (bool isInProgress, IPlatformDependentPackageManager.PackageInstallationStatus? status, string? version) arg
     )
     {
+        if (arg.isInProgress)
+        {
+            return "Loading...";
+        }
+
         if (!arg.status.HasValue)
         {
             return String.Empty;
@@ -172,25 +209,6 @@ public sealed partial class PackageActions
                 return $"A newer version ({arg.version}) is installed";
             default:
                 return "Unknown status";
-        }
-    }
-
-    private string StatusToText(IPlatformDependentPackageManager.PackageInstallationStatus? arg)
-    {
-        switch (arg)
-        {
-            case IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled:
-                return "Install";
-            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion:
-                return "Reinstall";
-            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion:
-                return "Upgrade";
-            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion:
-                return "Downgrade";
-            case null:
-                return "Close";
-            default:
-                throw new ArgumentOutOfRangeException(nameof(arg), arg, null);
         }
     }
 }

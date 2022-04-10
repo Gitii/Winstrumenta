@@ -12,6 +12,8 @@
     xmlns:modelViews="using:PackageInstaller.Core.ModelViews"
     xmlns:reactiveUi="using:ReactiveUI"
     xmlns:xaml="using:Microsoft.UI.Xaml"
+    xmlns:b="using:Microsoft.UI.Xaml.Data"
+    xmlns:w="using:System.Windows"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d"
 >
@@ -127,20 +129,20 @@
             Spacing="4"
         >
             <controls:StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
-                <controls:ComboBox x:Name="DistroList" Width="250">
+                <controls:ComboBox x:Name="DistroList" Width="300">
                     <controls:ComboBox.ItemTemplate>
                         <xaml:DataTemplate
-                            d:DataContext="{d:DesignInstance modelViews:WslDistributionModelView, IsDesignTimeCreatable=False}"
-                            x:DataType="modelViews:WslDistributionModelView"
+                            d:DataContext="{d:DesignInstance modelViews:DistributionModelView, IsDesignTimeCreatable=False}"
+                            x:DataType="modelViews:DistributionModelView"
                         >
                             <controls:StackPanel Orientation="Horizontal" Spacing="10">
-                                <controls:Image Height="20" attached:ImageExtensions.SourceUri="{Binding Icon}" />
-                                <controls:TextBlock Text="{Binding Name}" />
+                                <controls:Image Height="20" attached:ImageExtensions.SourceUri="{b:Binding Icon}" />
+                                <controls:TextBlock Text="{b:Binding Name}" />
                             </controls:StackPanel>
                         </xaml:DataTemplate>
                     </controls:ComboBox.ItemTemplate>
                 </controls:ComboBox>
-                <controls:Button x:Name="PrimaryActionButton">
+                <controls:SplitButton x:Name="ActionButton">
                     <controls:StackPanel Orientation="Horizontal">
                         <controls:FontIcon
                             x:Name="PrimaryActionButtonIcon"
@@ -155,7 +157,10 @@
                         </controls:FontIcon>
                         <controls:TextBlock x:Name="PrimaryActionButtonText" />
                     </controls:StackPanel>
-                </controls:Button>
+                    <controls:SplitButton.Flyout>
+                        <controls:MenuFlyout x:Name="SecondaryActions" Placement="RightEdgeAlignedBottom" />
+                    </controls:SplitButton.Flyout>
+                </controls:SplitButton>
             </controls:StackPanel>
             <controls:TextBlock
                 x:Name="Remarks"

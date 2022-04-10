@@ -2,9 +2,8 @@
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using PackageInstaller.Core.Services;
 
-namespace PackageInstaller.Themes;
+namespace PackageInstaller.Core.Services.WinUI;
 
 public class ThemeManager : IThemeManager
 {

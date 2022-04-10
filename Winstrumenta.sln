@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistroManager", "DistroMana
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Community.Wsa.Sdk", "..\community.wsa.sdk\Community.Wsa.Sdk\Community.Wsa.Sdk.csproj", "{B6E9A951-402C-4D7C-B5CF-AA4896649F10}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageInstaller.Core.Services.WinUI", "PackageInstaller.Core.Services.WinUI\PackageInstaller.Core.Services.WinUI.csproj", "{36135626-0897-470C-A506-E4B73133694D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -269,6 +271,26 @@ Global
 		{B6E9A951-402C-4D7C-B5CF-AA4896649F10}.Release|x64.Build.0 = Release|Any CPU
 		{B6E9A951-402C-4D7C-B5CF-AA4896649F10}.Release|x86.ActiveCfg = Release|Any CPU
 		{B6E9A951-402C-4D7C-B5CF-AA4896649F10}.Release|x86.Build.0 = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|ARM.Build.0 = Debug|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|arm64.Build.0 = Debug|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|x64.ActiveCfg = Debug|x64
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|x64.Build.0 = Debug|x64
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Debug|x86.Build.0 = Debug|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|ARM.ActiveCfg = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|ARM.Build.0 = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|arm64.ActiveCfg = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|arm64.Build.0 = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|x64.ActiveCfg = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|x64.Build.0 = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|x86.ActiveCfg = Release|Any CPU
+		{36135626-0897-470C-A506-E4B73133694D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -282,6 +304,7 @@ Global
 		{AE919A53-9DFB-41F6-ADC8-E62B766B7EE7} = {EBDAA242-5E9F-4BEF-B2CE-0306995C8534}
 		{938B834D-5C5D-4A53-BCBA-F8BF1CC63196} = {EBDAA242-5E9F-4BEF-B2CE-0306995C8534}
 		{B6E9A951-402C-4D7C-B5CF-AA4896649F10} = {0936AB9E-97C3-4BC9-A48E-13544E1DB94E}
+		{36135626-0897-470C-A506-E4B73133694D} = {0936AB9E-97C3-4BC9-A48E-13544E1DB94E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0DED9F6D-C5E7-4E89-AC76-9D03F910A002}

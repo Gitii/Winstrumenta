@@ -77,6 +77,18 @@
                         <!-- prettier-ignore-end -->
                     </uap:FileTypeAssociation>
                 </uap:Extension>
+                <uap:Extension Category="windows.fileTypeAssociation">
+                    <uap:FileTypeAssociation Name="vnd.android.package-archive">
+                        <uap:SupportedFileTypes>
+                            <uap:FileType ContentType="application/vnd.android.package-archive">.apk</uap:FileType>
+                        </uap:SupportedFileTypes>
+                        <uap:DisplayName>Android Package</uap:DisplayName>
+                        <uap:Logo>closed-package.png</uap:Logo>
+                        <!-- prettier-ignore-start -->
+                        <uap:InfoTip>An Android Package file that's used to distribute applications on Google's Android operating system.</uap:InfoTip>
+                        <!-- prettier-ignore-end -->
+                    </uap:FileTypeAssociation>
+                </uap:Extension>
             </Extensions>
         </Application>
     </Applications>

@@ -1,5 +1,4 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Input;
 using System;
 using System.Linq;
 using System.Reactive;
@@ -12,7 +11,7 @@ using Microsoft.UI.Xaml.Controls;
 using Sextant;
 using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.ModelViews;
-using PackageInstaller.Themes;
+using PackageInstaller.Core.Services.WinUI;
 
 namespace PackageInstaller;
 
@@ -35,6 +34,7 @@ public sealed partial class MainWindow : DesktopWindow
 
         this.InitializeComponent();
 
+        Title = "Winstrumenta PackageManager";
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBar); // do not set the title bar to use a 100% custom one.
     }
@@ -56,7 +56,10 @@ public sealed partial class MainWindow : DesktopWindow
                     uiContext.Post(
                         (_) =>
                         {
-                            var navParms = new ErrorViewModel.NavigationParameter() { Exception = ex };
+                            var navParms = new ErrorViewModel.NavigationParameter()
+                            {
+                                Exception = ex
+                            };
 
                             _viewStackService
                                 .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())

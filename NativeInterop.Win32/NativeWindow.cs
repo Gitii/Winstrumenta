@@ -56,7 +56,13 @@ public class NativeWindow
             RECT rect;
             PInvoke.GetWindowRect(new HWND(_hwnd), out rect);
 
-            return new Rectangle { Bottom = rect.bottom, Left = rect.left, Right = rect.right, Top = rect.top };
+            return new Rectangle
+            {
+                Bottom = rect.bottom,
+                Left = rect.left,
+                Right = rect.right,
+                Top = rect.top
+            };
         }
     }
 
@@ -78,7 +84,6 @@ public class NativeWindow
                 Height = DisplayInformation.ConvertPixelToEpx(_hwnd, rs.Height)
             };
         }
-
         set
         {
             RawSize = new Size(
@@ -95,10 +100,7 @@ public class NativeWindow
             var bounds = RawBounds;
             return new Point() { X = bounds.Left, Y = bounds.Top, };
         }
-        set
-        {
-            SetRawPosition(value.X, value.Y);
-        }
+        set { SetRawPosition(value.X, value.Y); }
     }
 
     public Point Position
@@ -114,8 +116,10 @@ public class NativeWindow
         }
         set
         {
-            SetRawPosition(DisplayInformation.ConvertEpxToPixel(_hwnd, value.X),
-                DisplayInformation.ConvertEpxToPixel(_hwnd, value.Y));
+            SetRawPosition(
+                DisplayInformation.ConvertEpxToPixel(_hwnd, value.X),
+                DisplayInformation.ConvertEpxToPixel(_hwnd, value.Y)
+            );
         }
     }
 

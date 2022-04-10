@@ -5,12 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
-using PackageInstaller.Core.Services;
 using PackageInstaller.Core.Helpers;
 
-namespace PackageInstaller.IconThemes;
+namespace PackageInstaller.Core.Services.WinUI;
 
-class IconThemeManager : IIconThemeManager
+public class IconThemeManager : IIconThemeManager
 {
     private List<IconTheme> _themes;
     private IReadOnlyList<IIconTheme> _themesRo;

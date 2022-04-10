@@ -69,6 +69,13 @@ public class Dpkg : IDpkg
 
     public Task<(bool isSupported, string? reason)> IsPackageSupportedAsync(FileSystemPath filePath)
     {
+        if (!filePath.WindowsPath.EndsWith(".deb"))
+        {
+            return Task.FromResult<(bool isSupported, string? reason)>(
+                (false, "File doesn't have deb extension")
+            );
+        }
+
         return _debianPackageReader.IsSupportedAsync(filePath);
     }
 
@@ -178,7 +185,8 @@ public class Dpkg : IDpkg
 
     public Task<(bool success, string logs)> InstallAsync(
         string distroName,
-        FileSystemPath filePath
+        FileSystemPath filePath,
+        IProgressController progressController
     )
     {
         return ExecuteDpkgAsync(
@@ -190,22 +198,28 @@ public class Dpkg : IDpkg
         );
     }
 
-    public Task<(bool success, string logs)> UninstallAsync(string distroName, string packageName)
+    public Task<(bool success, string logs)> UninstallAsync(
+        string distroName,
+        string packageName,
+        IProgressController progressController
+    )
     {
         return ExecuteDpkgAsync(distroName, "-r", packageName);
     }
 
     public Task<(bool success, string logs)> UpgradeAsync(
         string distroName,
-        FileSystemPath filePath
+        FileSystemPath filePath,
+        IProgressController progressController
     )
     {
-        return InstallAsync(distroName, filePath);
+        return InstallAsync(distroName, filePath, progressController);
     }
 
     public Task<(bool success, string logs)> DowngradeAsync(
         string distroName,
-        FileSystemPath filePath
+        FileSystemPath filePath,
+        IProgressController progressController
     )
     {
         return ExecuteDpkgAsync(
@@ -221,7 +235,12 @@ public class Dpkg : IDpkg
     public async Task<bool> IsSupportedByDistributionAsync(string distroName, string distroOrigin)
     {
         return distroOrigin == WslProvider.ORIGIN_WSL
-            && await _wslCommands.CheckCommandExistsAsync(distroName, "dpkg");
+            && await _wslCommands.CheckCommandExistsAsync(distroName, "dpkg").ConfigureAwait(false);
+    }
+
+    public Task LaunchAsync(string distroName, string packageName)
+    {
+        throw new NotSupportedException("launching packages is not supported.");
     }
 
     public static IObservable<string> ReadLines(StreamReader reader)

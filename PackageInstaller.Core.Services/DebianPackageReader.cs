@@ -116,7 +116,11 @@ public class DebianPackageReader : IDebianPackageReader
             Architecture = cf.GetEntryContent("Architecture"),
             Version = cf.GetEntryContent("Version", ""),
             Description = cf.GetEntryContent("Description"),
-            AllFields = cf.Entries.ToDictionary(entry => entry.Key, entry => entry.Content, StringComparer.Ordinal)
+            AllFields = cf.Entries.ToDictionary(
+                entry => entry.Key,
+                entry => entry.Content,
+                StringComparer.Ordinal
+            )
         };
     }
 

@@ -1,10 +1,9 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using PackageInstaller.Core.Services;
 
-namespace PackageInstaller.IconThemes;
+namespace PackageInstaller.Core.Services.WinUI;
 
-class NullIconTheme : IIconTheme
+public class NullIconTheme : IIconTheme
 {
     public string Name { get; } = "No Icons";
     public string Description { get; } = "A fake icon theme that doesn't return any icons.";

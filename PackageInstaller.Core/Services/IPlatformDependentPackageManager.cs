@@ -79,10 +79,32 @@ public interface IPlatformDependentPackageManager
     /// <returns></returns>
     PackageInstallationStatus CompareVersions(string baseVersion, string otherVersion);
 
-    Task<(bool success, string logs)> InstallAsync(string distroName, FileSystemPath filePath);
-    Task<(bool success, string logs)> UninstallAsync(string distroName, string packageName);
-    Task<(bool success, string logs)> UpgradeAsync(string distroName, FileSystemPath filePath);
-    Task<(bool success, string logs)> DowngradeAsync(string distroName, FileSystemPath filePath);
+    Task<(bool success, string logs)> InstallAsync(
+        string distroName,
+        FileSystemPath filePath,
+        IProgressController progressController
+    );
+
+    Task<(bool success, string logs)> UninstallAsync(
+        string distroName,
+        string packageName,
+        IProgressController progressController
+    );
+
+    Task<(bool success, string logs)> UpgradeAsync(
+        string distroName,
+        FileSystemPath filePath,
+        IProgressController progressController
+    );
+
+    Task<(bool success, string logs)> DowngradeAsync(
+        string distroName,
+        FileSystemPath filePath,
+        IProgressController progressController
+    );
 
     Task<bool> IsSupportedByDistributionAsync(string distroName, string distroOrigin);
+
+
+    Task LaunchAsync(string distroName, string packageName);
 }

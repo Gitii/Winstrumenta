@@ -4,9 +4,9 @@ using ReactiveUI;
 
 namespace PackageInstaller.Core.ModelViews;
 
-public class WslDistributionModelView : ReactiveObject
+public class DistributionModelView : ReactiveObject
 {
-    public WslDistributionModelView(Distribution distribution)
+    public DistributionModelView(Distribution distribution)
     {
         _name = this.WhenAnyValue((x) => x.Distro, (Distribution d) => d.Name)
             .ObserveOn(RxApp.MainThreadScheduler)
