@@ -12,6 +12,7 @@ using SkiaSharp;
 using Svg;
 using Svg.Skia;
 using Windows.Foundation;
+using Microsoft.UI.Dispatching;
 using DependencyProperty = Microsoft.UI.Xaml.DependencyProperty;
 using Image = Microsoft.UI.Xaml.Controls.Image;
 using PropertyMetadata = Microsoft.UI.Xaml.PropertyMetadata;
@@ -87,6 +88,33 @@ public class SvgImageView : Grid
         }
         else if (Source is Stream stream)
         {
+            if (IsPngStream(stream))
+            {
+                try
+                {
+#pragma warning disable AsyncFixer03 // Fire-and-forget async-void methods or delegates
+                    _image.DispatcherQueue.TryEnqueue(
+                        DispatcherQueuePriority.Normal,
+                        // ReSharper disable once AsyncVoidLambda
+                        async () =>
+                        {
+                            stream.Seek(0, SeekOrigin.Begin);
+                            var image = new BitmapImage();
+                            await image.SetSourceAsync(stream.AsRandomAccessStream());
+                            _image.Source = image;
+                        }
+#pragma warning restore AsyncFixer03 // Fire-and-forget async-void methods or delegates
+                    );
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+
+                return;
+            }
+
             using var reader = new StreamReader(stream);
             _svg = reader.ReadToEnd();
         }
@@ -96,6 +124,19 @@ public class SvgImageView : Grid
         }
 
         UpdateImage();
+    }
+
+    private byte[] PNG_HEADER = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 };
+
+    private bool IsPngStream(Stream stream)
+    {
+        Span<byte> header = stackalloc byte[8];
+        if (stream.Read(header) != header.Length)
+        {
+            throw new Exception("Failed to read header");
+        }
+
+        return header.SequenceEqual(PNG_HEADER);
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)

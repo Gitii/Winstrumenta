@@ -4,46 +4,48 @@ using ReactiveUI;
 
 namespace PackageInstaller.Core.ModelViews;
 
-public class WslDistributionModelView : ReactiveObject
+public class DistributionModelView : ReactiveObject
 {
-    public WslDistributionModelView(WslDistribution distribution)
+    public DistributionModelView(Distribution distribution)
     {
-        _name = this.WhenAnyValue((x) => x.Distro, (WslDistribution d) => d.Name)
+        _name = this.WhenAnyValue((x) => x.Distro, (Distribution d) => d.Name)
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToProperty(this, (x) => x.Name);
 
-        _icon = this.WhenAnyValue((x) => x.Distro, (WslDistribution x) => x.Type)
+        _icon = this.WhenAnyValue((x) => x.Distro, (Distribution x) => x.Type)
             .Select(GetIconUriFromType)
             .ToProperty(this, (x) => x.Icon);
 
         Distro = distribution;
     }
 
-    private string GetIconUriFromType(WslDistributionType type)
+    private string GetIconUriFromType(DistributionType type)
     {
         switch (type)
         {
-            case WslDistributionType.Ubuntu:
+            case DistributionType.Ubuntu:
                 return ToUri("128_ubuntu.png");
-            case WslDistributionType.Debian:
+            case DistributionType.Debian:
                 return ToUri("128_debian.png");
-            case WslDistributionType.Fedora:
+            case DistributionType.Fedora:
                 return ToUri("128_debian.png");
-            case WslDistributionType.Arch:
+            case DistributionType.Arch:
                 return ToUri("128_fedora_newlogo.png");
-            case WslDistributionType.Kali:
+            case DistributionType.Kali:
                 return ToUri("128_kali.png");
-            case WslDistributionType.Alpine:
+            case DistributionType.Alpine:
                 return ToUri("128_alpine.png");
-            case WslDistributionType.OpenSUSE:
+            case DistributionType.OpenSUSE:
                 return ToUri("128_suse.png");
-            case WslDistributionType.SUSE:
+            case DistributionType.SUSE:
                 return ToUri("128_suse.png");
-            case WslDistributionType.GeneralDebBased:
+            case DistributionType.Android:
+                return ToUri("128_android.png");
+            case DistributionType.GeneralDebBased:
                 return ToUri("128_unknown.png");
-            case WslDistributionType.GeneralRpmBased:
+            case DistributionType.GeneralRpmBased:
                 return ToUri("128_unknown.png");
-            case WslDistributionType.Unknown:
+            case DistributionType.Unknown:
                 return ToUri("128_unknown.png");
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -55,9 +57,9 @@ public class WslDistributionModelView : ReactiveObject
         }
     }
 
-    WslDistribution _distro;
+    Distribution _distro;
 
-    public WslDistribution Distro
+    public Distribution Distro
     {
         get { return _distro; }
         set { this.RaiseAndSetIfChanged(ref _distro, value); }

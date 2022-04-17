@@ -1,11 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Input;
-using NativeInterop.Win32;
-using PackageInstaller.Core.Services;
-
-namespace PackageInstaller.AttachedProperties;
+﻿namespace PackageInstaller.AttachedProperties;
 
 //public class MouseHandler : DependencyObject
 //{

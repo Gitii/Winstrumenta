@@ -28,17 +28,29 @@ public interface IPlatformDependentPackageManager
     public readonly struct PackageInfo
     {
         public string Name { get; init; }
-        public string Version { get; init; }
+        public string VersionCode { get; init; }
     }
 
     public readonly struct PackageMetaData
     {
-        public string Package { get; init; }
-        public string Version { get; init; }
+        public string PackageName { get; init; }
+        public string PackageLabel { get; init; }
+        public string VersionCode { get; init; }
+
+        public string VersionLabel { get; init; }
+
         public string Architecture { get; init; }
         public string Description { get; init; }
 
+        /// <summary>
+        /// Name of the image (any format)
+        /// </summary>
         public string? IconName { get; init; }
+
+        /// <summary>
+        /// Image (encoded as png image)
+        /// </summary>
+        public byte[]? IconData { get; init; }
 
         public IReadOnlyDictionary<string, string> AllFields { get; init; }
     }
@@ -67,10 +79,31 @@ public interface IPlatformDependentPackageManager
     /// <returns></returns>
     PackageInstallationStatus CompareVersions(string baseVersion, string otherVersion);
 
-    Task<(bool success, string logs)> InstallAsync(string distroName, FileSystemPath filePath);
-    Task<(bool success, string logs)> UninstallAsync(string distroName, string packageName);
-    Task<(bool success, string logs)> UpgradeAsync(string distroName, FileSystemPath filePath);
-    Task<(bool success, string logs)> DowngradeAsync(string distroName, FileSystemPath filePath);
+    Task<(bool success, string logs)> InstallAsync(
+        string distroName,
+        FileSystemPath filePath,
+        IProgressController progressController
+    );
 
-    Task<bool> IsSupportedByDistributionAsync(string distroName);
+    Task<(bool success, string logs)> UninstallAsync(
+        string distroName,
+        string packageName,
+        IProgressController progressController
+    );
+
+    Task<(bool success, string logs)> UpgradeAsync(
+        string distroName,
+        FileSystemPath filePath,
+        IProgressController progressController
+    );
+
+    Task<(bool success, string logs)> DowngradeAsync(
+        string distroName,
+        FileSystemPath filePath,
+        IProgressController progressController
+    );
+
+    Task<bool> IsSupportedByDistributionAsync(string distroName, string distroOrigin);
+
+    Task LaunchAsync(string distroName, string packageName);
 }

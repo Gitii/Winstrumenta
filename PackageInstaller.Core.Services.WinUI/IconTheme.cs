@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PackageInstaller.Core.Helpers;
-using PackageInstaller.Core.Services;
 
-namespace PackageInstaller.IconThemes;
+namespace PackageInstaller.Core.Services.WinUI;
 
-internal class IconTheme : IIconTheme
+public class IconTheme : IIconTheme
 {
     private readonly Func<Task<Stream>> _iconsFileStreamFactory;
     private string? _mapping;

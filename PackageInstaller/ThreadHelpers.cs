@@ -19,6 +19,11 @@ class ThreadHelpers : IThreadHelpers
 
     public IThreadHelpers.BaseDispatcherAwaiter UiThread { get; }
 
+    public void Schedule(Action action)
+    {
+        _uiThreadDispatcherQueue.TryEnqueue(new DispatcherQueueHandler(action));
+    }
+
     class DispatcherAwaiter : IThreadHelpers.BaseDispatcherAwaiter
     {
         private readonly DispatcherQueue _uiThreadDispatcherQueue;

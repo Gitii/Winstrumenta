@@ -1,7 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,15 +13,16 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Community.Archives.Ar" Version="1.0.1" />
-        <PackageReference Include="Community.Archives.Rpm" Version="1.0.1" />
-        <PackageReference Include="Community.Archives.Tar" Version="1.0.1" />
-        <PackageReference Include="Community.Wsl.Sdk" Version="0.1.4" />
+        <PackageReference Include="Community.Archives.Apk" Version="1.2.0" />
+        <PackageReference Include="Community.Archives.Ar" Version="1.2.0" />
+        <PackageReference Include="Community.Archives.Rpm" Version="1.2.0" />
+        <PackageReference Include="Community.Archives.Tar" Version="1.2.0" />
+        <PackageReference Include="Community.Wsa.Sdk" Version="1.0.3" />
+        <PackageReference Include="Community.Wsl.Sdk" Version="2.0.2-alpha3" />
         <PackageReference Include="System.Memory" Version="4.5.4" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
     </ItemGroup>
-
 </Project>

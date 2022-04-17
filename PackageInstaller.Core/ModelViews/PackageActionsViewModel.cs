@@ -1,5 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using DynamicData;
 using Microsoft.Extensions.Hosting;
@@ -19,9 +21,9 @@ namespace PackageInstaller.Core.ModelViews;
 public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
-    private readonly IWsl _wsl;
-    private readonly SourceList<WslDistributionModelView> _distroSourceList;
-    private readonly ReadOnlyObservableCollection<WslDistributionModelView> _distroList;
+    private readonly IList<IDistributionProvider> _distributionProviders;
+    private readonly SourceList<DistributionModelView> _distroSourceList;
+    private readonly ReadOnlyObservableCollection<DistributionModelView> _distroList;
     private IEnumerable<IPlatformDependentPackageManager> _packageManagers;
     bool _inProgress;
     string _progressStatusMessage;
@@ -31,6 +33,16 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     Stream? _packageIconStream;
     private IThreadHelpers _threadHelpers;
     private IIconThemeManager _iconThemeManager;
+    private ObservableAsPropertyHelper<ActionModelView?> _primaryAction;
+    private ObservableAsPropertyHelper<IImmutableList<ActionModelView>> _secondaryActions;
+
+    private readonly ActionModelView _installActionMv;
+    private readonly ActionModelView _uninstallActionMv;
+    private readonly ActionModelView _reinstallActionMv;
+    private readonly ActionModelView _upgradeActionMv;
+    private readonly ActionModelView _downgradeActionMv;
+    private readonly ActionModelView _doNothingActionMv;
+    private readonly ActionModelView _launchActionMv;
 
     public Stream? PackageIconStream
     {
@@ -63,9 +75,11 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         public readonly FileSystemPath PackageFilePath { get; init; }
     }
 
+#pragma warning disable MA0051 // Method is too long
     public PackageActionsViewModel(
+#pragma warning restore MA0051 // Method is too long
         IHostApplicationLifetime applicationLifetime,
-        IWsl wsl,
+        IEnumerable<IDistributionProvider> distributionProviders,
         IParameterViewStackService viewStackService,
         IEnumerable<IPlatformDependentPackageManager> packageManagers,
         IPath path,
@@ -74,7 +88,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     )
     {
         _applicationLifetime = applicationLifetime;
-        _wsl = wsl;
+        _distributionProviders = distributionProviders.ToList();
         _viewStackService = viewStackService;
         _packageManagers = packageManagers;
         _path = path;
@@ -84,7 +98,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         _progressStatusMessage = String.Empty;
         ProgressStatusMessage = String.Empty;
 
-        _distroSourceList = new SourceList<WslDistributionModelView>();
+        _distroSourceList = new SourceList<DistributionModelView>();
         _distroSourceList
             .Connect()
             .AutoRefresh()
@@ -106,217 +120,132 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             .SelectMany(OnSelectedDistributionChangedAsync)
             .Subscribe();
 
-        PrimaryPackageCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryCommandAsync);
+        _launchActionMv = new ActionModelView(BuildCommandFunction(PackageAction.Launch), "Launch");
+        _installActionMv = new ActionModelView(
+            BuildCommandFunction(PackageAction.Install),
+            "Install"
+        );
+        _uninstallActionMv = new ActionModelView(
+            BuildCommandFunction(PackageAction.Uninstall),
+            "Uninstall"
+        );
+        _reinstallActionMv = new ActionModelView(
+            BuildCommandFunction(PackageAction.Install),
+            "Reinstall"
+        );
+        _upgradeActionMv = new ActionModelView(
+            BuildCommandFunction(PackageAction.Upgrade),
+            "Upgrade"
+        );
+        _downgradeActionMv = new ActionModelView(
+            BuildCommandFunction(PackageAction.Downgrade),
+            "Downgrade",
+            "This action may not do any dependency checking on downgrades "
+                + "and therefore will not warn you if the downgrade breaks the dependency "
+                + "of some other package.This can have serious side effects, downgrading "
+                + "essential system components can even make your whole system unusable. "
+                + "Use with care."
+        );
+        _doNothingActionMv = new ActionModelView(
+            () => _applicationLifetime.StopApplication(),
+            "Do nothing and exit"
+        );
 
-        InstallCommand = ReactiveCommand.CreateFromTask(InstallAsync);
-        ReInstallCommand = ReactiveCommand.CreateFromTask(ReInstallAsync);
-        UpgradeCommand = ReactiveCommand.CreateFromTask(UpgradeAsync);
-        DowngradeCommand = ReactiveCommand.CreateFromTask(DowngradeAsync);
-        UninstallCommand = ReactiveCommand.CreateFromTask(UninstallAsync);
+        _primaryAction = this.WhenAnyValue((mv) => mv.PackageInstallationStatus)
+            .Select(ChoosePrimaryAction)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .ToProperty(this, (mv) => mv.PrimaryAction);
+
+        _secondaryActions = this.WhenAnyValue((mv) => mv.PackageInstallationStatus)
+            .Select(ChooseSecondaryActions)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .ToProperty(this, (mv) => mv.SecondaryActions);
     }
 
-    private Task UninstallAsync()
+    private IImmutableList<ActionModelView> ChooseSecondaryActions(
+        IPlatformDependentPackageManager.PackageInstallationStatus? arg
+    )
     {
-        return Task.CompletedTask;
-    }
-
-    private Task ExecutePrimaryCommandAsync()
-    {
-        switch (PackageInstallationStatus)
+        switch (arg)
         {
             case IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled:
-                return InstallAsync();
+                return ImmutableList.Create<ActionModelView>();
             case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion:
-                return ReInstallAsync();
-            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion:
-                return UpgradeAsync();
-            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion:
-                return DowngradeAsync();
-            default:
-                throw new ArgumentOutOfRangeException(
-                    nameof(PackageInstallationStatus),
-                    PackageInstallationStatus?.ToString()
+                return ImmutableList.Create<ActionModelView>(
+                    _reinstallActionMv,
+                    _uninstallActionMv
                 );
+            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion:
+                return ImmutableList.Create<ActionModelView>(_uninstallActionMv, _launchActionMv);
+            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion:
+                return ImmutableList.Create<ActionModelView>(
+                    _downgradeActionMv,
+                    _uninstallActionMv,
+                    _launchActionMv
+                );
+            case null:
+                return ImmutableList.Create<ActionModelView>();
+            default:
+                throw new ArgumentOutOfRangeException(nameof(arg), arg, null);
         }
     }
 
-    private async Task DowngradeAsync()
+    private ActionModelView? ChoosePrimaryAction(
+        IPlatformDependentPackageManager.PackageInstallationStatus? arg
+    )
     {
-        try
+        switch (arg)
         {
-            InProgress = true;
-            ProgressStatusMessage = String.Empty;
+            case IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled:
+                return _installActionMv;
+            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledSameVersion:
+                return _launchActionMv;
+            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledOlderVersion:
+                return _upgradeActionMv;
+            case IPlatformDependentPackageManager.PackageInstallationStatus.InstalledNewerVersion:
+                return _doNothingActionMv;
+            case null:
+                return null;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(arg), arg, null);
+        }
+    }
 
-            ProgressStatusMessage = "Downgrading package...";
-
-            var distroName = SelectedWslDistribution!.Name;
-
-            var packageManager = await _packageManagers.GetSupportedManagerAsync(
-                PackageFilePath ?? throw new Exception("Package file path is null"),
-                distroName
-            );
-
-            var (success, log) = await packageManager.DowngradeAsync(distroName, PackageFilePath);
-
-            if (!success)
+    private Action BuildCommandFunction(PackageAction action)
+    {
+        return () =>
+        {
+            var navParms = new ActionExecutionViewModel.NavigationParameter()
             {
-                throw new DetailedException("Failed to install package", log);
-            }
-
-            ProgressStatusMessage = "Package downgraded!";
-
-            var navParms = new ResultViewModel.NavigationParameter()
-            {
-                Title = "Package has been downgraded successfully",
-                Description =
-                    $"The package '{PackageMetaData.Package}' has been downgraded to '{PackageMetaData.Version}' in '{SelectedWslDistribution.Name}'.",
-                Details = log
+                Distribution = SelectedWslDistribution!,
+                PackageFilePath = PackageFilePath!,
+                PackageMetaData = PackageMetaData,
+                SelectedAction = action,
             };
 
             _viewStackService
-                .PushPage<ResultViewModel>(navParms.ToNavigationParameter())
+                .PushPage<ActionExecutionViewModel>(navParms.ToNavigationParameter())
                 .Subscribe();
-        }
-        catch (Exception e)
-        {
-            var navParms = new ErrorViewModel.NavigationParameter() { Exception = e };
-
-            _viewStackService
-                .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
-                .Subscribe();
-        }
-        finally
-        {
-            InProgress = false;
-            ProgressStatusMessage = String.Empty;
-        }
+        };
     }
 
-    private async Task UpgradeAsync()
-    {
-        try
-        {
-            InProgress = true;
-            ProgressStatusMessage = String.Empty;
-
-            ProgressStatusMessage = "Upgrading package...";
-
-            var distroName = SelectedWslDistribution!.Name;
-
-            var packageManager = await _packageManagers.GetSupportedManagerAsync(
-                PackageFilePath ?? throw new Exception("Package file path is null"),
-                distroName
-            );
-
-            var (success, log) = await packageManager.UpgradeAsync(distroName, PackageFilePath);
-
-            if (!success)
-            {
-                throw new DetailedException("Failed to install package", log);
-            }
-
-            ProgressStatusMessage = "Package upgraded!";
-
-            var navParms = new ResultViewModel.NavigationParameter()
-            {
-                Title = "Package has been upgraded successfully",
-                Description =
-                    $"The package '{PackageMetaData.Package}' has been upgraded to '{PackageMetaData.Version}' in '{SelectedWslDistribution.Name}'.",
-                Details = log
-            };
-
-            _viewStackService
-                .PushPage<ResultViewModel>(navParms.ToNavigationParameter())
-                .Subscribe();
-        }
-        catch (Exception e)
-        {
-            var navParms = new ErrorViewModel.NavigationParameter() { Exception = e };
-
-            _viewStackService
-                .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
-                .Subscribe();
-        }
-        finally
-        {
-            InProgress = false;
-            ProgressStatusMessage = String.Empty;
-        }
-    }
-
-    private Task ReInstallAsync()
-    {
-        return InstallAsync();
-    }
-
-    private async Task InstallAsync()
-    {
-        try
-        {
-            InProgress = true;
-            ProgressStatusMessage = String.Empty;
-
-            ProgressStatusMessage = "Installing package...";
-
-            var distroName = SelectedWslDistribution!.Name;
-
-            var packageManager = await _packageManagers.GetSupportedManagerAsync(
-                PackageFilePath ?? throw new Exception("Package file path is null"),
-                distroName
-            );
-
-            var (success, log) = await packageManager.InstallAsync(distroName, PackageFilePath);
-
-            if (!success)
-            {
-                throw new DetailedException("Failed to install package", log);
-            }
-
-            ProgressStatusMessage = "Package installed!";
-
-            var navParms = new ResultViewModel.NavigationParameter()
-            {
-                Title = "Package has been installed successfully",
-                Description =
-                    $"The package '{PackageMetaData.Package}' has been installed in '{SelectedWslDistribution.Name}'.",
-                Details = log
-            };
-
-            _viewStackService
-                .PushPage<ResultViewModel>(navParms.ToNavigationParameter())
-                .Subscribe();
-        }
-        catch (Exception e)
-        {
-            var navParms = new ErrorViewModel.NavigationParameter() { Exception = e };
-
-            _viewStackService
-                .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
-                .Subscribe();
-        }
-        finally
-        {
-            InProgress = false;
-            ProgressStatusMessage = String.Empty;
-        }
-    }
-
-    private async Task<WslDistributionModelView?> OnSelectedDistributionChangedAsync(
-        WslDistributionModelView? arg
+    private async Task<DistributionModelView?> OnSelectedDistributionChangedAsync(
+        DistributionModelView? arg
     )
     {
         if (arg != null)
         {
-            var distroName = SelectedWslDistribution!.Name;
+            var distroName = arg.Distro.Id;
 
             var packageManager = await _packageManagers.GetSupportedManagerAsync(
                 PackageFilePath ?? throw new Exception("Package file path is null"),
-                distroName
+                distroName,
+                arg.Distro.Origin
             );
 
             var isInstalled = await packageManager.IsPackageInstalledAsync(
                 distroName,
-                PackageMetaData.Package
+                PackageMetaData.PackageName
             );
 
             if (!isInstalled)
@@ -329,16 +258,16 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             {
                 var installedPackageInfo = await packageManager.GetInstalledPackageInfoAsync(
                     distroName,
-                    PackageMetaData.Package
+                    PackageMetaData.PackageName
                 );
 
                 var installationStatus = packageManager.CompareVersions(
-                    installedPackageInfo.Version,
-                    PackageMetaData.Version
+                    installedPackageInfo.VersionCode,
+                    PackageMetaData.VersionCode
                 );
 
                 PackageInstallationStatus = installationStatus;
-                InstalledPackageVersion = installedPackageInfo.Version;
+                InstalledPackageVersion = installedPackageInfo.VersionCode;
             }
         }
         else
@@ -361,9 +290,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         set { this.RaiseAndSetIfChanged(ref _packageMetaData, value); }
     }
 
-    WslDistributionModelView? _selectedWslDistribution;
+    DistributionModelView? _selectedWslDistribution;
 
-    public WslDistributionModelView? SelectedWslDistribution
+    public DistributionModelView? SelectedWslDistribution
     {
         get { return _selectedWslDistribution; }
         set { this.RaiseAndSetIfChanged(ref _selectedWslDistribution, value); }
@@ -391,15 +320,17 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
         await Task.Delay(10);
 
-        var distros = await _wsl.GetAllInstalledDistributionsAsync();
+        var distros = await Task.WhenAll(
+            _distributionProviders.Select((dp) => dp.GetAllInstalledDistributionsAsync())
+        );
 
-        var supportedDistros = await GetSupportDistrosAsync(distros);
+        var supportedDistros = await GetSupportDistributionsAsync(distros.SelectMany(x => x));
 
         _distroSourceList.Edit(
             (list) =>
             {
                 list.Clear();
-                list.AddRange(supportedDistros.Select((d) => new WslDistributionModelView(d)));
+                list.AddRange(supportedDistros.Select((d) => new DistributionModelView(d)));
             }
         );
 
@@ -412,31 +343,37 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             SelectedWslDistribution = _distroSourceList.Items.First();
         }
 
-        if (PackageMetaData.IconName == null)
+        if (PackageMetaData.IconData?.Length > 0)
         {
-            PackageIconStream = null;
+            PackageIconStream = new MemoryStream(PackageMetaData.IconData);
         }
-        else
+        else if (PackageMetaData.IconName != null)
         {
             PackageIconStream = await _iconThemeManager.ActiveIconTheme.GetSvgIconByNameAsync(
                 PackageMetaData.IconName
             );
         }
+        else
+        {
+            PackageIconStream = null;
+        }
 
         InProgress = false;
     }
 
-    private Task<IList<WslDistribution>> GetSupportDistrosAsync(WslDistribution[] distros)
+    private Task<IList<Distribution>> GetSupportDistributionsAsync(
+        IEnumerable<Distribution> distros
+    )
     {
         return distros
-            .Where((d) => d.IsRunning && d.Name is not ("docker-desktop-data" or "docker-desktop"))
+            .Where((d) => d.IsRunning)
             .WhereAsync(
                 async (d) =>
                 {
                     foreach (var packageManager in _packageManagers)
                     {
                         if (
-                            await packageManager.IsSupportedByDistributionAsync(d.Name)
+                            await packageManager.IsSupportedByDistributionAsync(d.Id, d.Origin)
                             && (
                                 await packageManager.IsPackageSupportedAsync(
                                     PackageFilePath
@@ -476,17 +413,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
     public ReactiveCommand<Unit, Unit> Close { get; }
 
-    public ReadOnlyObservableCollection<WslDistributionModelView> DistroList => _distroList;
+    public ReadOnlyObservableCollection<DistributionModelView> DistroList => _distroList;
 
-    public ReactiveCommand<Unit, Unit> ReInstallCommand { get; }
+    public ActionModelView? PrimaryAction => _primaryAction.Value;
 
-    public ReactiveCommand<Unit, Unit> InstallCommand { get; }
-
-    public ReactiveCommand<Unit, Unit> UninstallCommand { get; }
-
-    public ReactiveCommand<Unit, Unit> UpgradeCommand { get; }
-
-    public ReactiveCommand<Unit, Unit> DowngradeCommand { get; }
-
-    public ReactiveCommand<Unit, Unit> PrimaryPackageCommand { get; }
+    public IImmutableList<ActionModelView> SecondaryActions => _secondaryActions.Value;
 }

@@ -1,4 +1,4 @@
-﻿<local:ReactivePagePackageActions
+<local:ReactivePagePackageActions
     x:Class="PackageInstaller.Pages.PackageActions"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,8 +12,11 @@
     xmlns:modelViews="using:PackageInstaller.Core.ModelViews"
     xmlns:reactiveUi="using:ReactiveUI"
     xmlns:xaml="using:Microsoft.UI.Xaml"
+    xmlns:b="using:Microsoft.UI.Xaml.Data"
+    xmlns:w="using:System.Windows"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+>
     <controls:Page.Triggers>
         <xaml:EventTrigger RoutedEvent="Page.Loaded">
             <media:BeginStoryboard>
@@ -22,7 +25,8 @@
                         media:Storyboard.TargetName="PrimaryActionButtonIcon"
                         media:Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.Rotation)"
                         To="360"
-                        Duration="0:0:2" />
+                        Duration="0:0:2"
+                    />
                 </media:Storyboard>
             </media:BeginStoryboard>
         </xaml:EventTrigger>
@@ -46,78 +50,51 @@
                 <controls:RowDefinition Height="Auto" />
                 <controls:RowDefinition Height="Auto" />
                 <controls:RowDefinition Height="Auto" />
+                <controls:RowDefinition Height="Auto" />
             </controls:Grid.RowDefinitions>
             <controls:TextBlock
-                x:Name="PackageName"
+                x:Name="PackageLabel"
                 Margin="0,0,0,5"
                 controls:Grid.Column="0"
                 controls:Grid.ColumnSpan="2"
                 FontSize="24"
                 FontWeight="Bold"
-                TextWrapping="Wrap" />
-            <controls:TextBlock
-                x:Name="Version"
-                controls:Grid.Column="1"
-                controls:Grid.Row="1" />
-            <controls:StackPanel
-                controls:Grid.Column="0"
-                controls:Grid.Row="1"
-                Orientation="Horizontal"
-                Spacing="5">
-                <controls:FontIcon
-                    FontFamily="{StaticResource SymbolThemeFontFamily}"
-                    FontSize="10"
-                    Glyph="&#59543;" />
-                <controls:TextBlock>
-                    Version
-                </controls:TextBlock>
+                TextWrapping="Wrap"
+            />
+            <controls:TextBlock x:Name="PackageName" controls:Grid.Column="1" controls:Grid.Row="1" />
+            <controls:StackPanel controls:Grid.Column="0" controls:Grid.Row="1" Orientation="Horizontal" Spacing="5">
+                <controls:FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="10" Glyph="&#59543;" />
+                <controls:TextBlock>Package</controls:TextBlock>
             </controls:StackPanel>
-            <controls:TextBlock
-                x:Name="Architecture"
-                controls:Grid.Column="1"
-                controls:Grid.Row="2" />
-            <controls:StackPanel
-                controls:Grid.Column="0"
-                controls:Grid.Row="2"
-                Orientation="Horizontal"
-                Spacing="5">
-                <controls:FontIcon
-                    FontFamily="{StaticResource SymbolThemeFontFamily}"
-                    FontSize="10"
-                    Glyph="&#59155;" />
-                <controls:TextBlock>
-                    Architecture
-                </controls:TextBlock>
+            <controls:TextBlock x:Name="Version" controls:Grid.Column="1" controls:Grid.Row="2" />
+            <controls:StackPanel controls:Grid.Column="0" controls:Grid.Row="2" Orientation="Horizontal" Spacing="5">
+                <controls:FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="10" Glyph="&#59543;" />
+                <controls:TextBlock>Version</controls:TextBlock>
             </controls:StackPanel>
-
+            <controls:TextBlock x:Name="Architecture" controls:Grid.Column="1" controls:Grid.Row="3" />
+            <controls:StackPanel controls:Grid.Column="0" controls:Grid.Row="3" Orientation="Horizontal" Spacing="5">
+                <controls:FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="10" Glyph="&#59155;" />
+                <controls:TextBlock>Architecture</controls:TextBlock>
+            </controls:StackPanel>
             <controls:TextBlock
                 x:Name="Description"
                 controls:Grid.Column="1"
-                controls:Grid.Row="3"
-                TextWrapping="Wrap" />
+                controls:Grid.Row="4"
+                TextWrapping="Wrap"
+            />
             <controls:StackPanel
                 VerticalAlignment="Top"
                 controls:Grid.Column="0"
-                controls:Grid.Row="3"
+                controls:Grid.Row="4"
                 Orientation="Horizontal"
-                Spacing="5">
-                <controls:FontIcon
-                    FontFamily="{StaticResource SymbolThemeFontFamily}"
-                    FontSize="12"
-                    Glyph="&#59959;" />
-                <controls:TextBlock>
-                    Description
-                </controls:TextBlock>
+                Spacing="5"
+            >
+                <controls:FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="12" Glyph="&#59959;" />
+                <controls:TextBlock>Description</controls:TextBlock>
             </controls:StackPanel>
-
         </controls:Grid>
 
-        <controls:Grid
-            Width="100"
-            Height="100"
-            VerticalAlignment="Top"
-            controls:Grid.Column="1"
-            controls:Grid.Row="0">
+        <controls:Grid Width="100" Height="100" VerticalAlignment="Top" controls:Grid.Column="1" controls:Grid.Row="0">
             <controls:Grid.ColumnDefinitions>
                 <controls:ColumnDefinition Width="0.3*" />
                 <controls:ColumnDefinition Width="0.7*" />
@@ -132,14 +109,16 @@
                 controls:Grid.ColumnSpan="2"
                 controls:Grid.Row="0"
                 controls:Grid.RowSpan="2"
-                Source="ms-appx:///Assets/parcel.png" />
+                Source="ms-appx:///Assets/parcel.png"
+            />
 
             <controls1:SvgImageView
                 x:Name="PackageIcon"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 controls:Grid.Column="1"
-                controls:Grid.Row="1" />
+                controls:Grid.Row="1"
+            />
         </controls:Grid>
         <controls:StackPanel
             HorizontalAlignment="Right"
@@ -147,43 +126,47 @@
             controls:Grid.ColumnSpan="2"
             controls:Grid.Row="1"
             Orientation="Vertical"
-            Spacing="4">
-            <controls:StackPanel
-                HorizontalAlignment="Right"
-                Orientation="Horizontal"
-                Spacing="8">
-                <controls:ComboBox x:Name="DistroList" Width="250">
+            Spacing="4"
+        >
+            <controls:StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                <controls:ComboBox x:Name="DistroList" Width="300">
                     <controls:ComboBox.ItemTemplate>
-                        <xaml:DataTemplate d:DataContext="{d:DesignInstance modelViews:WslDistributionModelView, IsDesignTimeCreatable=False}" x:DataType="modelViews:WslDistributionModelView">
+                        <xaml:DataTemplate
+                            d:DataContext="{d:DesignInstance modelViews:DistributionModelView, IsDesignTimeCreatable=False}"
+                            x:DataType="modelViews:DistributionModelView"
+                        >
                             <controls:StackPanel Orientation="Horizontal" Spacing="10">
-                                <controls:Image Height="20" attached:ImageExtensions.SourceUri="{Binding Icon}" />
-                                <controls:TextBlock Text="{Binding Name}" />
+                                <controls:Image Height="20" attached:ImageExtensions.SourceUri="{b:Binding Icon}" />
+                                <controls:TextBlock Text="{b:Binding Name}" />
                             </controls:StackPanel>
                         </xaml:DataTemplate>
                     </controls:ComboBox.ItemTemplate>
                 </controls:ComboBox>
-                <controls:Button x:Name="PrimaryActionButton">
+                <controls:SplitButton x:Name="ActionButton">
                     <controls:StackPanel Orientation="Horizontal">
                         <controls:FontIcon
                             x:Name="PrimaryActionButtonIcon"
                             Margin="0,0,4,0"
                             FontFamily="{StaticResource SymbolThemeFontFamily}"
                             Glyph="&#61802;"
-                            RenderTransformOrigin="0.5,0.5">
+                            RenderTransformOrigin="0.5,0.5"
+                        >
                             <controls:FontIcon.RenderTransform>
                                 <CompositeTransform />
                             </controls:FontIcon.RenderTransform>
                         </controls:FontIcon>
                         <controls:TextBlock x:Name="PrimaryActionButtonText" />
                     </controls:StackPanel>
-                </controls:Button>
+                    <controls:SplitButton.Flyout>
+                        <controls:MenuFlyout x:Name="SecondaryActions" Placement="RightEdgeAlignedBottom" />
+                    </controls:SplitButton.Flyout>
+                </controls:SplitButton>
             </controls:StackPanel>
             <controls:TextBlock
                 x:Name="Remarks"
                 FontSize="10"
-                Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" />
+                Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+            />
         </controls:StackPanel>
-
-
     </controls:Grid>
 </local:ReactivePagePackageActions>

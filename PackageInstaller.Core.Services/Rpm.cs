@@ -56,7 +56,7 @@ public class Rpm : IRpm
         return new IPlatformDependentPackageManager.PackageInfo()
         {
             Name = packageName,
-            Version = result
+            VersionCode = result
         };
     }
 
@@ -70,18 +70,21 @@ public class Rpm : IRpm
         var md = await reader.GetMetaDataAsync(stream).ConfigureAwait(false);
 
         var package = md.Package;
+        var packageLabel = md.Package;
         var parser = new RpmPackageNameParser();
         if (parser.TryParse(package, out var parsedPackageName))
         {
-            package = parsedPackageName!.Value.Name;
+            packageLabel = package = parsedPackageName!.Value.Name;
         }
 
         return new IPlatformDependentPackageManager.PackageMetaData()
         {
-            Package = package,
+            PackageName = package,
+            PackageLabel = packageLabel,
             Architecture = md.Architecture,
             Description = md.Description,
-            Version = md.Version,
+            VersionCode = md.Version,
+            VersionLabel = md.Version,
             AllFields = md.AllFields,
             IconName = null,
         };
@@ -91,6 +94,11 @@ public class Rpm : IRpm
         FileSystemPath filePath
     )
     {
+        if (!filePath.WindowsPath.EndsWith(".rpm"))
+        {
+            return (false, "File doesn't have rpm extension");
+        }
+
         try
         {
             var reader = new RpmArchiveReader();
@@ -159,20 +167,26 @@ public class Rpm : IRpm
 
     public Task<(bool success, string logs)> InstallAsync(
         string distroName,
-        FileSystemPath filePath
+        FileSystemPath filePath,
+        IProgressController progressController
     )
     {
         return ExecuteRpmAsync(distroName, "-v", "--install", filePath.UnixPath);
     }
 
-    public Task<(bool success, string logs)> UninstallAsync(string distroName, string packageName)
+    public Task<(bool success, string logs)> UninstallAsync(
+        string distroName,
+        string packageName,
+        IProgressController progressController
+    )
     {
         return ExecuteRpmAsync(distroName, "-v", "--erase", packageName);
     }
 
     public Task<(bool success, string logs)> UpgradeAsync(
         string distroName,
-        FileSystemPath filePath
+        FileSystemPath filePath,
+        IProgressController progressController
     )
     {
         return ExecuteRpmAsync(distroName, "-v", "--upgrade", filePath.UnixPath);
@@ -180,14 +194,21 @@ public class Rpm : IRpm
 
     public Task<(bool success, string logs)> DowngradeAsync(
         string distroName,
-        FileSystemPath filePath
+        FileSystemPath filePath,
+        IProgressController progressController
     )
     {
         return ExecuteRpmAsync(distroName, "-v", "--upgrade", "--oldpackage", filePath.UnixPath);
     }
 
-    public Task<bool> IsSupportedByDistributionAsync(string distroName)
+    public async Task<bool> IsSupportedByDistributionAsync(string distroName, string distroOrigin)
     {
-        return _wslCommands.CheckCommandExistsAsync(distroName, "rpm");
+        return distroOrigin == WslProvider.ORIGIN_WSL
+            && await _wslCommands.CheckCommandExistsAsync(distroName, "rpm").ConfigureAwait(false);
+    }
+
+    public Task LaunchAsync(string distroName, string packageName)
+    {
+        throw new NotSupportedException("launching packages is not supported.");
     }
 }
