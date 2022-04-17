@@ -1,5 +1,5 @@
 ﻿using Community.Wsl.Sdk;
-using Community.Wsl.Sdk.Strategies.Command;
+using Community.Wsl.Sdk.Strategies.Commands;
 
 namespace PackageInstaller.Core.Services;
 

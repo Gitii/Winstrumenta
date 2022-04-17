@@ -74,7 +74,7 @@ public class Rpm : IRpm
         var parser = new RpmPackageNameParser();
         if (parser.TryParse(package, out var parsedPackageName))
         {
-            packageLabel = parsedPackageName!.Value.Name;
+            packageLabel = package = parsedPackageName!.Value.Name;
         }
 
         return new IPlatformDependentPackageManager.PackageMetaData()

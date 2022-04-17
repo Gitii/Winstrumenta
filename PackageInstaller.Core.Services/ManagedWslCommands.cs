@@ -1,5 +1,5 @@
 ﻿using Community.Wsl.Sdk;
-using Community.Wsl.Sdk.Strategies.Command;
+using Community.Wsl.Sdk.Strategies.Commands;
 
 namespace PackageInstaller.Core.Services;
 
@@ -14,7 +14,7 @@ public class ManagedWslCommands : IWslCommands
         bool shellExecute = false
     )
     {
-        return new ManagedCommand(distroName, command, arguments, options, asRoot, shellExecute);
+        return new Command(distroName, command, arguments, options, asRoot, shellExecute);
     }
 
     public async Task<string> ExecuteCommandAsync(
