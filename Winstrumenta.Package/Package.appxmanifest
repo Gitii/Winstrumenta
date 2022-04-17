@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Package
     xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
     xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
@@ -7,14 +7,14 @@
     IgnorableNamespaces="uap uap3 rescap"
 >
     <Identity
-        Name="3a9f26ca-cae5-423d-9cdc-65c30fd23a78"
-        Publisher="CN=TestPublisher"
-        Version="1.0.4.0"
+        Name="56395Gitii.Winstrumenta.PackageManager"
+        Publisher="CN=A9134821-5FAD-42C9-A538-BB11394F8155"
+        Version="1.0.10.0"
         ProcessorArchitecture="x64"
     />
     <Properties>
-        <DisplayName>Winstrumenta</DisplayName>
-        <PublisherDisplayName>Germi</PublisherDisplayName>
+        <DisplayName>Winstrumenta.PackageManager</DisplayName>
+        <PublisherDisplayName>Gitii</PublisherDisplayName>
         <Logo>Images\StoreLogo.png</Logo>
     </Properties>
     <Dependencies>
