@@ -1,4 +1,4 @@
-﻿using Community.Wsa.Sdk.Strategies.Api;
+﻿using Community.Wsa.Sdk;
 
 namespace PackageInstaller.Core.Services;
 

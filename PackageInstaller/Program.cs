@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection;
-using Community.Wsa.Sdk.Strategies.Api;
-using Community.Wsa.Sdk.Strategies.Packages;
+using Community.Wsa.Sdk;
 using Community.Wsl.Sdk.Strategies.Api;
 using CommunityToolkit.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;

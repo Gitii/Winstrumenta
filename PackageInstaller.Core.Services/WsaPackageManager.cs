@@ -1,15 +1,14 @@
 ﻿using Community.Archives.Apk;
 using Community.Archives.Core;
+using Community.Wsa.Sdk;
 using Community.Wsa.Sdk.Exceptions;
-using Community.Wsa.Sdk.Strategies.Api;
-using Community.Wsa.Sdk.Strategies.Packages;
 
 namespace PackageInstaller.Core.Services;
 
 public class WsaPackageManager : IPlatformDependentPackageManager
 {
     private readonly AdbPackageManager _adbPackageManager;
-    private readonly Community.Wsa.Sdk.Strategies.Packages.WsaPackageManager _wsaPackageManager;
+    private readonly Community.Wsa.Sdk.WsaPackageManager _wsaPackageManager;
     private readonly IWsaApi _wsaApi;
     private readonly ILauncher _launcher;
     private readonly IWsaClient _wsaClient;
@@ -21,7 +20,7 @@ public class WsaPackageManager : IPlatformDependentPackageManager
         IWsaClient wsaClient,
         IAdb adb,
         AdbPackageManager adbPackageManager,
-        Community.Wsa.Sdk.Strategies.Packages.WsaPackageManager wsaPackageManager
+        Community.Wsa.Sdk.WsaPackageManager wsaPackageManager
     )
     {
         _wsaApi = wsaApi;
@@ -68,7 +67,8 @@ public class WsaPackageManager : IPlatformDependentPackageManager
 
         return new IPlatformDependentPackageManager.PackageInfo()
         {
-            Name = info.Value.DisplayName, VersionCode = $"{info.Value.DisplayVersion} ({info.Value.VersionCode})"
+            Name = info.Value.DisplayName,
+            VersionCode = $"{info.Value.DisplayVersion} ({info.Value.VersionCode})"
         };
     }
 
