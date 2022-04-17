@@ -15,9 +15,7 @@ namespace PackageInstaller.Pages;
     "MA0048:File name must match type name",
     Justification = "Workaround: Xaml doesn't support generic types."
 )]
-public class ReactivePageActionExecution : ReactivePage<ActionExecutionViewModel>
-{
-}
+public class ReactivePageActionExecution : ReactivePage<ActionExecutionViewModel> { }
 
 public sealed partial class ActionExecution
 {
@@ -38,19 +36,30 @@ public sealed partial class ActionExecution
                     )
                     .DisposeWith(disposable);
 
-                this.OneWayBind(ViewModel, (vm) => vm.ActionFailed, (v) => v.ErrorActionPanel.Visibility,
-                        hasFailed => hasFailed ? Visibility.Visible : Visibility.Collapsed)
+                this.OneWayBind(
+                        ViewModel,
+                        (vm) => vm.ActionFailed,
+                        (v) => v.ErrorActionPanel.Visibility,
+                        hasFailed => hasFailed ? Visibility.Visible : Visibility.Collapsed
+                    )
                     .DisposeWith(disposable);
 
-                this.BindCommand(ViewModel, (vm) => vm.CloseCommand, (v) => v.CloseButton).DisposeWith(disposable);
+                this.BindCommand(ViewModel, (vm) => vm.CloseCommand, (v) => v.CloseButton)
+                    .DisposeWith(disposable);
 
                 this.BindCommand(ViewModel, (vm) => vm.RetryActionCommand, (v) => v.RetryButton)
                     .DisposeWith(disposable);
 
-                this.BindCommand(ViewModel, (vm) => vm.ShowErrorActions, (v) => v.ShowErrorDetailsButton)
+                this.BindCommand(
+                        ViewModel,
+                        (vm) => vm.ShowErrorActions,
+                        (v) => v.ShowErrorDetailsButton
+                    )
                     .DisposeWith(disposable);
 
-                this.ViewModel!.ShowPopupInteraction.RegisterHandler(ShowPopupAsync).DisposeWith(disposable);
+                this.ViewModel!.ShowPopupInteraction
+                    .RegisterHandler(ShowPopupAsync)
+                    .DisposeWith(disposable);
             }
         );
     }

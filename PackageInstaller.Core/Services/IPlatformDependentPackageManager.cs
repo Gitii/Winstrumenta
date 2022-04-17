@@ -105,6 +105,5 @@ public interface IPlatformDependentPackageManager
 
     Task<bool> IsSupportedByDistributionAsync(string distroName, string distroOrigin);
 
-
     Task LaunchAsync(string distroName, string packageName);
 }
