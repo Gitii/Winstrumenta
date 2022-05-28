@@ -9,11 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Community.Wsl.Sdk" Version="2.0.2-alpha3" />
-        <PackageReference Include="DynamicData" Version="7.5.4" />
-        <PackageReference Include="JetBrains.Profiler.Api" Version="1.1.8" />
+        <PackageReference Include="Community.Wsl.Sdk" Version="2.0.2" />
+        <PackageReference Include="DynamicData" Version="7.8.5" />
+        <PackageReference Include="JetBrains.Profiler.Api" Version="1.2.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-        <PackageReference Include="ReactiveUI" Version="17.1.50" />
+        <PackageReference Include="ReactiveUI" Version="18.0.10" />
         <PackageReference Include="Sextant" Version="2.12.4" />
     </ItemGroup>
 </Project>
