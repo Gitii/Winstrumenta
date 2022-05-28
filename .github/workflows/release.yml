@@ -82,5 +82,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: "${{ env.OUTPUT_PATH }}/*"
-          prerelease: ${{ endsWith(steps.tagName.outputs.tag, '[-][\w\d]+') }}
+          prerelease: ${{ contains(steps.tagName.outputs.tag, '-') }}
           body_path: "./RELEASE-NOTES.txt"
