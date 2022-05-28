@@ -27,6 +27,9 @@ jobs:
       - name: Extract release notes
         run: |
           git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' > ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
+      - name: Create release message
+        run: |
+          echo "\n\nIt is recommended to install it from the now from [Microsoft Store](https://www.microsoft.com/store/apps/windows)." | Out-File -Append ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
       - name: Setup .NET SDKs
         uses: actions/setup-dotnet@v1
         with:
@@ -72,4 +75,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: "${{ env.OUTPUT_PATH }}/*"
+          prerelease: ${{ endsWith(steps.tagName.outputs.tag, '[-][\w\d]+') }}
           body_path: "./RELEASE-NOTES.txt"
