@@ -46,11 +46,16 @@ jobs:
         run: |
           # Update appxmanifest. This must be done before the build.
           $manifestPath = "$env:PROJ_PATH\..\Package.appxmanifest"
-          $v = [Version] "$env:TAG_NAME"
-          $v = New-Object Version @($v.Major, $v.Minor, $v.Build, 0)
+          $parts = @("$env:TAG_NAME" -split "-")
+          $version = $parts[0]
+          $channel = if ($parts[1]) {$parts[1]} else {"0"}
+          $revision = $channel.GetEnumerator() | % { [int] $_ } | Measure -Sum | Select -ExpandProperty Sum
+          $parsedVersion = [Version] $version
+          $packageVersion = New-Object Version @($parsedVersion.Major, $parsedVersion.Minor, $parsedVersion.Build, $revision)
           [xml]$manifest = Get-Content $manifestPath
-          $manifest.Package.Identity.Version = $v.ToString(4)   
+          $manifest.Package.Identity.Version = $packageVersion.ToString(4)   
           $manifest.save($manifestPath)
+          echo "Package version: $packageVersion","Channel: $channel"
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
           PROJ_PATH: ${{ matrix.packaging-project }}
