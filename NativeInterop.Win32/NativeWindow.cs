@@ -56,13 +56,7 @@ public class NativeWindow
             RECT rect;
             PInvoke.GetWindowRect(new HWND(_hwnd), out rect);
 
-            return new Rectangle
-            {
-                Bottom = rect.bottom,
-                Left = rect.left,
-                Right = rect.right,
-                Top = rect.top
-            };
+            return new Rectangle { Bottom = rect.bottom, Left = rect.left, Right = rect.right, Top = rect.top };
         }
     }
 
@@ -269,7 +263,7 @@ public class NativeWindow
                     IsClosing = true;
                     foreach (var listener in _listeners)
                     {
-                        listener.Closing(this);
+                        listener.OnClosing(this);
                     }
                 }
 
@@ -278,21 +272,21 @@ public class NativeWindow
             case WindowMessage.WM_MOVE:
                 foreach (var listener in _listeners)
                 {
-                    listener.Moving(this);
+                    listener.OnMoving(this);
                 }
 
                 break;
             case WindowMessage.WM_SIZING:
                 foreach (var listener in _listeners)
                 {
-                    listener.Sizing(this);
+                    listener.OnSizing(this);
                 }
 
                 break;
             case WindowMessage.WM_DPICHANGED:
                 foreach (var listener in _listeners)
                 {
-                    listener.DpiChanged(this, HiWord(wParam));
+                    listener.OnDpiChanged(this, HiWord(wParam));
                 }
 
                 break;

@@ -175,22 +175,22 @@ public class DesktopWindow : Window, INativeWindowListener
         Loaded?.Invoke(this, new WindowLoadedEventArgs(this));
     }
 
-    void INativeWindowListener.Closing(NativeWindow nativeWindow)
+    void INativeWindowListener.OnClosing(NativeWindow nativeWindow)
     {
         Closing?.Invoke(this, new WindowClosingEventArgs(this));
     }
 
-    void INativeWindowListener.Moving(NativeWindow nativeWindow)
+    void INativeWindowListener.OnMoving(NativeWindow nativeWindow)
     {
         OnWindowMoving();
     }
 
-    void INativeWindowListener.Sizing(NativeWindow nativeWindow)
+    void INativeWindowListener.OnSizing(NativeWindow nativeWindow)
     {
         OnWindowSizing();
     }
 
-    void INativeWindowListener.DpiChanged(NativeWindow nativeWindow, uint dpi)
+    void INativeWindowListener.OnDpiChanged(NativeWindow nativeWindow, uint dpi)
     {
         OnWindowDpiChanged(dpi);
     }
