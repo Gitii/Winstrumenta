@@ -46,8 +46,10 @@ jobs:
         run: |
           # Update appxmanifest. This must be done before the build.
           $manifestPath = "$env:PROJ_PATH\..\Package.appxmanifest"
+          $v = [Version] "$env:TAG_NAME"
+          $v = New-Object Version @($v.Major, $v.Minor, $v.Build, 0)
           [xml]$manifest = Get-Content $manifestPath
-          $manifest.Package.Identity.Version = "$env:TAG_NAME.0"    
+          $manifest.Package.Identity.Version = $v.ToString(4)   
           $manifest.save($manifestPath)
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
