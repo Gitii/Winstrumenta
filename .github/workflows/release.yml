@@ -75,7 +75,8 @@ jobs:
         run: |
           $Folder = $(Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*_Test").FullName
           7z a -mx9 -tzip "$env:OUTPUT_PATH/${env:TAG_NAME}-Sideload.zip" "$Folder/*"
-          Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*.msixupload" | Copy-Item -Destination $env:OUTPUT_PATH
+          Get-ChildItem -Recurse -Path "$env:ARTIFACT_PATH" -Filter "*.msixupload" | Copy-Item -Destination $env:OUTPUT_PATH
+          Get-ChildItem -Recurse -Path "$env:ARTIFACT_PATH" -Filter "*.msixbundle" | Copy-Item -Destination $env:OUTPUT_PATH
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
       - name: Attach files to Github releases
