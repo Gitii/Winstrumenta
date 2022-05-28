@@ -45,7 +45,7 @@ The main tool right now is `Package Manager`.
 ## Getting started with `Package Manager`
 
 Package Manager is distributed through the `Microsoft Store`:  
-<a href="https://www.microsoft.com/store/apps/windows">
+<a href="https://www.microsoft.com/store/apps/9N9MX3J3F4G0">
 <img title="Download from Microsoft-Store" src="Assets/ms-store-badge.png" alt="Download from Microsoft-Store" width="100">
 </a>
 

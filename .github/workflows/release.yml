@@ -27,6 +27,9 @@ jobs:
       - name: Extract release notes
         run: |
           git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' > ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
+      - name: Create release message
+        run: |
+          echo "`n`nIt is recommended to install it from [Microsoft Store](https://www.microsoft.com/store/apps/9N9MX3J3F4G0)." | Out-File -Append ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
       - name: Setup .NET SDKs
         uses: actions/setup-dotnet@v1
         with:
@@ -43,9 +46,16 @@ jobs:
         run: |
           # Update appxmanifest. This must be done before the build.
           $manifestPath = "$env:PROJ_PATH\..\Package.appxmanifest"
+          $parts = @("$env:TAG_NAME" -split "-")
+          $version = $parts[0]
+          $channel = if ($parts[1]) {$parts[1]} else {"0"}
+          $revision = $channel.GetEnumerator() | % { [int] $_ } | Measure -Sum | Select -ExpandProperty Sum
+          $parsedVersion = [Version] $version
+          $packageVersion = New-Object Version @($parsedVersion.Major, $parsedVersion.Minor, $parsedVersion.Build, $revision)
           [xml]$manifest = Get-Content $manifestPath
-          $manifest.Package.Identity.Version = "$env:TAG_NAME.0"    
+          $manifest.Package.Identity.Version = $packageVersion.ToString(4)   
           $manifest.save($manifestPath)
+          echo "Package version: $packageVersion","Channel: $channel"
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
           PROJ_PATH: ${{ matrix.packaging-project }}
@@ -65,11 +75,13 @@ jobs:
         run: |
           $Folder = $(Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*_Test").FullName
           7z a -mx9 -tzip "$env:OUTPUT_PATH/${env:TAG_NAME}-Sideload.zip" "$Folder/*"
-          Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*.msixupload" | Copy-Item -Destination $env:OUTPUT_PATH
+          Get-ChildItem -Recurse -Path "$env:ARTIFACT_PATH" -Filter "*.msixupload" | Copy-Item -Destination $env:OUTPUT_PATH
+          Get-ChildItem -Recurse -Path "$env:ARTIFACT_PATH" -Filter "*.msixbundle" | Copy-Item -Destination $env:OUTPUT_PATH
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
       - name: Attach files to Github releases
         uses: softprops/action-gh-release@v1
         with:
           files: "${{ env.OUTPUT_PATH }}/*"
+          prerelease: ${{ contains(steps.tagName.outputs.tag, '-') }}
           body_path: "./RELEASE-NOTES.txt"
