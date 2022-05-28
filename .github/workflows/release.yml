@@ -29,7 +29,7 @@ jobs:
           git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' > ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
       - name: Create release message
         run: |
-          echo "`n`nIt is recommended to install it from the now from [Microsoft Store](https://www.microsoft.com/store/apps/9N9MX3J3F4G0)." | Out-File -Append ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
+          echo "`n`nIt is recommended to install it from [Microsoft Store](https://www.microsoft.com/store/apps/9N9MX3J3F4G0)." | Out-File -Append ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
       - name: Setup .NET SDKs
         uses: actions/setup-dotnet@v1
         with:
