@@ -64,7 +64,7 @@ public sealed partial class ActionExecution
         );
     }
 
-    private Task ShowPopupAsync(InteractionContext<PopupInput, Unit> interaction)
+    private async Task ShowPopupAsync(InteractionContext<PopupInput, Unit> interaction)
     {
         var dialog = new ContentDialog()
         {
@@ -86,6 +86,8 @@ public sealed partial class ActionExecution
             PrimaryButtonText = "Close",
         };
 
-        return dialog.ShowAsync().AsTask();
+        await dialog.ShowAsync().AsTask().ConfigureAwait(true);
+
+        interaction.SetOutput(Unit.Default);
     }
 }
