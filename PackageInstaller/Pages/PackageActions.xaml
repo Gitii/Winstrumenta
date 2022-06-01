@@ -155,7 +155,7 @@
                                 <CompositeTransform />
                             </controls:FontIcon.RenderTransform>
                         </controls:FontIcon>
-                        <controls:TextBlock x:Name="PrimaryActionButtonText" />
+                        <controls:TextBlock MinWidth="50" x:Name="PrimaryActionButtonText" />
                     </controls:StackPanel>
                     <controls:SplitButton.Flyout>
                         <controls:MenuFlyout x:Name="SecondaryActions" Placement="RightEdgeAlignedBottom" />
