@@ -78,18 +78,26 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
 
     private void ShowErrorInPopup()
     {
+        var content = GetErrorMessageFromException(_error);
+
         ShowPopupInteraction
-            .Handle(
-                new PopupInput()
-                {
-                    Title = "Error details",
-                    Content =
-                        _error == null
-                            ? String.Empty
-                            : (_error.Message + "\n\n" + _error.StackTrace),
-                }
-            )
+            .Handle(new PopupInput() { Title = "Error details", Content = content, })
             .Subscribe();
+    }
+
+    private string GetErrorMessageFromException(Exception? error)
+    {
+        return error switch
+        {
+            null => string.Empty,
+            DetailedException ex => Join(ex.Details, ex.Message, ex.StackTrace),
+            var genericException => Join(genericException.Message, genericException.StackTrace),
+        };
+
+        string Join(params string?[] parts)
+        {
+            return String.Join(Environment.NewLine, parts.Where((p) => !string.IsNullOrEmpty(p)));
+        }
     }
 
     public readonly struct NavigationParameter
@@ -267,173 +275,4 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
     public ReadOnlyObservableCollection<OperationProgressModelView> OperationList => _operationList;
 
     public Interaction<PopupInput, Unit> ShowPopupInteraction => _showPopupInteraction;
-
-    //private Task ReInstallAsync()
-    //{
-    //    return InstallAsync();
-    //}
-
-    //private async Task InstallAsync()
-    //{
-    //    try
-    //    {
-    //        InProgress = true;
-    //        ProgressStatusMessage = String.Empty;
-
-    //        ProgressStatusMessage = "Installing package...";
-
-    //        var distroName = SelectedWslDistribution!.Name;
-
-    //        var packageManager = await _packageManagers.GetSupportedManagerAsync(
-    //            PackageFilePath ?? throw new Exception("Package file path is null"),
-    //            distroName,
-    //            SelectedWslDistribution.Distro.Origin
-    //        );
-
-    //        var (success, log) = await packageManager.InstallAsync(distroName, PackageFilePath);
-
-    //        if (!success)
-    //        {
-    //            throw new DetailedException("Failed to install package", log);
-    //        }
-
-    //        ProgressStatusMessage = "Package installed!";
-
-    //        var navParms = new ResultViewModel.NavigationParameter()
-    //        {
-    //            Title = "Package has been installed successfully",
-    //            Description =
-    //                $"The package '{PackageMetaData.PackageLabel}' has been installed in '{SelectedWslDistribution.Name}'.",
-    //            Details = log
-    //        };
-
-    //        _viewStackService
-    //            .PushPage<ResultViewModel>(navParms.ToNavigationParameter())
-    //            .Subscribe();
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        var navParms = new ErrorViewModel.NavigationParameter() { Exception = e };
-
-    //        _viewStackService
-    //            .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
-    //            .Subscribe();
-    //    }
-    //    finally
-    //    {
-    //        InProgress = false;
-    //        ProgressStatusMessage = String.Empty;
-    //    }
-    //}
-
-    //private async Task DowngradeAsync()
-    //{
-    //    try
-    //    {
-    //        InProgress = true;
-    //        ProgressStatusMessage = String.Empty;
-
-    //        ProgressStatusMessage = "Downgrading package...";
-
-    //        var distroName = SelectedWslDistribution!.Name;
-
-    //        var packageManager = await _packageManagers.GetSupportedManagerAsync(
-    //            PackageFilePath ?? throw new Exception("Package file path is null"),
-    //            distroName,
-    //            SelectedWslDistribution.Distro.Origin
-    //        );
-
-    //        var (success, log) = await packageManager.DowngradeAsync(distroName, PackageFilePath);
-
-    //        if (!success)
-    //        {
-    //            throw new DetailedException("Failed to install package", log);
-    //        }
-
-    //        ProgressStatusMessage = "Package downgraded!";
-
-    //        var navParms = new ResultViewModel.NavigationParameter()
-    //        {
-    //            Title = "Package has been downgraded successfully",
-    //            Description =
-    //                $"The package '{PackageMetaData.PackageLabel}' has been downgraded to '{PackageMetaData.VersionLabel}' in '{SelectedWslDistribution.Name}'.",
-    //            Details = log
-    //        };
-
-    //        _viewStackService
-    //            .PushPage<ResultViewModel>(navParms.ToNavigationParameter())
-    //            .Subscribe();
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        var navParms = new ErrorViewModel.NavigationParameter() { Exception = e };
-
-    //        _viewStackService
-    //            .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
-    //            .Subscribe();
-    //    }
-    //    finally
-    //    {
-    //        InProgress = false;
-    //        ProgressStatusMessage = String.Empty;
-    //    }
-    //}
-
-    //private async Task UpgradeAsync()
-    //{
-    //    try
-    //    {
-    //        InProgress = true;
-    //        ProgressStatusMessage = String.Empty;
-
-    //        ProgressStatusMessage = "Upgrading package...";
-
-    //        var distroName = SelectedWslDistribution!.Name;
-
-    //        var packageManager = await _packageManagers.GetSupportedManagerAsync(
-    //            PackageFilePath ?? throw new Exception("Package file path is null"),
-    //            distroName,
-    //            SelectedWslDistribution.Distro.Origin
-    //        );
-
-    //        var (success, log) = await packageManager.UpgradeAsync(distroName, PackageFilePath);
-
-    //        if (!success)
-    //        {
-    //            throw new DetailedException("Failed to install package", log);
-    //        }
-
-    //        ProgressStatusMessage = "Package upgraded!";
-
-    //        var navParms = new ResultViewModel.NavigationParameter()
-    //        {
-    //            Title = "Package has been upgraded successfully",
-    //            Description =
-    //                $"The package '{PackageMetaData.PackageLabel}' has been upgraded to '{PackageMetaData.VersionLabel}' in '{SelectedWslDistribution.Name}'.",
-    //            Details = log
-    //        };
-
-    //        _viewStackService
-    //            .PushPage<ResultViewModel>(navParms.ToNavigationParameter())
-    //            .Subscribe();
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        var navParms = new ErrorViewModel.NavigationParameter() { Exception = e };
-
-    //        _viewStackService
-    //            .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
-    //            .Subscribe();
-    //    }
-    //    finally
-    //    {
-    //        InProgress = false;
-    //        ProgressStatusMessage = String.Empty;
-    //    }
-    //}
-
-    //private Task UninstallAsync()
-    //{
-    //    return Task.CompletedTask;
-    //}
 }
