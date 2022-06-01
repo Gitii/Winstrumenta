@@ -189,6 +189,8 @@ public class Dpkg : IDpkg
         IProgressController progressController
     )
     {
+        progressController.StartNew("Installing...", true);
+
         return ExecuteDpkgAsync(
             distroName,
             "--force-confold",
@@ -204,6 +206,8 @@ public class Dpkg : IDpkg
         IProgressController progressController
     )
     {
+        progressController.StartNew("Uninstalling...", true);
+
         return ExecuteDpkgAsync(distroName, "-r", packageName);
     }
 
@@ -213,6 +217,8 @@ public class Dpkg : IDpkg
         IProgressController progressController
     )
     {
+        progressController.StartNew("Upgrading...", true);
+
         return InstallAsync(distroName, filePath, progressController);
     }
 
@@ -222,6 +228,8 @@ public class Dpkg : IDpkg
         IProgressController progressController
     )
     {
+        progressController.StartNew("Downgrading...", true);
+
         return ExecuteDpkgAsync(
             distroName,
             "--force-confold",
