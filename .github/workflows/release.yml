@@ -48,7 +48,7 @@ jobs:
           $manifestPath = "$env:PROJ_PATH\..\Package.appxmanifest"
           $parts = @("$env:TAG_NAME" -split "-")
           $version = $parts[0]
-          $channel = if ($parts[1]) {$parts[1]} else {"0"}
+          $channel = if ($parts[1]) {$parts[1]} else {""}
           $revision = $channel.GetEnumerator() | % { [int] $_ } | Measure -Sum | Select -ExpandProperty Sum
           $parsedVersion = [Version] $version
           $packageVersion = New-Object Version @($parsedVersion.Major, $parsedVersion.Minor, $parsedVersion.Build, $revision)
