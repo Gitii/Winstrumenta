@@ -58,12 +58,12 @@ public interface IPlatformDependentPackageManager
     /// <summary>
     /// Checks if the specified package is installed in the specified distro.
     /// </summary>
-    /// <param name="distroName">The name of the distribution.</param>
+    /// <param name="deviceId">The name of the distribution.</param>
     /// <param name="packageName">The name of the package.</param>
     /// <returns></returns>
-    public Task<bool> IsPackageInstalledAsync(string distroName, string packageName);
+    public Task<bool> IsPackageInstalledAsync(string deviceId, string packageName);
 
-    public Task<PackageInfo> GetInstalledPackageInfoAsync(string distroName, string packageName);
+    public Task<PackageInfo> GetInstalledPackageInfoAsync(string deviceId, string packageName);
 
     public Task<PackageMetaData> ExtractPackageMetaDataAsync(FileSystemPath filePath);
 
@@ -86,24 +86,24 @@ public interface IPlatformDependentPackageManager
     );
 
     Task<(bool success, string logs)> UninstallAsync(
-        string distroName,
+        string deviceId,
         string packageName,
         IProgressController progressController
     );
 
     Task<(bool success, string logs)> UpgradeAsync(
-        string distroName,
+        string deviceId,
         FileSystemPath filePath,
         IProgressController progressController
     );
 
     Task<(bool success, string logs)> DowngradeAsync(
-        string distroName,
+        string deviceId,
         FileSystemPath filePath,
         IProgressController progressController
     );
 
-    Task<bool> IsSupportedByDistributionAsync(string distroName, string distroOrigin);
+    Task<bool> IsSupportedByDistributionAsync(string deviceId, string distroOrigin);
 
-    Task LaunchAsync(string distroName, string packageName);
+    Task LaunchAsync(string deviceId, string packageName, IProgressController progressController);
 }

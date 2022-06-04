@@ -16,11 +16,11 @@ public class Dpkg : IDpkg
         _debianPackageReader = debianPackageReader;
     }
 
-    public async Task<bool> IsPackageInstalledAsync(string distroName, string packageName)
+    public async Task<bool> IsPackageInstalledAsync(string deviceId, string packageName)
     {
         var output = await _wslCommands
             .ExecuteCommandAsync(
-                distroName,
+                deviceId,
                 "dpkg",
                 new[] { "-s", packageName },
                 ignoreExitCode: true,
@@ -80,13 +80,13 @@ public class Dpkg : IDpkg
     }
 
     public async Task<IPlatformDependentPackageManager.PackageInfo> GetInstalledPackageInfoAsync(
-        string distroName,
+        string deviceId,
         string packageName
     )
     {
         var output = await _wslCommands
             .ExecuteCommandAsync(
-                distroName,
+                deviceId,
                 "dpkg",
                 new[] { "-s", packageName },
                 ignoreExitCode: true
@@ -201,29 +201,29 @@ public class Dpkg : IDpkg
     }
 
     public Task<(bool success, string logs)> UninstallAsync(
-        string distroName,
+        string deviceId,
         string packageName,
         IProgressController progressController
     )
     {
         progressController.StartNew("Uninstalling...", true);
 
-        return ExecuteDpkgAsync(distroName, "-r", packageName);
+        return ExecuteDpkgAsync(deviceId, "-r", packageName);
     }
 
     public Task<(bool success, string logs)> UpgradeAsync(
-        string distroName,
+        string deviceId,
         FileSystemPath filePath,
         IProgressController progressController
     )
     {
         progressController.StartNew("Upgrading...", true);
 
-        return InstallAsync(distroName, filePath, progressController);
+        return InstallAsync(deviceId, filePath, progressController);
     }
 
     public Task<(bool success, string logs)> DowngradeAsync(
-        string distroName,
+        string deviceId,
         FileSystemPath filePath,
         IProgressController progressController
     )
@@ -231,7 +231,7 @@ public class Dpkg : IDpkg
         progressController.StartNew("Downgrading...", true);
 
         return ExecuteDpkgAsync(
-            distroName,
+            deviceId,
             "--force-confold",
             "--force-confdef",
             "--force-downgrade",
@@ -240,13 +240,17 @@ public class Dpkg : IDpkg
         );
     }
 
-    public async Task<bool> IsSupportedByDistributionAsync(string distroName, string distroOrigin)
+    public async Task<bool> IsSupportedByDistributionAsync(string deviceId, string distroOrigin)
     {
         return distroOrigin == WslProvider.ORIGIN_WSL
-            && await _wslCommands.CheckCommandExistsAsync(distroName, "dpkg").ConfigureAwait(false);
+            && await _wslCommands.CheckCommandExistsAsync(deviceId, "dpkg").ConfigureAwait(false);
     }
 
-    public Task LaunchAsync(string distroName, string packageName)
+    public Task LaunchAsync(
+        string deviceId,
+        string packageName,
+        IProgressController progressController
+    )
     {
         throw new NotSupportedException("launching packages is not supported.");
     }

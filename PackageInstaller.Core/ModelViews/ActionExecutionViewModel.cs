@@ -202,7 +202,7 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
         {
             case PackageAction.Launch:
                 await packageManager
-                    .LaunchAsync(distroName, _packageMetaData.PackageName)
+                    .LaunchAsync(distroName, _packageMetaData.PackageName, progressController)
                     .ConfigureAwait(false);
                 return (true, String.Empty);
             case PackageAction.Install:
