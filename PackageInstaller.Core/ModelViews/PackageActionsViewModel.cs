@@ -1,11 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using DynamicData;
 using Microsoft.Extensions.Hosting;
-using PackageInstaller.Core.Exceptions;
 using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
@@ -250,8 +248,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
             if (!isInstalled)
             {
-                PackageInstallationStatus =
-                    IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled;
+                PackageInstallationStatus = IPlatformDependentPackageManager
+                    .PackageInstallationStatus
+                    .NotInstalled;
                 InstalledPackageVersion = String.Empty;
             }
             else
@@ -272,8 +271,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
         else
         {
-            PackageInstallationStatus =
-                IPlatformDependentPackageManager.PackageInstallationStatus.NotInstalled;
+            PackageInstallationStatus = IPlatformDependentPackageManager
+                .PackageInstallationStatus
+                .NotInstalled;
             InstalledPackageVersion = null;
         }
 

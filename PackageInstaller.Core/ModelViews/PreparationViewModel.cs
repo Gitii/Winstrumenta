@@ -9,11 +9,6 @@ using Sextant;
 
 namespace PackageInstaller.Core.ModelViews;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage(
-    "Usage",
-    "MA0004:Use Task.ConfigureAwait(false)",
-    Justification = "ModelView should care about thread context."
-)]
 public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
 {
     private IEnumerable<IPlatformDependentPackageManager> _packagesManagers;
@@ -64,11 +59,14 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
 
         try
         {
-            MemoryProfiler.CollectAllocations(true);
-            MeasureProfiler.StartCollectingData();
+            if (arguments.Length == 0)
+            {
+                NavigateToGettingStarted();
+
+                return;
+            }
+
             await _iconThemeManager.LoadThemesAsync().ConfigureAwait(false);
-            MeasureProfiler.SaveData("Loaded themes");
-            MemoryProfiler.GetSnapshot("Loaded themes");
 
             var packageFilePath = ParseArguments(arguments);
 
@@ -76,13 +74,9 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
                 .GetSupportedManagerAsync(packageFilePath)
                 .ConfigureAwait(false);
 
-            MemoryProfiler.CollectAllocations(true);
-            MeasureProfiler.StartCollectingData();
             var data = await packageManager
                 .ExtractPackageMetaDataAsync(packageFilePath)
                 .ConfigureAwait(false);
-            MeasureProfiler.SaveData("Extracted archive metadata");
-            MemoryProfiler.GetSnapshot("Extracted archive metadata");
 
             var navParms = new PackageActionsViewModel.NavigationParameter()
             {
@@ -104,15 +98,14 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
         }
     }
 
+    private void NavigateToGettingStarted()
+    {
+        _viewStackService.PushPage<GettingStartedModelView>().Subscribe();
+    }
+
     private FileSystemPath ParseArguments(string[] arguments)
     {
-        if (arguments.Length == 0)
-        {
-            throw new Exception(
-                "No arguments passed in. The first argument must be the file path to the debian package."
-            );
-        }
-        else if (arguments.Length > 1)
+        if (arguments.Length > 1)
         {
             throw new Exception(
                 "Too many arguments passed in. The first argument must be the file path to the debian package."

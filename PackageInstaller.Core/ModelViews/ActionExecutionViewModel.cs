@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using DynamicData;
-using Microsoft.Extensions.Hosting;
 using PackageInstaller.Core.Exceptions;
 using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
