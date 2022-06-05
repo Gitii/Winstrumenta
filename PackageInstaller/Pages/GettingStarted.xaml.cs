@@ -17,6 +17,11 @@ using Splat;
 
 namespace PackageInstaller.Pages;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Design",
+    "MA0048:File name must match type name",
+    Justification = "Workaround: Xaml doesn't support generic types."
+)]
 public class ReactivePageGettingStarted : ReactivePage<GettingStartedModelView> { }
 
 public sealed partial class GettingStarted
@@ -70,13 +75,13 @@ public sealed partial class GettingStarted
                     .DisposeWith(disposable);
 
                 this.ViewModel!.PickFileInteraction
-                    .RegisterHandler(PickFile)
+                    .RegisterHandler(PickFileAsync)
                     .DisposeWith(disposable);
             }
         );
     }
 
-    private async Task PickFile(InteractionContext<Unit, PickFileOutput> arg)
+    private async Task PickFileAsync(InteractionContext<Unit, PickFileOutput> arg)
     {
         var window = Locator.Current.GetService<MainWindow>()!;
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
