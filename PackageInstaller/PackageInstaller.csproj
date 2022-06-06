@@ -48,7 +48,7 @@
         <PackageReference Include="Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection" Version="0.5.0" />
         <PackageReference Include="CommunityToolkit.WinUI.UI" Version="7.1.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.3" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
         <PackageReference Include="ReactiveUI" Version="18.0.10" />
         <PackageReference Include="ReactiveUI.WinUI" Version="18.0.10" />
@@ -66,9 +66,7 @@
     <ItemGroup>
         <ProjectReference Include="..\NativeInterop.Win32.Xaml\NativeInterop.Win32.Xaml.csproj" />
         <ProjectReference Include="..\NativeInterop.Win32\NativeInterop.Win32.csproj" />
-        <ProjectReference
-            Include="..\PackageInstaller.Core.Services.WinUI\PackageInstaller.Core.Services.WinUI.csproj"
-        />
+        <ProjectReference Include="..\PackageInstaller.Core.Services.WinUI\PackageInstaller.Core.Services.WinUI.csproj" />
         <ProjectReference Include="..\PackageInstaller.Core.Services\PackageInstaller.Core.Services.csproj" />
         <ProjectReference Include="..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
     </ItemGroup>

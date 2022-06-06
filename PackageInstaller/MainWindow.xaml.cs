@@ -36,7 +36,7 @@ public sealed partial class MainWindow : DesktopWindow
 
         Title = "Winstrumenta PackageManager";
         ExtendsContentIntoTitleBar = true;
-        SetTitleBar(TitleBar); // do not set the title bar to use a 100% custom one.
+        SetTitleBar(DummyTitleBar); // do not set the title bar to use a 100% custom one.
     }
 
     public void SetLaunchArgs(string arguments)
@@ -56,7 +56,10 @@ public sealed partial class MainWindow : DesktopWindow
                     uiContext.Post(
                         (_) =>
                         {
-                            var navParms = new ErrorViewModel.NavigationParameter() { Exception = ex };
+                            var navParms = new ErrorViewModel.NavigationParameter()
+                            {
+                                Exception = ex
+                            };
 
                             _viewStackService
                                 .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
@@ -74,8 +77,7 @@ public sealed partial class MainWindow : DesktopWindow
 
         ContentControl.Content = content;
 
-        _themeManager.SetPanel(TitleBar);
-
+        _themeManager.SetPanel(DummyTitleBar);
         ForceUpdateTheme();
 
         var arguments = Environment.GetCommandLineArgs().Skip(1).ToArray();

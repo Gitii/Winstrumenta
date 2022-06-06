@@ -1,9 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using Microsoft.UI.Xaml;
 using PackageInstaller.Core.ModelViews;
-using PackageInstaller.Core.Services;
 using ReactiveUI;
-using Splat;
 
 namespace PackageInstaller.Pages;
 
@@ -53,7 +51,5 @@ public sealed partial class Error
                     .DisposeWith(disposable);
             }
         );
-
-        Locator.Current.GetService<IThemeManager>()!.SetTitleBarColor(255, 139, 0, 0);
     }
 }
