@@ -15,9 +15,6 @@
                     <SolidColorBrush x:Key="WindowCaptionBackgroundDisabled">
                         <ThemeResource ResourceKey="ApplicationPageBackgroundThemeBrush" />
                     </SolidColorBrush>
-                    <SolidColorBrush x:Key="WindowCaptionForeground">
-                        <ThemeResource ResourceKey="ApplicationHeaderForegroundThemeBrush" />
-                    </SolidColorBrush>
                 </ResourceDictionary>
                 <!--  Other merged dictionaries here  -->
             </ResourceDictionary.MergedDictionaries>

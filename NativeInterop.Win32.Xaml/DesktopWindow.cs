@@ -13,6 +13,11 @@ public class DesktopWindow : Window, INativeWindowListener
     private bool _loaded = false;
     protected NativeWindow _nativeWindow;
     private DynamicApplicationTheme _requestedTheme = DynamicApplicationTheme.Auto;
+    private bool _systemBackdropEnabled;
+    private WindowsSystemDispatcherQueueHelper? _wsdqHelper; // See separate sample below for implementation
+    private Microsoft.UI.Composition.SystemBackdrops.ISystemBackdropControllerWithTargets? _backdropController;
+    private Microsoft.UI.Composition.SystemBackdrops.SystemBackdropConfiguration? _backdropConfigurationSource;
+    private bool _useMicaSystemBackdrop = true;
 
     public DesktopWindow()
     {
@@ -65,6 +70,46 @@ public class DesktopWindow : Window, INativeWindowListener
     public bool IsClosing
     {
         get => _nativeWindow.IsClosing;
+    }
+
+    public bool SystemBackdropEnabled
+    {
+        get => _systemBackdropEnabled;
+        set
+        {
+            if (_systemBackdropEnabled && value == false)
+            {
+                value = TryUnsetSystemBackdrop();
+            }
+
+            if (!_systemBackdropEnabled && value)
+            {
+                value = TrySetSystemBackdrop();
+            }
+
+            _systemBackdropEnabled = value;
+        }
+    }
+
+    public bool UseMicaSystemBackdrop
+    {
+        get => _useMicaSystemBackdrop;
+        set
+        {
+            if (SystemBackdropEnabled)
+            {
+                throw new Exception(
+                    $"{nameof(UseMicaSystemBackdrop)} must be set before {nameof(SystemBackdropEnabled)} is set."
+                );
+            }
+
+            _useMicaSystemBackdrop = value;
+        }
+    }
+
+    private bool TryUnsetSystemBackdrop()
+    {
+        return true;
     }
 
     public new UIElement Content
@@ -175,6 +220,65 @@ public class DesktopWindow : Window, INativeWindowListener
         Loaded?.Invoke(this, new WindowLoadedEventArgs(this));
     }
 
+    private void Window_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        if (_backdropConfigurationSource != null)
+        {
+            _backdropConfigurationSource.IsInputActive =
+                args.WindowActivationState != WindowActivationState.Deactivated;
+        }
+    }
+
+    private void Window_Closed(object sender, WindowEventArgs args)
+    {
+        // Make sure any Mica/Acrylic controller is disposed so it doesn't try to
+        // use this closed window.
+        if (_backdropController != null)
+        {
+            _backdropController.Dispose();
+            _backdropController = null;
+        }
+
+        this.Activated -= Window_Activated;
+        _backdropConfigurationSource = null;
+    }
+
+    private void Window_ThemeChanged(FrameworkElement sender, object args)
+    {
+        if (_backdropConfigurationSource != null)
+        {
+            SetConfigurationSourceTheme();
+        }
+    }
+
+    private void SetConfigurationSourceTheme()
+    {
+        if (_backdropConfigurationSource == null)
+        {
+            return;
+        }
+
+        switch (this.ActualTheme)
+        {
+            case ApplicationTheme.Dark:
+                _backdropConfigurationSource.Theme = Microsoft
+                    .UI
+                    .Composition
+                    .SystemBackdrops
+                    .SystemBackdropTheme
+                    .Dark;
+                break;
+            case ApplicationTheme.Light:
+                _backdropConfigurationSource.Theme = Microsoft
+                    .UI
+                    .Composition
+                    .SystemBackdrops
+                    .SystemBackdropTheme
+                    .Light;
+                break;
+        }
+    }
+
     void INativeWindowListener.OnClosing(NativeWindow nativeWindow)
     {
         Closing?.Invoke(this, new WindowClosingEventArgs(this));
@@ -222,6 +326,8 @@ public class DesktopWindow : Window, INativeWindowListener
                         null
                     );
             }
+
+            SetConfigurationSourceTheme();
         }
     }
 
@@ -293,6 +399,54 @@ public class DesktopWindow : Window, INativeWindowListener
     {
         WindowDpiChangedEventArgs windowDpiChangedEvent = new(this, (int)newDpi);
         DpiChanged?.Invoke(this, windowDpiChangedEvent);
+    }
+
+    bool TrySetSystemBackdrop()
+    {
+        if (
+            UseMicaSystemBackdrop
+            && Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported()
+        )
+        {
+            SetSystemBackdrop<Microsoft.UI.Composition.SystemBackdrops.MicaController>();
+            return true;
+        }
+
+        if (Microsoft.UI.Composition.SystemBackdrops.DesktopAcrylicController.IsSupported())
+        {
+            SetSystemBackdrop<Microsoft.UI.Composition.SystemBackdrops.DesktopAcrylicController>();
+            return true;
+        }
+
+        return false; // Mica and Acrylic are not supported on this system
+    }
+
+    void SetSystemBackdrop<T>()
+        where T : class,
+            Microsoft.UI.Composition.SystemBackdrops.ISystemBackdropControllerWithTargets,
+            new()
+    {
+        _wsdqHelper = new WindowsSystemDispatcherQueueHelper();
+        _wsdqHelper.EnsureWindowsSystemDispatcherQueueController();
+
+        // Hooking up the policy object
+        _backdropConfigurationSource =
+            new Microsoft.UI.Composition.SystemBackdrops.SystemBackdropConfiguration();
+        this.Activated += Window_Activated;
+        this.Closed += Window_Closed;
+
+        // Initial configuration state.
+        _backdropConfigurationSource.IsInputActive = true;
+        SetConfigurationSourceTheme();
+
+        _backdropController = new T();
+
+        // Enable the system backdrop.
+        // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
+        _backdropController.AddSystemBackdropTarget(
+            this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>()
+        );
+        _backdropController.SetSystemBackdropConfiguration(_backdropConfigurationSource);
     }
 
     [ComImport]
