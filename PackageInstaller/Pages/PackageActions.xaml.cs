@@ -6,7 +6,6 @@ using DynamicData;
 using DynamicData.Binding;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using PackageInstaller.AttachedProperties;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services;
 using ReactiveUI;

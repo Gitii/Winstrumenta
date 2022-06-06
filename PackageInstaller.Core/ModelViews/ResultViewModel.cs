@@ -7,11 +7,6 @@ using Sextant;
 
 namespace PackageInstaller.Core.ModelViews;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage(
-    "Usage",
-    "MA0004:Use Task.ConfigureAwait(false)",
-    Justification = "ModelView should care about thread context."
-)]
 public class ResultViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;

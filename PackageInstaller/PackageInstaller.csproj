@@ -14,12 +14,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-      <Compile Remove="Properties\**" />
-      <Content Remove="Properties\**" />
-      <EmbeddedResource Remove="Properties\**" />
-      <None Remove="Properties\**" />
-      <Page Remove="Properties\**" />
-      <PRIResource Remove="Properties\**" />
+        <Compile Remove="Properties\**" />
+        <Content Remove="Properties\**" />
+        <EmbeddedResource Remove="Properties\**" />
+        <None Remove="Properties\**" />
+        <Page Remove="Properties\**" />
+        <PRIResource Remove="Properties\**" />
     </ItemGroup>
     <ItemGroup>
         <Content Remove="Assets\DistroIcons\README.md" />
@@ -36,6 +36,7 @@
         <None Remove="Assets\parcel.svg" />
         <None Remove="Assets\success.png" />
         <None Remove="Assets\warning.png" />
+        <None Remove="Pages\GettingStarted.xaml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -45,6 +46,7 @@
         </PackageReference>
         <PackageReference Include="Community.Sextant.WinUI" Version="0.5.0" />
         <PackageReference Include="Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection" Version="0.5.0" />
+        <PackageReference Include="CommunityToolkit.WinUI.UI" Version="7.1.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.3" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
@@ -64,8 +66,17 @@
     <ItemGroup>
         <ProjectReference Include="..\NativeInterop.Win32.Xaml\NativeInterop.Win32.Xaml.csproj" />
         <ProjectReference Include="..\NativeInterop.Win32\NativeInterop.Win32.csproj" />
-        <ProjectReference Include="..\PackageInstaller.Core.Services.WinUI\PackageInstaller.Core.Services.WinUI.csproj" />
+        <ProjectReference
+            Include="..\PackageInstaller.Core.Services.WinUI\PackageInstaller.Core.Services.WinUI.csproj"
+        />
         <ProjectReference Include="..\PackageInstaller.Core.Services\PackageInstaller.Core.Services.csproj" />
         <ProjectReference Include="..\PackageInstaller.Core\PackageInstaller.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Page Update="Pages\GettingStarted.xaml">
+            <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
     </ItemGroup>
 </Project>

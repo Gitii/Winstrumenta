@@ -1,4 +1,4 @@
-﻿<local:ReactivePagePreparation
+<local:ReactivePagePreparation
     x:Class="PackageInstaller.Pages.Preparation"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -9,21 +9,16 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:reactiveUi="using:ReactiveUI"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+>
     <StackPanel Orientation="Vertical">
         <Grid Padding="0,0,15,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <controls:PlaceholderContainer
-                Grid.Column="0"
-                HorizontalAlignment="Stretch"
-                Rows="3" />
-            <controls:Shimmer
-                Grid.Column="1"
-                Width="100"
-                Height="100" />
+            <controls:PlaceholderContainer Grid.Column="0" HorizontalAlignment="Stretch" Rows="3" />
+            <controls:Shimmer Grid.Column="1" Width="100" Height="100" />
         </Grid>
         <controls:PlaceholderContainer Margin="0,40,0,0" Rows="3" />
     </StackPanel>

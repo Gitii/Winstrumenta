@@ -78,10 +78,6 @@ public static class Program
     private static void ConfigureComplexServices(IServiceCollection collection)
     {
         collection.AddSingleton<MainWindow>();
-        //collection.AddSingleton<ThemeManager>();
-        //collection.AddSingleton<IThemeManager, ThemeManager>(
-        //    provider => provider.GetRequiredService<ThemeManager>()
-        //);
         collection.AddSingleton<IThreadHelpers>(
             (provider) =>
             {
@@ -106,6 +102,7 @@ public static class Program
                             .RegisterViewAndViewModel<Error, ErrorViewModel>()
                             .RegisterViewAndViewModel<Result, ResultViewModel>()
                             .RegisterViewAndViewModel<ActionExecution, ActionExecutionViewModel>()
+                            .RegisterViewAndViewModel<GettingStarted, GettingStartedModelView>()
                             .RegisterViewAndViewModel<Preparation, PreparationViewModel>();
                     }
                 );

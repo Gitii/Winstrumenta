@@ -56,10 +56,7 @@ public sealed partial class MainWindow : DesktopWindow
                     uiContext.Post(
                         (_) =>
                         {
-                            var navParms = new ErrorViewModel.NavigationParameter()
-                            {
-                                Exception = ex
-                            };
+                            var navParms = new ErrorViewModel.NavigationParameter() { Exception = ex };
 
                             _viewStackService
                                 .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
