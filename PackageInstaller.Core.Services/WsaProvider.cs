@@ -13,27 +13,64 @@ public class WsaProvider : IDistributionProvider
         _wsa = wsa;
     }
 
-    public Task<Distribution[]> GetAllInstalledDistributionsAsync()
+    public Task<DistributionList> GetAllInstalledDistributionsAsync(string packageExtensionHint)
     {
+        var isApk = packageExtensionHint == "apk";
+
+        if (isApk && !_wsa.IsWsaSupported(out var notSupportedMessage))
+        {
+            return Task.FromResult(
+                DistributionList.CreateWithAlertOnly(
+                    new DistributionList.Alert()
+                    {
+                        Message = notSupportedMessage ?? "WSA is not supported on this device.",
+                        HelpUrl =
+                            "https://support.microsoft.com/en-us/windows/install-mobile-apps-and-the-amazon-appstore-f8d0abb5-44ad-47d8-b9fb-ad6b1459ff6c",
+                        Priority = DistributionList.AlertPriority.Critical
+                    }
+                )
+            );
+        }
+
+        if (isApk && !_wsa.IsWsaInstalled)
+        {
+            return Task.FromResult(
+                DistributionList.CreateWithAlertOnly(
+                    new DistributionList.Alert()
+                    {
+                        Title = "WSA is not installed on this device.",
+                        Message =
+                            "Consider installing WSA if you want to manage android packages in WSA using this package manager.",
+                        HelpUrl =
+                            "https://docs.microsoft.com/en-us/windows/android/wsa/#install-the-amazon-appstore",
+                        Priority = DistributionList.AlertPriority.Important
+                    }
+                )
+            );
+        }
+
         if (_wsa.IsWsaSupported() && _wsa.IsWsaInstalled)
         {
             return Task.FromResult(
-                new Distribution[]
+                new DistributionList()
                 {
-                    new Distribution()
+                    InstalledDistributions = new Distribution[]
                     {
-                        IsAvailable = true,
-                        IsRunning = true,
-                        Version = new Version(1, 0),
-                        Origin = ORIGIN_WSA,
-                        Name = "Windows Subsystem for Android",
-                        Id = IWsaApi.ADB_WSA_DEVICE_SERIAL_NUMBER,
-                        Type = DistributionType.Android
+                        new Distribution()
+                        {
+                            IsAvailable = true,
+                            IsRunning = true,
+                            Version = new Version(11, 0),
+                            Origin = ORIGIN_WSA,
+                            Name = "Windows Subsystem for Android",
+                            Id = IWsaApi.ADB_WSA_DEVICE_SERIAL_NUMBER,
+                            Type = DistributionType.Android
+                        }
                     }
                 }
             );
         }
 
-        return Task.FromResult(Array.Empty<Distribution>());
+        return Task.FromResult(new DistributionList());
     }
 }

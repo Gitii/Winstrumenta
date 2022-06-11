@@ -98,6 +98,7 @@ public static class Program
                     viewBuilder =>
                     {
                         viewBuilder
+                            .RegisterViewAndViewModel<NotificationHub, NotificationHubModelView>()
                             .RegisterViewAndViewModel<PackageActions, PackageActionsViewModel>()
                             .RegisterViewAndViewModel<Error, ErrorViewModel>()
                             .RegisterViewAndViewModel<Result, ResultViewModel>()

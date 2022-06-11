@@ -9,6 +9,7 @@
     xmlns:local="using:PackageInstaller.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:CommunityToolkit.WinUI.UI"
+    xmlns:attachedProperties="using:PackageInstaller.AttachedProperties"
     mc:Ignorable="d"
 >
     <controls:Page.Resources>
@@ -41,7 +42,7 @@
             BorderBrush="Gray"
             CornerRadius="10"
             Background="{StaticResource TranslucentGray}"
-            ui:FrameworkElementExtensions.Cursor="Cross"
+            attachedProperties:FrameworkElementExtensions.Cursor="Hand"
             AllowDrop="False"
             CanDrag="False"
         >
@@ -64,7 +65,7 @@
             BorderBrush="Gray"
             CornerRadius="10"
             Background="{StaticResource TranslucentGray}"
-            ui:FrameworkElementExtensions.Cursor="Hand"
+            attachedProperties:FrameworkElementExtensions.Cursor="Hand"
         >
             <controls:StackPanel VerticalAlignment="Center">
                 <controls:Viewbox MaxHeight="100" MaxWidth="100">

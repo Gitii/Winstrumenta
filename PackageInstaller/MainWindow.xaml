@@ -12,6 +12,7 @@
     Loaded="MainWindow_OnActivated"
     RequestedTheme="Auto"
     Resizeable="False"
+    UseMicaSystemBackdrop="True"
     SystemBackdropEnabled="True"
     mc:Ignorable="d"
 >
@@ -24,6 +25,7 @@
             VerticalAlignment="Top"
             x:Name="DummyTitleBar"
             Height="32"
+            Margin="48,0,0,0"
             controls:Grid.Row="0"
         />
         <controls:ContentControl

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
@@ -166,7 +168,7 @@ public sealed partial class PackageActions
                     )
                     .DisposeWith(disposable);
 
-                ViewModel!.DistroList
+                this.ViewModel.DistroList
                     .ToObservable()
                     .Subscribe(
                         item =>
@@ -177,6 +179,30 @@ public sealed partial class PackageActions
                             }
                         }
                     )
+                    .DisposeWith(disposable);
+
+                this.OneWayBind(
+                        ViewModel,
+                        (mv) => mv.Notifications,
+                        (mv) => mv.NotificationIconGlyph.Visibility,
+                        (list) => list.Count == 0 ? Visibility.Collapsed : Visibility.Visible
+                    )
+                    .DisposeWith(disposable);
+
+                this.OneWayBind(
+                        ViewModel,
+                        (mv) => mv.NotificationIconType,
+                        (mv) => mv.NotificationIconGlyph.Priority
+                    )
+                    .DisposeWith(disposable);
+
+                Observable
+                    .FromEventPattern<PointerEventHandler, PointerRoutedEventArgs>(
+                        ev => this.NotificationIconGlyph.PointerReleased += ev,
+                        ev => this.NotificationIconGlyph.PointerReleased -= ev
+                    )
+                    .Select(x => Unit.Default)
+                    .InvokeCommand(ViewModel!.GotoNotificationHub)
                     .DisposeWith(disposable);
             }
         );

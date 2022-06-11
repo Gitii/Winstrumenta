@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
@@ -11,7 +12,7 @@ using Sextant;
 
 namespace PackageInstaller.Core.ModelViews;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage(
+[SuppressMessage(
     "Usage",
     "MA0004:Use Task.ConfigureAwait(false)",
     Justification = "ModelView should care about thread context."
@@ -20,58 +21,37 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IList<IDistributionProvider> _distributionProviders;
-    private readonly SourceList<DistributionModelView> _distroSourceList;
     private readonly ReadOnlyObservableCollection<DistributionModelView> _distroList;
-    private IEnumerable<IPlatformDependentPackageManager> _packageManagers;
-    bool _inProgress;
-    string _progressStatusMessage;
-    FileSystemPath? _packageFilePath;
-    private readonly IParameterViewStackService _viewStackService;
-    private IPath _path;
-    Stream? _packageIconStream;
-    private IThreadHelpers _threadHelpers;
-    private IIconThemeManager _iconThemeManager;
-    private ObservableAsPropertyHelper<ActionModelView?> _primaryAction;
-    private ObservableAsPropertyHelper<IImmutableList<ActionModelView>> _secondaryActions;
+    private readonly SourceList<DistributionModelView> _distroSourceList;
+    private readonly ActionModelView _doNothingActionMv;
+    private readonly ActionModelView _downgradeActionMv;
 
     private readonly ActionModelView _installActionMv;
-    private readonly ActionModelView _uninstallActionMv;
-    private readonly ActionModelView _reinstallActionMv;
-    private readonly ActionModelView _upgradeActionMv;
-    private readonly ActionModelView _downgradeActionMv;
-    private readonly ActionModelView _doNothingActionMv;
     private readonly ActionModelView _launchActionMv;
 
-    public Stream? PackageIconStream
-    {
-        get { return _packageIconStream; }
-        set { this.RaiseAndSetIfChanged(ref _packageIconStream, value); }
-    }
+    readonly ObservableAsPropertyHelper<DistributionList.AlertPriority> _notificationIconType;
+    private readonly ActionModelView _reinstallActionMv;
+    private readonly ActionModelView _uninstallActionMv;
+    private readonly ActionModelView _upgradeActionMv;
+    private readonly IParameterViewStackService _viewStackService;
+    private IIconThemeManager _iconThemeManager;
+    bool _inProgress;
 
-    public FileSystemPath? PackageFilePath
-    {
-        get { return _packageFilePath; }
-        set { this.RaiseAndSetIfChanged(ref _packageFilePath, value); }
-    }
+    string? _installedPackageVersion;
+    FileSystemPath? _packageFilePath;
+    Stream? _packageIconStream;
 
-    public string ProgressStatusMessage
-    {
-        get { return _progressStatusMessage; }
-        set { this.RaiseAndSetIfChanged(ref _progressStatusMessage, value); }
-    }
+    IPlatformDependentPackageManager.PackageInstallationStatus? _packageInstallationStatus;
+    private IEnumerable<IPlatformDependentPackageManager> _packageManagers;
 
-    public bool InProgress
-    {
-        get { return _inProgress; }
-        private set { this.RaiseAndSetIfChanged(ref _inProgress, value); }
-    }
+    IPlatformDependentPackageManager.PackageMetaData _packageMetaData;
+    private IPath _path;
+    private ObservableAsPropertyHelper<ActionModelView?> _primaryAction;
+    string _progressStatusMessage;
+    private ObservableAsPropertyHelper<IImmutableList<ActionModelView>> _secondaryActions;
 
-    public readonly struct NavigationParameter
-    {
-        public readonly IPlatformDependentPackageManager.PackageMetaData PackageMetaData { get; init; }
-
-        public readonly FileSystemPath PackageFilePath { get; init; }
-    }
+    DistributionModelView? _selectedWslDistribution;
+    private IThreadHelpers _threadHelpers;
 
 #pragma warning disable MA0051 // Method is too long
     public PackageActionsViewModel(
@@ -95,6 +75,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
         _progressStatusMessage = String.Empty;
         ProgressStatusMessage = String.Empty;
+        _notifications = ImmutableList<NotificationModelView>.Empty;
 
         _distroSourceList = new SourceList<DistributionModelView>();
         _distroSourceList
@@ -110,6 +91,17 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             {
                 _applicationLifetime.StopApplication();
                 Environment.Exit(0);
+            }
+        );
+
+        GotoNotificationHub = ReactiveCommand.Create(
+            () =>
+            {
+                var navParams = new NotificationHubModelView.NavigationParameter() { Notifications = Notifications, };
+
+                _viewStackService
+                    .PushPage<NotificationHubModelView>(navParams.ToNavigationParameter())
+                    .Subscribe();
             }
         );
 
@@ -139,10 +131,10 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             BuildCommandFunction(PackageAction.Downgrade),
             "Downgrade",
             "This action may not do any dependency checking on downgrades "
-                + "and therefore will not warn you if the downgrade breaks the dependency "
-                + "of some other package.This can have serious side effects, downgrading "
-                + "essential system components can even make your whole system unusable. "
-                + "Use with care."
+            + "and therefore will not warn you if the downgrade breaks the dependency "
+            + "of some other package.This can have serious side effects, downgrading "
+            + "essential system components can even make your whole system unusable. "
+            + "Use with care."
         );
         _doNothingActionMv = new ActionModelView(
             () => _applicationLifetime.StopApplication(),
@@ -158,7 +150,105 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             .Select(ChooseSecondaryActions)
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToProperty(this, (mv) => mv.SecondaryActions);
+
+        _notificationIconType = this.WhenAnyValue((mv) => mv.Notifications)
+            .Select(
+                (x) =>
+                    x.MaxBy((n) => n.Priority)?.Priority
+                    ?? DistributionList.AlertPriority.Information
+            )
+            .ToProperty(this, (mv) => mv.NotificationIconType);
     }
+
+    ImmutableList<NotificationModelView> _notifications;
+
+    public ImmutableList<NotificationModelView> Notifications
+    {
+        get { return _notifications; }
+        set { this.RaiseAndSetIfChanged(ref _notifications, value); }
+    }
+
+    public Stream? PackageIconStream
+    {
+        get { return _packageIconStream; }
+        set { this.RaiseAndSetIfChanged(ref _packageIconStream, value); }
+    }
+
+    public FileSystemPath? PackageFilePath
+    {
+        get { return _packageFilePath; }
+        set { this.RaiseAndSetIfChanged(ref _packageFilePath, value); }
+    }
+
+    public string ProgressStatusMessage
+    {
+        get { return _progressStatusMessage; }
+        set { this.RaiseAndSetIfChanged(ref _progressStatusMessage, value); }
+    }
+
+    public bool InProgress
+    {
+        get { return _inProgress; }
+        private set { this.RaiseAndSetIfChanged(ref _inProgress, value); }
+    }
+
+    public IPlatformDependentPackageManager.PackageMetaData PackageMetaData
+    {
+        get { return _packageMetaData; }
+        set { this.RaiseAndSetIfChanged(ref _packageMetaData, value); }
+    }
+
+    public DistributionModelView? SelectedWslDistribution
+    {
+        get { return _selectedWslDistribution; }
+        set { this.RaiseAndSetIfChanged(ref _selectedWslDistribution, value); }
+    }
+
+    public IPlatformDependentPackageManager.PackageInstallationStatus? PackageInstallationStatus
+    {
+        get { return _packageInstallationStatus; }
+        set { this.RaiseAndSetIfChanged(ref _packageInstallationStatus, value); }
+    }
+
+    public string? InstalledPackageVersion
+    {
+        get { return _installedPackageVersion; }
+        set { this.RaiseAndSetIfChanged(ref _installedPackageVersion, value); }
+    }
+
+    public ReactiveCommand<Unit, Unit> GotoNotificationHub { get; }
+
+    public ReactiveCommand<Unit, Unit> Close { get; }
+
+    public ReadOnlyObservableCollection<DistributionModelView> DistroList => _distroList;
+
+    public ActionModelView? PrimaryAction => _primaryAction.Value;
+
+    public IImmutableList<ActionModelView> SecondaryActions => _secondaryActions.Value;
+
+    public DistributionList.AlertPriority NotificationIconType => _notificationIconType.Value;
+
+    public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
+    {
+        return Observable.Return(Unit.Default);
+    }
+
+    public IObservable<Unit> WhenNavigatedFrom(INavigationParameter parameter)
+    {
+        return Observable.Return(Unit.Default);
+    }
+
+    public IObservable<Unit> WhenNavigatingTo(INavigationParameter parameter)
+    {
+        var navParms = parameter.FromNavigationParameter<NavigationParameter>();
+
+        PackageMetaData = navParms.PackageMetaData;
+        PackageFilePath = navParms.PackageFilePath;
+
+        return ObservableAsync.From(ProcessPackageAsync, RxApp.MainThreadScheduler);
+    }
+
+    public string Id { get; } = nameof(PackageActionsViewModel);
 
     private IImmutableList<ActionModelView> ChooseSecondaryActions(
         IPlatformDependentPackageManager.PackageInstallationStatus? arg
@@ -280,61 +370,38 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         return arg;
     }
 
-    public string Id { get; } = nameof(PackageActionsViewModel);
-
-    IPlatformDependentPackageManager.PackageMetaData _packageMetaData;
-
-    public IPlatformDependentPackageManager.PackageMetaData PackageMetaData
-    {
-        get { return _packageMetaData; }
-        set { this.RaiseAndSetIfChanged(ref _packageMetaData, value); }
-    }
-
-    DistributionModelView? _selectedWslDistribution;
-
-    public DistributionModelView? SelectedWslDistribution
-    {
-        get { return _selectedWslDistribution; }
-        set { this.RaiseAndSetIfChanged(ref _selectedWslDistribution, value); }
-    }
-
-    IPlatformDependentPackageManager.PackageInstallationStatus? _packageInstallationStatus;
-
-    public IPlatformDependentPackageManager.PackageInstallationStatus? PackageInstallationStatus
-    {
-        get { return _packageInstallationStatus; }
-        set { this.RaiseAndSetIfChanged(ref _packageInstallationStatus, value); }
-    }
-
-    string? _installedPackageVersion;
-
-    public string? InstalledPackageVersion
-    {
-        get { return _installedPackageVersion; }
-        set { this.RaiseAndSetIfChanged(ref _installedPackageVersion, value); }
-    }
-
     private async Task ProcessPackageAsync()
     {
         InProgress = true;
 
         await Task.Delay(10);
 
-        var distros = await Task.WhenAll(
-            _distributionProviders.Select((dp) => dp.GetAllInstalledDistributionsAsync())
+        var ext = Path.GetExtension(PackageFilePath?.WindowsPath ?? "").TrimStart('.');
+
+        var distributionLists = await Task.WhenAll(
+            _distributionProviders.Select((dp) => dp.GetAllInstalledDistributionsAsync(ext))
         );
 
-        var supportedDistros = await GetSupportDistributionsAsync(distros.SelectMany(x => x));
+        var installedDistributions = await GetSupportDistributionsAsync(
+            distributionLists.SelectMany(x => x.InstalledDistributions)
+        );
 
         _distroSourceList.Edit(
             (list) =>
             {
                 list.Clear();
-                list.AddRange(supportedDistros.Select((d) => new DistributionModelView(d)));
+                list.AddRange(installedDistributions.Select((d) => new DistributionModelView(d)));
             }
         );
 
         await _threadHelpers.UiThread;
+
+        Notifications = distributionLists
+            .SelectMany((x) => x.Alerts)
+            .OrderBy((x) => x.Priority)
+            .ThenBy((x) => x.Title)
+            .Select((x) => new NotificationModelView(x))
+            .ToImmutableList();
 
         if (SelectedWslDistribution == null && _distroSourceList.Count > 0)
         {
@@ -377,7 +444,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
                             && (
                                 await packageManager.IsPackageSupportedAsync(
                                     PackageFilePath
-                                        ?? throw new Exception("Package file path is null")
+                                    ?? throw new Exception("Package file path is null")
                                 )
                             ).isSupported
                         )
@@ -391,31 +458,10 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             );
     }
 
-    public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
+    public readonly struct NavigationParameter
     {
-        return Observable.Return(Unit.Default);
+        public readonly IPlatformDependentPackageManager.PackageMetaData PackageMetaData { get; init; }
+
+        public readonly FileSystemPath PackageFilePath { get; init; }
     }
-
-    public IObservable<Unit> WhenNavigatedFrom(INavigationParameter parameter)
-    {
-        return Observable.Return(Unit.Default);
-    }
-
-    public IObservable<Unit> WhenNavigatingTo(INavigationParameter parameter)
-    {
-        var navParms = parameter.FromNavigationParameter<NavigationParameter>();
-
-        PackageMetaData = navParms.PackageMetaData;
-        PackageFilePath = navParms.PackageFilePath;
-
-        return ObservableAsync.From(ProcessPackageAsync, RxApp.MainThreadScheduler);
-    }
-
-    public ReactiveCommand<Unit, Unit> Close { get; }
-
-    public ReadOnlyObservableCollection<DistributionModelView> DistroList => _distroList;
-
-    public ActionModelView? PrimaryAction => _primaryAction.Value;
-
-    public IImmutableList<ActionModelView> SecondaryActions => _secondaryActions.Value;
 }

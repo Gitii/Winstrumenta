@@ -1,0 +1,60 @@
+<controls:UserControl
+    x:Class="PackageInstaller.Controls.NotificationIcon"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:xaml="using:Microsoft.UI.Xaml"
+    xmlns:media="using:Microsoft.UI.Xaml.Media"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    xmlns:animation="using:Microsoft.UI.Xaml.Media.Animation"
+    xmlns:controls1="using:PackageInstaller.Controls"
+    mc:Ignorable="d"
+>
+    <controls:Grid Padding="5" x:Name="PulseBox" RenderTransformOrigin="0.5,0.5">
+        <controls:Grid.Triggers>
+            <xaml:EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                <animation:BeginStoryboard>
+                    <animation:Storyboard RepeatBehavior="Forever">
+                        <animation:DoubleAnimationUsingKeyFrames
+                            animation:Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                            animation:Storyboard.TargetName="PulseBox"
+                        >
+                            <animation:EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.15" />
+                            <animation:EasingDoubleKeyFrame KeyTime="0:0:1" Value="1" />
+                        </animation:DoubleAnimationUsingKeyFrames>
+                        <animation:DoubleAnimationUsingKeyFrames
+                            animation:Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                            animation:Storyboard.TargetName="PulseBox"
+                        >
+                            <animation:EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.15" />
+                            <animation:EasingDoubleKeyFrame KeyTime="0:0:1" Value="1" />
+                        </animation:DoubleAnimationUsingKeyFrames>
+                    </animation:Storyboard>
+                </animation:BeginStoryboard>
+            </xaml:EventTrigger>
+        </controls:Grid.Triggers>
+        <controls:Grid.RenderTransform>
+            <media:TransformGroup>
+                <media:ScaleTransform />
+                <media:SkewTransform />
+                <media:RotateTransform />
+                <media:TranslateTransform />
+            </media:TransformGroup>
+        </controls:Grid.RenderTransform>
+        <controls:FontIcon
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            x:Name="NotificationIconGlyphBottom"
+            FontFamily="{StaticResource SymbolThemeFontFamily}"
+            Glyph="&#xE91F;"
+        />
+        <controls:FontIcon
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            x:Name="NotificationIconGlyphTop"
+            FontFamily="{StaticResource SymbolThemeFontFamily}"
+            Glyph="&#xF13F;"
+        />
+    </controls:Grid>
+</controls:UserControl>

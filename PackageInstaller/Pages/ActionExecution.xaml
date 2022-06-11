@@ -75,7 +75,7 @@
             FailedOperationTemplate="{StaticResource FailedOpTemplate}"
         />
     </local:ReactivePageActionExecution.Resources>
-    <controls:Grid Padding="30,0,30,30">
+    <controls:Grid Padding="30,32,30,30">
         <controls:Grid.RowDefinitions>
             <controls:RowDefinition Height="Auto" />
             <controls:RowDefinition Height="*" />
