@@ -101,14 +101,15 @@ public class AndroidDeviceProvider : IDistributionProvider
             )
             .ConfigureAwait(false);
 
-        var version = ParseVersion(androidVersion);
-
-        return (deviceName, version);
+        return (deviceName, ParseVersion(androidVersion));
     }
 
     private Version ParseVersion(string versionString)
     {
-        var parts = versionString.Split(".").Select(int.Parse).ToArray();
+        var parts = versionString
+            .Split(".", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(int.Parse)
+            .ToArray();
         return parts.Length switch
         {
             0 => new Version(0, 0),
