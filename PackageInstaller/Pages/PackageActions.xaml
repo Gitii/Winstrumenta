@@ -14,7 +14,7 @@
     xmlns:xaml="using:Microsoft.UI.Xaml"
     xmlns:b="using:Microsoft.UI.Xaml.Data"
     xmlns:w="using:System.Windows"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    xmlns:ui="using:CommunityToolkit.WinUI.UI"
     mc:Ignorable="d"
 >
     <controls:Page.Triggers>
@@ -31,7 +31,7 @@
             </media:BeginStoryboard>
         </xaml:EventTrigger>
     </controls:Page.Triggers>
-    <controls:Grid Padding="30,0,30,30">
+    <controls:Grid Padding="30,32,30,30">
         <controls:Grid.ColumnDefinitions>
             <controls:ColumnDefinition Width="*" />
             <controls:ColumnDefinition Width="Auto" />
@@ -120,53 +120,58 @@
                 controls:Grid.Row="1"
             />
         </controls:Grid>
-        <controls:StackPanel
-            HorizontalAlignment="Right"
-            controls:Grid.Column="0"
-            controls:Grid.ColumnSpan="2"
-            controls:Grid.Row="1"
-            Orientation="Vertical"
-            Spacing="4"
-        >
-            <controls:StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
-                <controls:ComboBox x:Name="DistroList" Width="300">
-                    <controls:ComboBox.ItemTemplate>
-                        <xaml:DataTemplate
-                            d:DataContext="{d:DesignInstance modelViews:DistributionModelView, IsDesignTimeCreatable=False}"
-                            x:DataType="modelViews:DistributionModelView"
-                        >
-                            <controls:StackPanel Orientation="Horizontal" Spacing="10">
-                                <controls:Image Height="20" attached:ImageExtensions.SourceUri="{b:Binding Icon}" />
-                                <controls:TextBlock Text="{b:Binding Name}" />
-                            </controls:StackPanel>
-                        </xaml:DataTemplate>
-                    </controls:ComboBox.ItemTemplate>
-                </controls:ComboBox>
-                <controls:SplitButton x:Name="ActionButton">
-                    <controls:StackPanel Orientation="Horizontal">
-                        <controls:FontIcon
-                            x:Name="PrimaryActionButtonIcon"
-                            Margin="0,0,4,0"
-                            FontFamily="{StaticResource SymbolThemeFontFamily}"
-                            Glyph="&#61802;"
-                            RenderTransformOrigin="0.5,0.5"
-                        >
-                            <controls:FontIcon.RenderTransform>
-                                <CompositeTransform />
-                            </controls:FontIcon.RenderTransform>
-                        </controls:FontIcon>
-                        <controls:TextBlock MinWidth="50" x:Name="PrimaryActionButtonText" />
-                    </controls:StackPanel>
-                    <controls:SplitButton.Flyout>
-                        <controls:MenuFlyout x:Name="SecondaryActions" Placement="RightEdgeAlignedBottom" />
-                    </controls:SplitButton.Flyout>
-                </controls:SplitButton>
+        <controls:Grid controls:Grid.Column="0" controls:Grid.ColumnSpan="2" controls:Grid.Row="1">
+            <controls:Grid.ColumnDefinitions>
+                <controls:ColumnDefinition Width="*" />
+                <controls:ColumnDefinition Width="Auto" />
+            </controls:Grid.ColumnDefinitions>
+            <controls:Grid
+                controls:Grid.Column="0"
+                attached:FrameworkElementExtensions.Cursor="Hand"
+            >
+                <controls1:NotificationIcon HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" x:Name="NotificationIconGlyph" />
+            </controls:Grid>
+            <controls:StackPanel controls:Grid.Column="1" Orientation="Vertical" Spacing="4">
+                <controls:StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                    <controls:ComboBox x:Name="DistroList" Width="300">
+                        <controls:ComboBox.ItemTemplate>
+                            <xaml:DataTemplate
+                                d:DataContext="{d:DesignInstance modelViews:DistributionModelView, IsDesignTimeCreatable=False}"
+                                x:DataType="modelViews:DistributionModelView"
+                            >
+                                <controls:StackPanel Orientation="Horizontal" Spacing="10">
+                                    <controls:Image Height="20" attached:ImageExtensions.SourceUri="{b:Binding Icon}" />
+                                    <controls:TextBlock Text="{b:Binding Name}" />
+                                </controls:StackPanel>
+                            </xaml:DataTemplate>
+                        </controls:ComboBox.ItemTemplate>
+                    </controls:ComboBox>
+                    <controls:SplitButton x:Name="ActionButton">
+                        <controls:StackPanel Orientation="Horizontal">
+                            <controls:FontIcon
+                                x:Name="PrimaryActionButtonIcon"
+                                Margin="0,0,4,0"
+                                FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                Glyph="&#61802;"
+                                RenderTransformOrigin="0.5,0.5"
+                            >
+                                <controls:FontIcon.RenderTransform>
+                                    <CompositeTransform />
+                                </controls:FontIcon.RenderTransform>
+                            </controls:FontIcon>
+                            <controls:TextBlock MinWidth="50" x:Name="PrimaryActionButtonText" />
+                        </controls:StackPanel>
+                        <controls:SplitButton.Flyout>
+                            <controls:MenuFlyout x:Name="SecondaryActions" Placement="RightEdgeAlignedBottom" />
+                        </controls:SplitButton.Flyout>
+                    </controls:SplitButton>
+                </controls:StackPanel>
+                <controls:TextBlock
+                    x:Name="Remarks"
+                    FontSize="10"
+                    Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                />
             </controls:StackPanel>
-            <controls:TextBlock
-                x:Name="Remarks"
-                FontSize="10"
-                Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
-            />
-        </controls:StackPanel>
+        </controls:Grid>
     </controls:Grid>
 </local:ReactivePagePackageActions>

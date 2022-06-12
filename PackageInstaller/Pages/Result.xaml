@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
 >
-    <controls:Grid Padding="40,0,40,40">
+    <controls:Grid Padding="40,32,40,40">
         <controls:Grid.ColumnDefinitions>
             <controls:ColumnDefinition Width="*" />
             <controls:ColumnDefinition Width="Auto" />

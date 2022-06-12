@@ -5,9 +5,9 @@ namespace PackageInstaller.Core.Services;
 
 public class WsaPackageManager : AndroidPackageManager
 {
-    private readonly Community.Wsa.Sdk.WsaPackageManager _wsaPackageManager;
     private readonly IWsaApi _wsaApi;
     private readonly IWsaClient _wsaClient;
+    private readonly Community.Wsa.Sdk.WsaPackageManager _wsaPackageManager;
 
     public WsaPackageManager(
         IWsaApi wsaApi,

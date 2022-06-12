@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net6.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Community.Wsl.Sdk" Version="2.0.2" />
+        <PackageReference Include="Community.Wsl.Sdk" Version="3.0.0-alpha2" />
         <PackageReference Include="DynamicData" Version="7.8.5" />
         <PackageReference Include="JetBrains.Profiler.Api" Version="1.2.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />

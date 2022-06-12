@@ -1,4 +1,4 @@
-﻿using Community.Wsl.Sdk.Strategies.Api;
+﻿using Community.Wsl.Sdk;
 
 namespace PackageInstaller.Core.Services;
 
@@ -7,17 +7,25 @@ public class WslProvider : IDistributionProvider
     public const string ORIGIN_WSL = "WSL";
 
     private IWslApi _wsl;
-    private IWslCommands _wslCommands;
 
-    public WslProvider(IWslApi wsl, IWslCommands wslCommands)
+    public WslProvider(IWslApi wsl)
     {
         _wsl = wsl;
-        _wslCommands = wslCommands;
     }
 
-    public Task<Distribution[]> GetAllInstalledDistributionsAsync()
+    public Task<DistributionList> GetAllInstalledDistributionsAsync(string packageExtensionHint)
     {
-        var distros = _wsl.GetDistroList();
+        if (!_wsl.IsWslSupported(out var notSupportedMessage))
+        {
+            return CreateWslNotSupportedResultAsync(notSupportedMessage);
+        }
+
+        if (!_wsl.IsInstalled)
+        {
+            return CreateWslNotInstalledResultAsync();
+        }
+
+        var distros = _wsl.GetDistributionList();
 
         List<Distribution> distributions = new List<Distribution>();
 
@@ -37,14 +45,102 @@ public class WslProvider : IDistributionProvider
                     Name = distroInfo.DistroName,
                     Id = distroInfo.DistroName,
                     Origin = ORIGIN_WSL,
-                    Version = distroInfo.WslVersion <= 1 ? new Version(1, 0) : new Version(2, 0),
+                    Version = new Version(distroInfo.WslVersion, 0),
                     Type = type,
                     IsAvailable = true
                 }
             );
         }
 
-        return Task.FromResult(distributions.ToArray());
+        var alerts = GetAlerts(distributions);
+
+        return Task.FromResult(
+            new DistributionList() { Alerts = alerts, InstalledDistributions = distributions }
+        );
+    }
+
+    private static Task<DistributionList> CreateWslNotInstalledResultAsync()
+    {
+        return Task.FromResult(
+            DistributionList.CreateWithAlertOnly(
+                new DistributionList.Alert()
+                {
+                    Title = "WSL is not installed",
+                    Message = "Please install WSL.",
+                    HelpUrl =
+                        "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
+                    Priority = DistributionList.AlertPriority.Critical
+                }
+            )
+        );
+    }
+
+    private static Task<DistributionList> CreateWslNotSupportedResultAsync(string? notSupportedMessage)
+    {
+        return Task.FromResult(
+            DistributionList.CreateWithAlertOnly(
+                new DistributionList.Alert()
+                {
+                    Message = notSupportedMessage ?? "WSL is not supported on this device.",
+                    HelpUrl =
+                        "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
+                    Priority = DistributionList.AlertPriority.Critical
+                }
+            )
+        );
+    }
+
+    private IReadOnlyList<DistributionList.Alert> GetAlerts(IList<Distribution> distributions)
+    {
+        if (distributions.Count == 0)
+        {
+            return new List<DistributionList.Alert>()
+            {
+                new DistributionList.Alert()
+                {
+                    Title = "There are no WSL distributions installed.",
+                    Message =
+                        "Consider installing one or more WSL distributions if you want to manage packages using this package manager.",
+                    HelpUrl =
+                        "https://docs.microsoft.com/en-us/windows/wsl/install#change-the-default-linux-distribution-installed",
+                    Priority = DistributionList.AlertPriority.Important
+                }
+            };
+        }
+
+        if (distributions.Any((d) => !d.IsRunning))
+        {
+            return new List<DistributionList.Alert>()
+            {
+                new DistributionList.Alert()
+                {
+                    Title = "Not all WSL distributions are running.",
+                    Message =
+                        "At least one of the installed WSL distributions is not running. Please start the distribution if you want to manage packages in them.",
+                    Priority = DistributionList.AlertPriority.Important
+                }
+            };
+        }
+
+        if (distributions.Any((d) => d.Version.Major < 2))
+        {
+            return new List<DistributionList.Alert>()
+            {
+                new DistributionList.Alert()
+                {
+                    Title = "Not all WSL distributions are running on WSL 2.",
+                    Message =
+                        "At least one of the installed WSL distributions is not running on WSL 2. "
+                        + "Distributions running on WSL 1 are still displayed but not supported by this app. "
+                        + "Consider upgrading them to WSL 2.",
+                    Priority = DistributionList.AlertPriority.Important,
+                    HelpUrl =
+                        "https://docs.microsoft.com/en-us/windows/wsl/install#upgrade-version-from-wsl-1-to-wsl-2"
+                }
+            };
+        }
+
+        return Array.Empty<DistributionList.Alert>();
     }
 
     private DistributionType GuessTypeFromName(string distroName)

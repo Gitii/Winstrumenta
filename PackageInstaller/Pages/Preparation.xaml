@@ -8,11 +8,10 @@
     xmlns:local="using:PackageInstaller.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:reactiveUi="using:ReactiveUI"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d"
 >
     <StackPanel Orientation="Vertical">
-        <Grid Padding="0,0,15,0">
+        <Grid Padding="0,32,15,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
