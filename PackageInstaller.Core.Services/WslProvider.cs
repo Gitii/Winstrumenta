@@ -1,4 +1,4 @@
-﻿using Community.Wsl.Sdk.Strategies.Api;
+﻿using Community.Wsl.Sdk;
 
 namespace PackageInstaller.Core.Services;
 
@@ -7,32 +7,25 @@ public class WslProvider : IDistributionProvider
     public const string ORIGIN_WSL = "WSL";
 
     private IWslApi _wsl;
-    private IWslCommands _wslCommands;
 
-    public WslProvider(IWslApi wsl, IWslCommands wslCommands)
+    public WslProvider(IWslApi wsl)
     {
         _wsl = wsl;
-        _wslCommands = wslCommands;
     }
 
     public Task<DistributionList> GetAllInstalledDistributionsAsync(string packageExtensionHint)
     {
         if (!_wsl.IsWslSupported(out var notSupportedMessage))
         {
-            return Task.FromResult(
-                DistributionList.CreateWithAlertOnly(
-                    new DistributionList.Alert()
-                    {
-                        Message = notSupportedMessage ?? "WSL is not supported on this device.",
-                        HelpUrl =
-                            "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
-                        Priority = DistributionList.AlertPriority.Critical
-                    }
-                )
-            );
+            return CreateWslNotSupportedResultAsync(notSupportedMessage);
         }
 
-        var distros = _wsl.GetDistroList();
+        if (!_wsl.IsInstalled)
+        {
+            return CreateWslNotInstalledResultAsync();
+        }
+
+        var distros = _wsl.GetDistributionList();
 
         List<Distribution> distributions = new List<Distribution>();
 
@@ -63,6 +56,37 @@ public class WslProvider : IDistributionProvider
 
         return Task.FromResult(
             new DistributionList() { Alerts = alerts, InstalledDistributions = distributions }
+        );
+    }
+
+    private static Task<DistributionList> CreateWslNotInstalledResultAsync()
+    {
+        return Task.FromResult(
+            DistributionList.CreateWithAlertOnly(
+                new DistributionList.Alert()
+                {
+                    Title = "WSL is not installed",
+                    Message = "Please install WSL.",
+                    HelpUrl =
+                        "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
+                    Priority = DistributionList.AlertPriority.Critical
+                }
+            )
+        );
+    }
+
+    private static Task<DistributionList> CreateWslNotSupportedResultAsync(string? notSupportedMessage)
+    {
+        return Task.FromResult(
+            DistributionList.CreateWithAlertOnly(
+                new DistributionList.Alert()
+                {
+                    Message = notSupportedMessage ?? "WSL is not supported on this device.",
+                    HelpUrl =
+                        "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
+                    Priority = DistributionList.AlertPriority.Critical
+                }
+            )
         );
     }
 
