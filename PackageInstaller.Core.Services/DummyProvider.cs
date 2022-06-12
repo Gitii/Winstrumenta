@@ -1,6 +1,6 @@
 ﻿namespace PackageInstaller.Core.Services;
 
-#if DEBUG
+#if DEBUG && false
 public class DummyProvider : IDistributionProvider
 {
     public async Task<DistributionList> GetAllInstalledDistributionsAsync(
