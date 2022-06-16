@@ -77,8 +77,8 @@ public class AndroidDeviceProvider : IDistributionProvider
         return new Distribution()
         {
             Id = kd.DeviceSerialNumber,
-            IsAvailable = !kd.IsOffline,
-            IsRunning = !kd.IsOffline,
+            IsAvailable = kd.IsDevice || kd.IsEmulator,
+            IsRunning = kd.IsDevice || kd.IsEmulator,
             Origin = ORIGIN_ANDROID_DEVICE,
             Type = DistributionType.Android,
             Name = deviceName,
@@ -90,6 +90,11 @@ public class AndroidDeviceProvider : IDistributionProvider
         KnownDevice kd
     )
     {
+        if (!kd.IsDevice && !kd.IsEmulator)
+        {
+            return ($"Unknown device ({kd.DeviceType})", new Version(0, 0));
+        }
+
         var deviceName = await _adb.ExecuteCommandAsync(
                 "getprop",
                 new string[] { "ro.product.model" }

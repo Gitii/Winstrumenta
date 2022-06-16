@@ -17,8 +17,8 @@
         <PackageReference Include="Community.Archives.Ar" Version="1.2.0" />
         <PackageReference Include="Community.Archives.Rpm" Version="1.2.0" />
         <PackageReference Include="Community.Archives.Tar" Version="1.2.0" />
-        <PackageReference Include="Community.Wsa.Sdk" Version="1.1.0-rc4" />
-        <PackageReference Include="Community.Wsl.Sdk" Version="3.0.0-alpha2" />
+        <PackageReference Include="Community.Wsa.Sdk" Version="1.2.0" />
+        <PackageReference Include="Community.Wsl.Sdk" Version="3.0.0" />
         <PackageReference Include="System.Memory" Version="4.5.5" />
     </ItemGroup>
 
