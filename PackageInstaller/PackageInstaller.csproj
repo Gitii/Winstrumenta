@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net6.0-windows10.0.20348.0</TargetFramework>
@@ -12,6 +12,8 @@
         <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
         <StartupObject>PackageInstaller.Program</StartupObject>
         <Nullable>enable</Nullable>
+        <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
+        <PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
     </PropertyGroup>
     <ItemGroup>
         <Compile Remove="Properties\**" />
@@ -36,9 +38,119 @@
         <None Remove="Assets\parcel.svg" />
         <None Remove="Assets\success.png" />
         <None Remove="Assets\warning.png" />
+        <None Remove="closed-package.png" />
         <None Remove="Controls\NotificationIcon.xaml" />
+        <None Remove="Images\LargeTile.scale-100.png" />
+        <None Remove="Images\LargeTile.scale-125.png" />
+        <None Remove="Images\LargeTile.scale-150.png" />
+        <None Remove="Images\LargeTile.scale-200.png" />
+        <None Remove="Images\LargeTile.scale-400.png" />
+        <None Remove="Images\SmallTile.scale-100.png" />
+        <None Remove="Images\SmallTile.scale-125.png" />
+        <None Remove="Images\SmallTile.scale-150.png" />
+        <None Remove="Images\SmallTile.scale-200.png" />
+        <None Remove="Images\SmallTile.scale-400.png" />
+        <None Remove="Images\SplashScreen.scale-100.png" />
+        <None Remove="Images\SplashScreen.scale-125.png" />
+        <None Remove="Images\SplashScreen.scale-150.png" />
+        <None Remove="Images\SplashScreen.scale-200.png" />
+        <None Remove="Images\SplashScreen.scale-400.png" />
+        <None Remove="Images\Square150x150Logo.scale-100.png" />
+        <None Remove="Images\Square150x150Logo.scale-125.png" />
+        <None Remove="Images\Square150x150Logo.scale-150.png" />
+        <None Remove="Images\Square150x150Logo.scale-200.png" />
+        <None Remove="Images\Square150x150Logo.scale-400.png" />
+        <None Remove="Images\Square44x44Logo.altform-lightunplated_targetsize-16.png" />
+        <None Remove="Images\Square44x44Logo.altform-lightunplated_targetsize-24.png" />
+        <None Remove="Images\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
+        <None Remove="Images\Square44x44Logo.altform-lightunplated_targetsize-32.png" />
+        <None Remove="Images\Square44x44Logo.altform-lightunplated_targetsize-48.png" />
+        <None Remove="Images\Square44x44Logo.altform-unplated_targetsize-16.png" />
+        <None Remove="Images\Square44x44Logo.altform-unplated_targetsize-24.png" />
+        <None Remove="Images\Square44x44Logo.altform-unplated_targetsize-256.png" />
+        <None Remove="Images\Square44x44Logo.altform-unplated_targetsize-32.png" />
+        <None Remove="Images\Square44x44Logo.altform-unplated_targetsize-48.png" />
+        <None Remove="Images\Square44x44Logo.scale-100.png" />
+        <None Remove="Images\Square44x44Logo.scale-125.png" />
+        <None Remove="Images\Square44x44Logo.scale-150.png" />
+        <None Remove="Images\Square44x44Logo.scale-200.png" />
+        <None Remove="Images\Square44x44Logo.scale-400.png" />
+        <None Remove="Images\Square44x44Logo.targetsize-16.png" />
+        <None Remove="Images\Square44x44Logo.targetsize-24.png" />
+        <None Remove="Images\Square44x44Logo.targetsize-256.png" />
+        <None Remove="Images\Square44x44Logo.targetsize-32.png" />
+        <None Remove="Images\Square44x44Logo.targetsize-48.png" />
+        <None Remove="Images\StoreLogo.scale-100.png" />
+        <None Remove="Images\StoreLogo.scale-125.png" />
+        <None Remove="Images\StoreLogo.scale-150.png" />
+        <None Remove="Images\StoreLogo.scale-200.png" />
+        <None Remove="Images\StoreLogo.scale-400.png" />
+        <None Remove="Images\Wide310x150Logo.scale-100.png" />
+        <None Remove="Images\Wide310x150Logo.scale-125.png" />
+        <None Remove="Images\Wide310x150Logo.scale-150.png" />
+        <None Remove="Images\Wide310x150Logo.scale-200.png" />
+        <None Remove="Images\Wide310x150Logo.scale-400.png" />
+        <None Remove="Package.appxmanifest" />
         <None Remove="Pages\GettingStarted.xaml" />
         <None Remove="Pages\NotificationHub.xaml" />
+    </ItemGroup>
+    <ItemGroup>
+        <AppxManifest Include="Package.appxmanifest">
+            <SubType>Designer</SubType>
+        </AppxManifest>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="closed-package.png" />
+        <Content Include="Images\LargeTile.scale-100.png" />
+        <Content Include="Images\LargeTile.scale-125.png" />
+        <Content Include="Images\LargeTile.scale-150.png" />
+        <Content Include="Images\LargeTile.scale-200.png" />
+        <Content Include="Images\LargeTile.scale-400.png" />
+        <Content Include="Images\SmallTile.scale-100.png" />
+        <Content Include="Images\SmallTile.scale-125.png" />
+        <Content Include="Images\SmallTile.scale-150.png" />
+        <Content Include="Images\SmallTile.scale-200.png" />
+        <Content Include="Images\SmallTile.scale-400.png" />
+        <Content Include="Images\SplashScreen.scale-100.png" />
+        <Content Include="Images\SplashScreen.scale-125.png" />
+        <Content Include="Images\SplashScreen.scale-150.png" />
+        <Content Include="Images\SplashScreen.scale-200.png" />
+        <Content Include="Images\SplashScreen.scale-400.png" />
+        <Content Include="Images\Square150x150Logo.scale-100.png" />
+        <Content Include="Images\Square150x150Logo.scale-125.png" />
+        <Content Include="Images\Square150x150Logo.scale-150.png" />
+        <Content Include="Images\Square150x150Logo.scale-200.png" />
+        <Content Include="Images\Square150x150Logo.scale-400.png" />
+        <Content Include="Images\Square44x44Logo.altform-lightunplated_targetsize-16.png" />
+        <Content Include="Images\Square44x44Logo.altform-lightunplated_targetsize-24.png" />
+        <Content Include="Images\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
+        <Content Include="Images\Square44x44Logo.altform-lightunplated_targetsize-32.png" />
+        <Content Include="Images\Square44x44Logo.altform-lightunplated_targetsize-48.png" />
+        <Content Include="Images\Square44x44Logo.altform-unplated_targetsize-16.png" />
+        <Content Include="Images\Square44x44Logo.altform-unplated_targetsize-24.png" />
+        <Content Include="Images\Square44x44Logo.altform-unplated_targetsize-256.png" />
+        <Content Include="Images\Square44x44Logo.altform-unplated_targetsize-32.png" />
+        <Content Include="Images\Square44x44Logo.altform-unplated_targetsize-48.png" />
+        <Content Include="Images\Square44x44Logo.scale-100.png" />
+        <Content Include="Images\Square44x44Logo.scale-125.png" />
+        <Content Include="Images\Square44x44Logo.scale-150.png" />
+        <Content Include="Images\Square44x44Logo.scale-200.png" />
+        <Content Include="Images\Square44x44Logo.scale-400.png" />
+        <Content Include="Images\Square44x44Logo.targetsize-16.png" />
+        <Content Include="Images\Square44x44Logo.targetsize-24.png" />
+        <Content Include="Images\Square44x44Logo.targetsize-256.png" />
+        <Content Include="Images\Square44x44Logo.targetsize-32.png" />
+        <Content Include="Images\Square44x44Logo.targetsize-48.png" />
+        <Content Include="Images\StoreLogo.scale-100.png" />
+        <Content Include="Images\StoreLogo.scale-125.png" />
+        <Content Include="Images\StoreLogo.scale-150.png" />
+        <Content Include="Images\StoreLogo.scale-200.png" />
+        <Content Include="Images\StoreLogo.scale-400.png" />
+        <Content Include="Images\Wide310x150Logo.scale-100.png" />
+        <Content Include="Images\Wide310x150Logo.scale-125.png" />
+        <Content Include="Images\Wide310x150Logo.scale-150.png" />
+        <Content Include="Images\Wide310x150Logo.scale-200.png" />
+        <Content Include="Images\Wide310x150Logo.scale-400.png" />
     </ItemGroup>
 
     <ItemGroup>

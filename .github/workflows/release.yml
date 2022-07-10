@@ -3,20 +3,28 @@ on:
     tags:
       - "v*"
 
+env:
+  ARTIFACT_PATH: C:\AppPackage
+  OUTPUT_PATH: C:\Release
+  CERTIFICATE_PATH: "cert.pfx"
+
 jobs:
   test:
     uses: ./.github/workflows/ci.yml
 
-  publish:
+  build:
     runs-on: windows-2022
     needs: test
     strategy:
       matrix:
-        packaging-project: ["Winstrumenta.Package/Winstrumenta.Package.wapproj"]
-    env:
-      ARTIFACT_PATH: C:\AppPackage
-      OUTPUT_PATH: C:\Release
-      CERTIFICATE_PATH: "cert.pfx"
+        project:
+          [
+            {
+              name: "PackageInstaller",
+              path: "PackageInstaller/PackageInstaller.csproj",
+            },
+          ]
+        platform: ["x86", "x64", "arm64"]
     steps:
       - uses: olegtarasov/get-tag@v2.1
         id: tagName
@@ -24,17 +32,10 @@ jobs:
           tagRegex: "v(.*)"
           tagRegexGroup: 1
       - uses: actions/checkout@v2
-      - name: Extract release notes
-        run: |
-          git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' > ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
-      - name: Create release message
-        run: |
-          echo "`n`nIt is recommended to install it from [Microsoft Store](https://www.microsoft.com/store/apps/9N9MX3J3F4G0)." | Out-File -Append ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
       - name: Setup .NET SDKs
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 6.0.x
-          include-prerelease: true
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
         with:
@@ -58,27 +59,73 @@ jobs:
           echo "Package version: $packageVersion","Channel: $channel"
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
-          PROJ_PATH: ${{ matrix.packaging-project }}
+          PROJ_PATH: ${{ matrix.project.path }}
       - name: Extract certificate
         shell: bash
         run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
       - name: Package msix
         run: |
-          msbuild "$env:PROJ_PATH" /t:Build /restore /m /p:Configuration=Release /p:AppxPackageDir="$env:ARTIFACT_PATH" /p:UapAppxPackageBuildMode=StoreUpload `
-          /p:Version="$env:TAG_NAME" /p:AppxBundle=Always /p:AppxBundlePlatforms="x86|x64|arm64" `
+          msbuild "${{ env.PROJ_PATH }}" /t:Build /restore /m /p:Configuration=Release /p:AppxPackageDir="${{ env.ARTIFACT_PATH }}" /p:UapAppxPackageBuildMode=SideloadOnly `
+          /p:Version="$env:TAG_NAME" /p:AppxBundle=Never /p:AppxBundlePlatforms="${{ env.PLATFORM }}" /p:GenerateAppxPackageOnBuild=true `
           /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}" `
           /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}" /p:UseSubFolderForOutputDirDuringMultiPlatformBuild=false
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
-          PROJ_PATH: ${{ matrix.packaging-project }}
-      - name: Prepare release files
+          PROJ_PATH: ${{ matrix.project.path }}
+          PLATFORM: ${{ matrix.platform }}
+      - name: Upload platform build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.project.name }}-platforms # each job will extend the artifact upload with new platform specific files
+          path: ${{ env.ARTIFACT_PATH }}/*.msix
+
+  bundle:
+    runs-on: windows-2022
+    needs: build
+    strategy:
+      matrix:
+        project-name: ["PackageInstaller"]
+    steps:
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.6
+        with:
+          sdk-version: 20348
+      - run: mkdir "${{ env.ARTIFACT_PATH }}"
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.project-name }}-platforms
+          path: ${{ env.ARTIFACT_PATH }}
+      - name: Extract certificate
+        shell: bash
+        run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
+      - run: |
+          MakeAppx bundle /d "${{ env.ARTIFACT_PATH }}" /p "${{ env.ARTIFACT_PATH }}/bundle.msixbundle"
+          SignTool" sign /fd SHA256 /a /f "${{ env.CERTIFICATE_PATH }}" /p "${{ secrets.APPX_CERTIFICATE_PASSWORD }}" "${{ env.ARTIFACT_PATH }}/bundle.msixbundle"
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: bundle # each job will extend the artifact upload with new bundled files
+          path: ${{ env.ARTIFACT_PATH }}/*.msixbundle
+
+  publish:
+    runs-on: windows-2022
+    needs: bundle
+    steps:
+      - uses: olegtarasov/get-tag@v2.1
+        id: tagName
+        with:
+          tagRegex: "v(.*)"
+          tagRegexGroup: 1
+      - uses: actions/checkout@v2
+      - name: Extract release notes
         run: |
-          $Folder = $(Get-ChildItem -Path "$env:ARTIFACT_PATH" -Filter "*_Test").FullName
-          7z a -mx9 -tzip "$env:OUTPUT_PATH/${env:TAG_NAME}-Sideload.zip" "$Folder/*"
-          Get-ChildItem -Recurse -Path "$env:ARTIFACT_PATH" -Filter "*.msixupload" | Copy-Item -Destination $env:OUTPUT_PATH
-          Get-ChildItem -Recurse -Path "$env:ARTIFACT_PATH" -Filter "*.msixbundle" | Copy-Item -Destination $env:OUTPUT_PATH
-        env:
-          TAG_NAME: ${{ steps.tagName.outputs.tag }}
+          git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' > ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
+      - name: Create release message
+        run: |
+          echo "`n`nIt is recommended to install it from [Microsoft Store](https://www.microsoft.com/store/apps/9N9MX3J3F4G0)." | Out-File -Append ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
+      - uses: actions/download-artifact@v3
+        with:
+          name: bundle
+          path: ${{ env.OUTPUT_PATH }}
       - name: Attach files to Github releases
         uses: softprops/action-gh-release@v1
         with:
