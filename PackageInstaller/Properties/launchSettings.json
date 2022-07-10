@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "AppTest (Package)": {
+    "PackageInstaller (Package)": {
       "commandName": "MsixPackage"
     },
-    "AppTest (Unpackaged)": {
+    "PackageInstaller (Unpackaged)": {
       "commandName": "Project"
     }
   }
