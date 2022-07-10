@@ -4,8 +4,8 @@ on:
       - "v*"
 
 env:
-  ARTIFACT_PATH: C:\AppPackage
-  OUTPUT_PATH: C:\Release
+  ARTIFACT_PATH: C:/AppPackage/
+  OUTPUT_PATH: C:/Release/
   CERTIFICATE_PATH: "cert.pfx"
 
 jobs:
