@@ -96,6 +96,8 @@ jobs:
   bundle:
     runs-on: windows-2022
     needs: [build, get-version]
+    env:
+      BUNDLE_DIRECTORY: C:\bundle
     strategy:
       matrix:
         project-name: ["PackageInstaller"]
@@ -111,10 +113,14 @@ jobs:
       - name: Extract certificate
         shell: bash
         run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
+      - name: Collect msix files
+        run: |
+          New-Item -Path "${{ env.BUNDLE_DIRECTORY }}" -ItemType Directory
+          Get-ChildItem -Recurse -Path "$env:ARTIFACT_PATH" -Filter "*.msix" | Copy-Item -Destination $env:BUNDLE_DIRECTORY
       - name: Bundle all msix files
         uses: LanceMcCarthy/Action-MsixBundler@v1
         with:
-          msix-folder: "${{ env.ARTIFACT_PATH }}"
+          msix-folder: "${{ env.BUNDLE_DIRECTORY }}"
           msixbundle-filepath: "${{ env.ARTIFACT_PATH }}/${{ matrix.project-name }}.msixbundle"
           msixbundle-version: "${{ needs.get-version.outputs.version }}"
           enable-bundle-signing: true
