@@ -112,7 +112,7 @@ jobs:
         shell: bash
         run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
       - name: Bundle all msix files
-        uses: LanceMcCarthy/Action-MsixBundler@vX.X.X
+        uses: LanceMcCarthy/Action-MsixBundler@v1
         with:
           msix-folder: "${{ env.ARTIFACT_PATH }}"
           msixbundle-filepath: "${{ env.ARTIFACT_PATH }}/${{ matrix.project-name }}.msixbundle"
