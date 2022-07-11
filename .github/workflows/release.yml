@@ -33,8 +33,8 @@ jobs:
           $revision = $channel.GetEnumerator() | % { [int] $_ } | Measure -Sum | Select -ExpandProperty Sum
           $parsedVersion = [Version] $version
           $packageVersion = New-Object Version @($parsedVersion.Major, $parsedVersion.Minor, $parsedVersion.Build, $revision)
-          [string] strVersion = $packageVersion.ToString(4)
-          [string] strShortVersion = $packageVersion.ToString(3)
+          [string] $strVersion = $packageVersion.ToString(4)
+          [string] $strShortVersion = $packageVersion.ToString(3)
           echo "::set-output name=version::$strVersion"
           echo "::set-output name=shortVersion::$strShortVersion"
 
