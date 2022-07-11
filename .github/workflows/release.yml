@@ -71,7 +71,6 @@ jobs:
           $manifest.Package.Identity.Version = "${{ needs.get-version.outputs.version }}"
           $manifest.save($manifestPath)
         env:
-          TAG_NAME: ${{ steps.tagName.outputs.tag }}
           PROJ_PATH: ${{ matrix.project.path }}
       - name: Extract certificate
         shell: bash
@@ -83,7 +82,7 @@ jobs:
           /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}" `
           /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}" /p:UseSubFolderForOutputDirDuringMultiPlatformBuild=false
         env:
-          TAG_NAME: ${{ steps.tagName.outputs.tag }}
+          TAG_NAME: ${{ needs.get-version.outputs.version }}
           PROJ_PATH: ${{ matrix.project.path }}
           PLATFORM: ${{ matrix.platform }}
       - name: Upload platform build artifacts
@@ -134,13 +133,8 @@ jobs:
 
   publish:
     runs-on: windows-2022
-    needs: bundle
+    needs: [bundle, get-version]
     steps:
-      - uses: olegtarasov/get-tag@v2.1
-        id: tagName
-        with:
-          tagRegex: "v(.*)"
-          tagRegexGroup: 1
       - uses: actions/checkout@v2
       - name: Extract release notes
         run: |
@@ -156,5 +150,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: "${{ env.OUTPUT_PATH }}/*"
-          prerelease: ${{ contains(steps.tagName.outputs.tag, '-') }}
+          prerelease: ${{ contains(needs.get-version.outputs.version, '-') }}
           body_path: "./RELEASE-NOTES.txt"
