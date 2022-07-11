@@ -101,7 +101,7 @@ jobs:
         run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
       - run: |
           MakeAppx bundle /d "${{ env.ARTIFACT_PATH }}" /p "${{ env.ARTIFACT_PATH }}/bundle.msixbundle"
-          SignTool" sign /fd SHA256 /a /f "${{ env.CERTIFICATE_PATH }}" /p "${{ secrets.APPX_CERTIFICATE_PASSWORD }}" "${{ env.ARTIFACT_PATH }}/bundle.msixbundle"
+          SignTool sign /fd SHA256 /a /f "${{ env.CERTIFICATE_PATH }}" /p "${{ secrets.APPX_CERTIFICATE_PASSWORD }}" "${{ env.ARTIFACT_PATH }}/bundle.msixbundle"
       - name: Upload bundle artifact
         uses: actions/upload-artifact@v2
         with:
