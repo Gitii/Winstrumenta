@@ -21,6 +21,7 @@ jobs:
 
   execute_tests:
     runs-on: windows-2022
+    name: Execute tests
     strategy:
       matrix:
         platform: ["x86", "x64", "arm64"]
