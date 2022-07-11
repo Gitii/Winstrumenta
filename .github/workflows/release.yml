@@ -27,7 +27,7 @@ jobs:
         name: Extract version number
         shell: powershell
         run: |
-          $parts = @("$env:TAG_NAME" -split "-")
+          $parts = @("${{ steps.tagName.outputs.tag }}" -split "-")
           $version = $parts[0]
           $channel = if ($parts[1]) {$parts[1]} else {""}
           $revision = $channel.GetEnumerator() | % { [int] $_ } | Measure -Sum | Select -ExpandProperty Sum
