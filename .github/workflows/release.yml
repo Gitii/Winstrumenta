@@ -77,7 +77,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.project.name }}-platforms # each job will extend the artifact upload with new platform specific files
-          path: ${{ env.ARTIFACT_PATH }}/*.msix
+          path: |
+            ${{ env.ARTIFACT_PATH }}/*/*.msix
+            ${{ env.ARTIFACT_PATH }}/*/*.msixsym
 
   bundle:
     runs-on: windows-2022
@@ -104,7 +106,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: bundle # each job will extend the artifact upload with new bundled files
-          path: ${{ env.ARTIFACT_PATH }}/*.msixbundle
+          path: |
+            ${{ env.ARTIFACT_PATH }}/*.msixbundle
+            ${{ env.ARTIFACT_PATH }}/*.msixsym
 
   publish:
     runs-on: windows-2022
