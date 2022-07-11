@@ -12,9 +12,35 @@ jobs:
   test:
     uses: ./.github/workflows/ci.yml
 
+  get-version:
+    runs-on: windows-2022
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      shortVersion: ${{ steps.extract-version.outputs.shortVersion }}
+    steps:
+      - uses: olegtarasov/get-tag@v2.1
+        id: tagName
+        with:
+          tagRegex: "v(.*)"
+          tagRegexGroup: 1
+      - id: extract-version
+        name: Extract version number
+        shell: powershell
+        run: |
+          $parts = @("$env:TAG_NAME" -split "-")
+          $version = $parts[0]
+          $channel = if ($parts[1]) {$parts[1]} else {""}
+          $revision = $channel.GetEnumerator() | % { [int] $_ } | Measure -Sum | Select -ExpandProperty Sum
+          $parsedVersion = [Version] $version
+          $packageVersion = New-Object Version @($parsedVersion.Major, $parsedVersion.Minor, $parsedVersion.Build, $revision)
+          [string] strVersion = $packageVersion.ToString(4)
+          [string] strShortVersion = $packageVersion.ToString(3)
+          echo "::set-output name=version::$strVersion"
+          echo "::set-output name=shortVersion::$strShortVersion"
+
   build:
     runs-on: windows-2022
-    needs: test
+    needs: [test, get-version]
     strategy:
       matrix:
         project:
@@ -26,11 +52,6 @@ jobs:
           ]
         platform: ["x86", "x64", "arm64"]
     steps:
-      - uses: olegtarasov/get-tag@v2.1
-        id: tagName
-        with:
-          tagRegex: "v(.*)"
-          tagRegexGroup: 1
       - uses: actions/checkout@v2
       - name: Setup .NET SDKs
         uses: actions/setup-dotnet@v1
@@ -45,18 +66,10 @@ jobs:
       - name: Update Manifest version string
         shell: powershell
         run: |
-          # Update appxmanifest. This must be done before the build.
           $manifestPath = "$env:PROJ_PATH\..\Package.appxmanifest"
-          $parts = @("$env:TAG_NAME" -split "-")
-          $version = $parts[0]
-          $channel = if ($parts[1]) {$parts[1]} else {""}
-          $revision = $channel.GetEnumerator() | % { [int] $_ } | Measure -Sum | Select -ExpandProperty Sum
-          $parsedVersion = [Version] $version
-          $packageVersion = New-Object Version @($parsedVersion.Major, $parsedVersion.Minor, $parsedVersion.Build, $revision)
           [xml]$manifest = Get-Content $manifestPath
-          $manifest.Package.Identity.Version = $packageVersion.ToString(4)   
+          $manifest.Package.Identity.Version = "${{ needs.get-version.outputs.version }}"
           $manifest.save($manifestPath)
-          echo "Package version: $packageVersion","Channel: $channel"
         env:
           TAG_NAME: ${{ steps.tagName.outputs.tag }}
           PROJ_PATH: ${{ matrix.project.path }}
@@ -83,7 +96,7 @@ jobs:
 
   bundle:
     runs-on: windows-2022
-    needs: build
+    needs: [build, get-version]
     strategy:
       matrix:
         project-name: ["PackageInstaller"]
@@ -99,16 +112,25 @@ jobs:
       - name: Extract certificate
         shell: bash
         run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
-      - run: |
-          MakeAppx bundle /d "${{ env.ARTIFACT_PATH }}" /p "${{ env.ARTIFACT_PATH }}/bundle.msixbundle"
-          SignTool sign /fd SHA256 /a /f "${{ env.CERTIFICATE_PATH }}" /p "${{ secrets.APPX_CERTIFICATE_PASSWORD }}" "${{ env.ARTIFACT_PATH }}/bundle.msixbundle"
+      - name: Bundle all msix files
+        uses: LanceMcCarthy/Action-MsixBundler@vX.X.X
+        with:
+          msix-folder: "${{ env.ARTIFACT_PATH }}"
+          msixbundle-filepath: "${{ env.ARTIFACT_PATH }}/${{ matrix.project-name }}.msixbundle"
+          msixbundle-version: "${{ needs.get-version.outputs.version }}"
+          enable-bundle-signing: true
+          certificate-path: ${{ env.CERTIFICATE_PATH }}
+          certificate-private-key: ${{ secrets.APPX_CERTIFICATE_PASSWORD }}
+      - name: Create msixupload
+        run: |
+          7z a -mx9 -tzip "${{ env.ARTIFACT_PATH }}/${{ matrix.project-name }}.msixupload" "${{ env.ARTIFACT_PATH }}/*.msixsym" "${{ env.ARTIFACT_PATH }}/*.msixbundle"
       - name: Upload bundle artifact
         uses: actions/upload-artifact@v2
         with:
           name: bundle # each job will extend the artifact upload with new bundled files
           path: |
             ${{ env.ARTIFACT_PATH }}/*.msixbundle
-            ${{ env.ARTIFACT_PATH }}/*.msixsym
+            ${{ env.ARTIFACT_PATH }}/*.msixupload
 
   publish:
     runs-on: windows-2022
