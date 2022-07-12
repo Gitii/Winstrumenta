@@ -3,14 +3,16 @@ on:
     tags:
       - "v*"
 
+name: "Build, bundle and publish"
+
 env:
   ARTIFACT_PATH: C:/AppPackage/
   OUTPUT_PATH: C:/Release/
   CERTIFICATE_PATH: "cert.pfx"
 
 jobs:
-  test:
-    uses: ./.github/workflows/ci.yml
+  validate:
+    uses: ./.github/workflows/validate.yml
 
   get-version:
     runs-on: windows-2022
@@ -40,7 +42,7 @@ jobs:
 
   build:
     runs-on: windows-2022
-    needs: [test, get-version]
+    needs: [validate, get-version]
     strategy:
       matrix:
         project:
@@ -66,25 +68,23 @@ jobs:
       - name: Update Manifest version string
         shell: powershell
         run: |
-          $manifestPath = "$env:PROJ_PATH\..\Package.appxmanifest"
+          $manifestPath = "${{ matrix.project.path }}\..\Package.appxmanifest"
           [xml]$manifest = Get-Content $manifestPath
           $manifest.Package.Identity.Version = "${{ needs.get-version.outputs.version }}"
           $manifest.save($manifestPath)
-        env:
-          PROJ_PATH: ${{ matrix.project.path }}
       - name: Extract certificate
         shell: bash
         run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
       - name: Package msix
         run: |
-          msbuild "${{ env.PROJ_PATH }}" /t:Build /restore /m /p:Configuration=Release /p:AppxPackageDir="${{ env.ARTIFACT_PATH }}" /p:UapAppxPackageBuildMode=SideloadOnly `
-          /p:Version="$env:TAG_NAME" /p:AppxBundle=Never /p:AppxBundlePlatforms="${{ env.PLATFORM }}" /p:GenerateAppxPackageOnBuild=true `
+          msbuild "${{ matrix.project.path }}" /t:Build /restore /m /p:Configuration=Release /p:AppxPackageDir="${{ env.ARTIFACT_PATH }}" /p:UapAppxPackageBuildMode=SideloadOnly `
+          /p:Version="${{ needs.get-version.outputs.version }}" /p:AppxBundle=Never /p:AppxBundlePlatforms="${{ matrix.platform }}" /p:GenerateAppxPackageOnBuild=true `
           /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}" `
           /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}" /p:UseSubFolderForOutputDirDuringMultiPlatformBuild=false
-        env:
-          TAG_NAME: ${{ needs.get-version.outputs.version }}
-          PROJ_PATH: ${{ matrix.project.path }}
-          PLATFORM: ${{ matrix.platform }}
+      - name: Package sideload Package
+        run: |
+          $Folder = $(Get-ChildItem -Path "${{ env.ARTIFACT_PATH }}" -Filter "*_Test").FullName
+          7z a -mx9 -tzip "${{ env.ARTIFACT_PATH }}/${{ matrix.project.name }}-${{ needs.get-version.outputs.version }}-${{ matrix.platform }}-Sideload.zip" "$Folder/*"
       - name: Upload platform build artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -92,6 +92,12 @@ jobs:
           path: |
             ${{ env.ARTIFACT_PATH }}/*/*.msix
             ${{ env.ARTIFACT_PATH }}/*/*.msixsym
+      - name: Upload platform sideload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: sideload # each job will extend the artifact upload with new sideload files
+          path: |
+            ${{ env.ARTIFACT_PATH }}/*.zip
 
   bundle:
     runs-on: windows-2022
@@ -102,9 +108,6 @@ jobs:
       matrix:
         project-name: ["PackageInstaller"]
     steps:
-      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.6
-        with:
-          sdk-version: 20348
       - run: mkdir "${{ env.ARTIFACT_PATH }}"
       - uses: actions/download-artifact@v3
         with:
@@ -152,9 +155,13 @@ jobs:
         with:
           name: bundle
           path: ${{ env.OUTPUT_PATH }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: sideload
+          path: ${{ env.OUTPUT_PATH }}
       - name: Attach files to Github releases
         uses: softprops/action-gh-release@v1
         with:
           files: "${{ env.OUTPUT_PATH }}/*"
-          prerelease: ${{ contains(needs.get-version.outputs.version, '-') }}
+          prerelease: ${{ contains("${{ needs.get-version.outputs.version }}", '-') }}
           body_path: "./RELEASE-NOTES.txt"
