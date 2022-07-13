@@ -78,8 +78,8 @@ jobs:
       - name: Package msix
         run: |
           msbuild "${{ matrix.project.path }}" /t:Build /restore /m /p:Configuration=Release /p:AppxPackageDir="${{ env.ARTIFACT_PATH }}" /p:UapAppxPackageBuildMode=SideloadOnly `
-          /p:Version="${{ needs.get-version.outputs.version }}" /p:AppxBundle=Never /p:AppxBundlePlatforms="${{ matrix.platform }}" /p:GenerateAppxPackageOnBuild=true `
-          /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}" `
+          /p:Version="${{ needs.get-version.outputs.version }}" /p:AppxBundle=Never /p:AppxBundlePlatforms="${{ matrix.platform }}" /p:Platform="${{ matrix.platform }}" `
+          /p:GenerateAppxPackageOnBuild=true /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}" `
           /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}" /p:UseSubFolderForOutputDirDuringMultiPlatformBuild=false
       - name: Package sideload Package
         run: |
