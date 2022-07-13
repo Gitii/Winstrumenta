@@ -86,13 +86,17 @@ jobs:
         run: |
           $Folder = $(Get-ChildItem -Path "${{ env.ARTIFACT_PATH }}" -Filter "*_Test").FullName
           7z a -mx9 -tzip "${{ env.ARTIFACT_PATH }}/${{ matrix.project.name }}-${{ needs.get-version.outputs.version }}-${{ matrix.platform }}-Sideload.zip" "$Folder/*"
+      - name: Pull up msix and symbol files
+        run: |
+          Get-ChildItem "${{ env.ARTIFACT_PATH }}/*/*.msix" | Move-Item -Destination "${{ env.ARTIFACT_PATH }}"
+          Get-ChildItem "${{ env.ARTIFACT_PATH }}/*/*.msixsym" | Move-Item -Destination "${{ env.ARTIFACT_PATH }}"
       - name: Upload platform build artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.project.name }}-platforms # each job will extend the artifact upload with new platform specific files
           path: |
-            ${{ env.ARTIFACT_PATH }}/*/*.msix
-            ${{ env.ARTIFACT_PATH }}/*/*.msixsym
+            ${{ env.ARTIFACT_PATH }}/*.msix
+            ${{ env.ARTIFACT_PATH }}/*.msixsym
       - name: Upload platform sideload artifacts
         uses: actions/upload-artifact@v2
         with:
