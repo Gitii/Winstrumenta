@@ -163,5 +163,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: "${{ env.OUTPUT_PATH }}/*"
-          prerelease: ${{ contains("${{ needs.get-version.outputs.version }}", '-') }}
+          prerelease: ${{ contains(needs.get-version.outputs.version, '-') }}
           body_path: "./RELEASE-NOTES.txt"

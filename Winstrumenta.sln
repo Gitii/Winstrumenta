@@ -21,10 +21,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		.onsaveconfig = .onsaveconfig
 		.github\workflows\auto-approve.yml = .github\workflows\auto-approve.yml
-		.github\workflows\ci.yml = .github\workflows\ci.yml
 		Directory.Build.props = Directory.Build.props
+		.github\workflows\publish.yml = .github\workflows\publish.yml
 		README.md = README.md
-		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\validate.yml = .github\workflows\validate.yml
 	EndProjectSection
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Winstrumenta.DistroManager", "Winstrumenta.DistroManager\Winstrumenta.DistroManager.wapproj", "{AE919A53-9DFB-41F6-ADC8-E62B766B7EE7}"
