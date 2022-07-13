@@ -17,6 +17,7 @@ jobs:
   get-version:
     runs-on: windows-2022
     outputs:
+      tag: ${{ steps.tagName.outputs.tag }}
       version: ${{ steps.extract-version.outputs.version }}
       shortVersion: ${{ steps.extract-version.outputs.shortVersion }}
     steps:
@@ -163,5 +164,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: "${{ env.OUTPUT_PATH }}/*"
-          prerelease: ${{ contains(needs.get-version.outputs.version, '-') }}
+          prerelease: ${{ contains(needs.get-version.outputs.tag, '-') }}
           body_path: "./RELEASE-NOTES.txt"
