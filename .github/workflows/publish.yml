@@ -14,12 +14,13 @@ jobs:
   validate:
     uses: ./.github/workflows/validate.yml
 
-  get-version:
+  release-preparation:
     runs-on: windows-2022
     outputs:
       tag: ${{ steps.tagName.outputs.tag }}
       version: ${{ steps.extract-version.outputs.version }}
       shortVersion: ${{ steps.extract-version.outputs.shortVersion }}
+      changelog: ${{ steps.github_release.outputs.changelog }}
     steps:
       - uses: olegtarasov/get-tag@v2.1
         id: tagName
@@ -40,10 +41,15 @@ jobs:
           [string] $strShortVersion = $packageVersion.ToString(3)
           echo "::set-output name=version::$strVersion"
           echo "::set-output name=shortVersion::$strShortVersion"
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: windows-2022
-    needs: [validate, get-version]
+    needs: [validate, release-preparation]
     strategy:
       matrix:
         project:
@@ -71,7 +77,7 @@ jobs:
         run: |
           $manifestPath = "${{ matrix.project.path }}\..\Package.appxmanifest"
           [xml]$manifest = Get-Content $manifestPath
-          $manifest.Package.Identity.Version = "${{ needs.get-version.outputs.version }}"
+          $manifest.Package.Identity.Version = "${{ needs.release-preparation.outputs.version }}"
           $manifest.save($manifestPath)
       - name: Extract certificate
         shell: bash
@@ -79,13 +85,13 @@ jobs:
       - name: Package msix
         run: |
           msbuild "${{ matrix.project.path }}" /t:Build /restore /m /p:Configuration=Release /p:AppxPackageDir="${{ env.ARTIFACT_PATH }}" /p:UapAppxPackageBuildMode=SideloadOnly `
-          /p:Version="${{ needs.get-version.outputs.version }}" /p:AppxBundle=Never /p:AppxBundlePlatforms="${{ matrix.platform }}" /p:Platform="${{ matrix.platform }}" `
+          /p:Version="${{ needs.release-preparation.outputs.version }}" /p:AppxBundle=Never /p:AppxBundlePlatforms="${{ matrix.platform }}" /p:Platform="${{ matrix.platform }}" `
           /p:GenerateAppxPackageOnBuild=true /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}" `
           /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}" /p:UseSubFolderForOutputDirDuringMultiPlatformBuild=false
       - name: Package sideload Package
         run: |
           $Folder = $(Get-ChildItem -Path "${{ env.ARTIFACT_PATH }}" -Filter "*_Test").FullName
-          7z a -mx9 -tzip "${{ env.ARTIFACT_PATH }}/${{ matrix.project.name }}-${{ needs.get-version.outputs.version }}-${{ matrix.platform }}-Sideload.zip" "$Folder/*"
+          7z a -mx9 -tzip "${{ env.ARTIFACT_PATH }}/${{ matrix.project.name }}-${{ needs.release-preparation.outputs.version }}-${{ matrix.platform }}-Sideload.zip" "$Folder/*"
       - name: Pull up msix and symbol files
         run: |
           Get-ChildItem "${{ env.ARTIFACT_PATH }}/*/*.msix" | Move-Item -Destination "${{ env.ARTIFACT_PATH }}"
@@ -106,7 +112,7 @@ jobs:
 
   bundle:
     runs-on: windows-2022
-    needs: [build, get-version]
+    needs: [build, release-preparation]
     env:
       BUNDLE_DIRECTORY: C:\bundle
     strategy:
@@ -130,7 +136,7 @@ jobs:
         with:
           msix-folder: "${{ env.BUNDLE_DIRECTORY }}"
           msixbundle-filepath: "${{ env.ARTIFACT_PATH }}/${{ matrix.project-name }}.msixbundle"
-          msixbundle-version: "${{ needs.get-version.outputs.version }}"
+          msixbundle-version: "${{ needs.release-preparation.outputs.version }}"
           enable-bundle-signing: true
           certificate-path: ${{ env.CERTIFICATE_PATH }}
           certificate-private-key: ${{ secrets.APPX_CERTIFICATE_PASSWORD }}
@@ -147,15 +153,16 @@ jobs:
 
   publish:
     runs-on: windows-2022
-    needs: [bundle, get-version]
+    needs: [bundle, release-preparation]
     steps:
-      - uses: actions/checkout@v2
       - name: Extract release notes
         run: |
-          git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' > ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
+          echo "${{ needs.release-preparation.outputs.changelog }}" | Out-File ./RELEASE-NOTES.txt
+          if (-! $?) { exit 1 } else { exit $LastExitCode }
       - name: Create release message
         run: |
-          echo "`n`nIt is recommended to install it from [Microsoft Store](https://www.microsoft.com/store/apps/9N9MX3J3F4G0)." | Out-File -Append ./RELEASE-NOTES.txt; if (-! $?) { exit 1 } else { exit $LastExitCode }
+          echo "`n`nIt is recommended to install it from [Microsoft Store](https://www.microsoft.com/store/apps/9N9MX3J3F4G0)." | Out-File -Append ./RELEASE-NOTES.txt
+          if (-! $?) { exit 1 } else { exit $LastExitCode }
       - uses: actions/download-artifact@v3
         with:
           name: bundle
@@ -168,5 +175,30 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: "${{ env.OUTPUT_PATH }}/*"
-          prerelease: ${{ contains(needs.get-version.outputs.tag, '-') }}
+          prerelease: ${{ contains(needs.release-preparation.outputs.tag, '-') }}
           body_path: "./RELEASE-NOTES.txt"
+
+  deploy:
+    runs-on: windows-2022
+    needs: [bundle, release-preparation]
+    strategy:
+      matrix:
+        project-name: ["PackageInstaller"]
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: bundle
+          path: ${{ env.OUTPUT_PATH }}
+      - name: Get bundle file
+        id: bundle-file
+        run: |
+          $FullName = $(Get-ChildItem -Path "${{ env.OUTPUT_PATH }}" -Filter "*.msixupload" | ? { $_.Name -match "${{ matrix.project-name }}" }).FullName
+          echo "::set-output name=fullName::$FullName"
+      - uses: isaacrlevin/windows-store-action
+        name: Publish to Store
+        with:
+          tenant-id: ${{ secrets.AZURE_AD_TENANT_ID }}
+          client-id: ${{ secrets[format('AZURE_AD_{0}_CLIENT_ID', matrix.project-name)] }}
+          client-secret: ${{ secrets[format('AZURE_AD_{0}_SECRET', matrix.project-name)] }}
+          app-id: ${{ secrets[format('STORE_{0}_APP_ID', matrix.project-name)] }}
+          package-path: ${{ steps.bundle-file.outputs.fullName }}
