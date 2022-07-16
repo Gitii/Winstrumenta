@@ -194,7 +194,7 @@ jobs:
         run: |
           $FullName = $(Get-ChildItem -Path "${{ env.OUTPUT_PATH }}" -Filter "*.msixupload" | ? { $_.Name -match "${{ matrix.project-name }}" }).FullName
           echo "::set-output name=fullName::$FullName"
-      - uses: isaacrlevin/windows-store-action
+      - uses: isaacrlevin/windows-store-action@v1
         name: Publish to Store
         with:
           tenant-id: ${{ secrets.AZURE_AD_TENANT_ID }}
