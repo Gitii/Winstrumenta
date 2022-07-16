@@ -46,6 +46,9 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          configuration: "changelog-configuration.json"
+          ignorePreReleases: "true"
 
   build:
     runs-on: windows-2022
