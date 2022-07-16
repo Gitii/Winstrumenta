@@ -196,7 +196,10 @@ jobs:
         id: bundle-file
         run: |
           $FullName = $(Get-ChildItem -Path "${{ env.OUTPUT_PATH }}" -Filter "*.msixupload" | ? { $_.Name -match "${{ matrix.project-name }}" }).FullName
-          echo "::set-output name=fullName::$FullName"
+          New-Item -ItemType Directory -Name C:\upload
+          Move-Item -Path $FullName -Destination C:\upload
+
+          echo "::set-output name=directory::C:\upload"
       - uses: isaacrlevin/windows-store-action@1.0
         name: Publish to Store
         with:
@@ -204,4 +207,4 @@ jobs:
           client-id: ${{ secrets[format('AZURE_AD_{0}_CLIENT_ID', matrix.project-name)] }}
           client-secret: ${{ secrets[format('AZURE_AD_{0}_SECRET', matrix.project-name)] }}
           app-id: ${{ secrets[format('STORE_{0}_APP_ID', matrix.project-name)] }}
-          package-path: ${{ steps.bundle-file.outputs.fullName }}
+          package-path: ${{ steps.bundle-file.outputs.directory }}
