@@ -196,7 +196,7 @@ jobs:
         id: bundle-file
         run: |
           $FullName = $(Get-ChildItem -Path "${{ env.OUTPUT_PATH }}" -Filter "*.msixupload" | ? { $_.Name -match "${{ matrix.project-name }}" }).FullName
-          New-Item -ItemType Directory -Name C:\upload
+          New-Item C:\upload -ItemType Directory 
           Move-Item -Path $FullName -Destination C:\upload
 
           echo "::set-output name=directory::C:\upload"
