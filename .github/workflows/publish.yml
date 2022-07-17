@@ -1,0 +1,210 @@
+name: "Build, bundle and publish"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  ARTIFACT_PATH: C:/AppPackage/
+  OUTPUT_PATH: C:/Release/
+  CERTIFICATE_PATH: "cert.pfx"
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  release-preparation:
+    runs-on: windows-2022
+    outputs:
+      tag: ${{ steps.tagName.outputs.tag }}
+      version: ${{ steps.extract-version.outputs.version }}
+      shortVersion: ${{ steps.extract-version.outputs.shortVersion }}
+      changelog: ${{ steps.github_release.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: olegtarasov/get-tag@v2.1
+        id: tagName
+        with:
+          tagRegex: "v(.*)"
+          tagRegexGroup: 1
+      - id: extract-version
+        name: Extract version number
+        shell: powershell
+        run: |
+          $parts = @("${{ steps.tagName.outputs.tag }}" -split "-")
+          $version = $parts[0]
+          $parsedVersion = [Version] $version
+          $packageVersion = New-Object Version @($parsedVersion.Major, $parsedVersion.Minor, $parsedVersion.Build, 0)
+          [string] $strVersion = $packageVersion.ToString(4)
+          [string] $strShortVersion = $packageVersion.ToString(3)
+          echo "::set-output name=version::$strVersion"
+          echo "::set-output name=shortVersion::$strShortVersion"
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          configuration: .github/changelog-configuration.json
+          ignorePreReleases: "true"
+
+  build:
+    runs-on: windows-2022
+    needs: [validate, release-preparation]
+    strategy:
+      matrix:
+        project:
+          [
+            {
+              name: "PackageInstaller",
+              path: "PackageInstaller/PackageInstaller.csproj",
+            },
+          ]
+        platform: ["x86", "x64", "arm64"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
+          vs-version: 17
+          vs-prerelease: true
+      - name: Update Manifest version string
+        shell: powershell
+        run: |
+          $manifestPath = "${{ matrix.project.path }}\..\Package.appxmanifest"
+          [xml]$manifest = Get-Content $manifestPath
+          $manifest.Package.Identity.Version = "${{ needs.release-preparation.outputs.version }}"
+          $manifest.save($manifestPath)
+      - name: Extract certificate
+        shell: bash
+        run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
+      - name: Package msix
+        run: |
+          msbuild "${{ matrix.project.path }}" /t:Build /restore /m /p:Configuration=Release /p:AppxPackageDir="${{ env.ARTIFACT_PATH }}" /p:UapAppxPackageBuildMode=SideloadOnly `
+          /p:Version="${{ needs.release-preparation.outputs.version }}" /p:AppxBundle=Never /p:AppxBundlePlatforms="${{ matrix.platform }}" /p:Platform="${{ matrix.platform }}" `
+          /p:GenerateAppxPackageOnBuild=true /p:AppxAutoIncrementPackageRevision=false /p:PackageCertificateKeyFile="${{ env.CERTIFICATE_PATH }}" `
+          /p:PackageCertificatePassword="${{ secrets.APPX_CERTIFICATE_PASSWORD }}" /p:UseSubFolderForOutputDirDuringMultiPlatformBuild=false
+      - name: Package sideload Package
+        run: |
+          $Folder = $(Get-ChildItem -Path "${{ env.ARTIFACT_PATH }}" -Filter "*_Test").FullName
+          7z a -mx9 -tzip "${{ env.ARTIFACT_PATH }}/${{ matrix.project.name }}-${{ needs.release-preparation.outputs.version }}-${{ matrix.platform }}-Sideload.zip" "$Folder/*"
+      - name: Pull up msix and symbol files
+        run: |
+          Get-ChildItem "${{ env.ARTIFACT_PATH }}/*/*.msixsym" | Rename-Item -NewName { [IO.Path]::ChangeExtension($_.Name, "appxsym") }
+          Get-ChildItem "${{ env.ARTIFACT_PATH }}/*/*.msix" | Move-Item -Destination "${{ env.ARTIFACT_PATH }}"
+          Get-ChildItem "${{ env.ARTIFACT_PATH }}/*/*.appxsym" | Move-Item -Destination "${{ env.ARTIFACT_PATH }}"
+      - name: Upload platform build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.project.name }}-platforms # each job will extend the artifact upload with new platform specific files
+          path: |
+            ${{ env.ARTIFACT_PATH }}/*.msix
+            ${{ env.ARTIFACT_PATH }}/*.appxsym
+      - name: Upload platform sideload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: sideload # each job will extend the artifact upload with new sideload files
+          path: |
+            ${{ env.ARTIFACT_PATH }}/*.zip
+
+  bundle:
+    runs-on: windows-2022
+    needs: [build, release-preparation]
+    env:
+      BUNDLE_DIRECTORY: C:\bundle
+    strategy:
+      matrix:
+        project-name: ["PackageInstaller"]
+    steps:
+      - run: mkdir "${{ env.ARTIFACT_PATH }}"
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.project-name }}-platforms
+          path: ${{ env.ARTIFACT_PATH }}
+      - name: Extract certificate
+        shell: bash
+        run: echo "${{ secrets.APPX_CERTIFICATE }}" | base64 -d > ${{ env.CERTIFICATE_PATH }}
+      - name: Collect msix files
+        run: |
+          New-Item -Path "${{ env.BUNDLE_DIRECTORY }}" -ItemType Directory
+          Get-ChildItem -Recurse -Path "$env:ARTIFACT_PATH" -Filter "*.msix" | Copy-Item -Destination $env:BUNDLE_DIRECTORY
+      - name: Bundle all msix files
+        uses: LanceMcCarthy/Action-MsixBundler@v1
+        with:
+          msix-folder: "${{ env.BUNDLE_DIRECTORY }}"
+          msixbundle-filepath: "${{ env.ARTIFACT_PATH }}/${{ matrix.project-name }}.msixbundle"
+          msixbundle-version: "${{ needs.release-preparation.outputs.version }}"
+          enable-bundle-signing: true
+          certificate-path: ${{ env.CERTIFICATE_PATH }}
+          certificate-private-key: ${{ secrets.APPX_CERTIFICATE_PASSWORD }}
+      - name: Create msixupload
+        run: |
+          7z a -mx9 -tzip "${{ env.ARTIFACT_PATH }}/${{ matrix.project-name }}.msixupload" "${{ env.ARTIFACT_PATH }}/*.appxsym" "${{ env.ARTIFACT_PATH }}/*.msixbundle"
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: bundle # each job will extend the artifact upload with new bundled files
+          path: |
+            ${{ env.ARTIFACT_PATH }}/*.msixbundle
+            ${{ env.ARTIFACT_PATH }}/*.msixupload
+
+  publish:
+    runs-on: windows-2022
+    needs: [bundle, release-preparation]
+    steps:
+      - name: Extract release notes
+        run: |
+          echo "${{ needs.release-preparation.outputs.changelog }}" | Out-File ./RELEASE-NOTES.txt
+          if (-! $?) { exit 1 } else { exit $LastExitCode }
+      - name: Create release message
+        run: |
+          echo "`n`nIt is recommended to install it from [Microsoft Store](https://www.microsoft.com/store/apps/9N9MX3J3F4G0)." | Out-File -Append ./RELEASE-NOTES.txt
+          if (-! $?) { exit 1 } else { exit $LastExitCode }
+      - uses: actions/download-artifact@v3
+        with:
+          name: bundle
+          path: ${{ env.OUTPUT_PATH }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: sideload
+          path: ${{ env.OUTPUT_PATH }}
+      - name: Attach files to Github releases
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "${{ env.OUTPUT_PATH }}/*"
+          prerelease: ${{ contains(needs.release-preparation.outputs.tag, '-') }}
+          body_path: "./RELEASE-NOTES.txt"
+
+  deploy:
+    runs-on: windows-2022
+    needs: [bundle, release-preparation]
+    strategy:
+      matrix:
+        project-name: ["PackageInstaller"]
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: bundle
+          path: ${{ env.OUTPUT_PATH }}
+      - name: Get bundle file
+        id: bundle-file
+        run: |
+          $FullName = $(Get-ChildItem -Path "${{ env.OUTPUT_PATH }}" -Filter "*.msixupload" | ? { $_.Name -match "${{ matrix.project-name }}" }).FullName
+          New-Item C:\upload -ItemType Directory 
+          Move-Item -Path $FullName -Destination C:\upload
+
+          echo "::set-output name=directory::C:\upload"
+      - uses: isaacrlevin/windows-store-action@1.0
+        name: Publish to Store
+        with:
+          tenant-id: ${{ secrets.AZURE_AD_TENANT_ID }}
+          client-id: ${{ secrets[format('AZURE_AD_{0}_CLIENT_ID', matrix.project-name)] }}
+          client-secret: ${{ secrets[format('AZURE_AD_{0}_SECRET', matrix.project-name)] }}
+          app-id: ${{ secrets[format('STORE_{0}_APP_ID', matrix.project-name)] }}
+          package-path: ${{ steps.bundle-file.outputs.directory }}
