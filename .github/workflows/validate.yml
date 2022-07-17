@@ -1,3 +1,5 @@
+name: Validate PRs and Main branch
+
 on:
   push:
     branches:
@@ -6,8 +8,6 @@ on:
     branches:
       - main
   workflow_call:
-
-name: Validate PRs and Main branch
 
 jobs:
   check_formatting:

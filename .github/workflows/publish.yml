@@ -1,9 +1,9 @@
+name: "Build, bundle and publish"
+
 on:
   push:
     tags:
       - "v*"
-
-name: "Build, bundle and publish"
 
 env:
   ARTIFACT_PATH: C:/AppPackage/
@@ -22,6 +22,7 @@ jobs:
       shortVersion: ${{ steps.extract-version.outputs.shortVersion }}
       changelog: ${{ steps.github_release.outputs.changelog }}
     steps:
+      - uses: actions/checkout@v2
       - uses: olegtarasov/get-tag@v2.1
         id: tagName
         with:
@@ -45,7 +46,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          configuration: "changelog-configuration.json"
+          configuration: .github/changelog-configuration.json
           ignorePreReleases: "true"
 
   build:
