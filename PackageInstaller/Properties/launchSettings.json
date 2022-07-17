@@ -4,7 +4,8 @@
       "commandName": "MsixPackage"
     },
     "PackageInstaller (Unpackaged)": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "nativeDebugging": true
     }
   }
 }

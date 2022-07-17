@@ -18,7 +18,7 @@ public class WsaProviderTests
 
         var wsa = new WsaProvider(wsaClient);
 
-        var list = await wsa.GetAllInstalledDistributionsAsync("");
+        var list = await wsa.GetAllInstalledDistributionsAsync("").ConfigureAwait(false);
 
         list.Alerts.Should().BeEmpty();
         list.InstalledDistributions.Should().BeEmpty();
@@ -39,7 +39,7 @@ public class WsaProviderTests
 
         var wsa = new WsaProvider(wsaClient);
 
-        var list = await wsa.GetAllInstalledDistributionsAsync(extension);
+        var list = await wsa.GetAllInstalledDistributionsAsync(extension).ConfigureAwait(false);
 
         list.Alerts.Should().NotBeEmpty();
         list.InstalledDistributions.Should().BeEmpty();
@@ -55,7 +55,7 @@ public class WsaProviderTests
 
         var wsa = new WsaProvider(wsaClient);
 
-        var list = await wsa.GetAllInstalledDistributionsAsync("");
+        var list = await wsa.GetAllInstalledDistributionsAsync("").ConfigureAwait(false);
 
         list.Alerts.Should().BeEmpty();
         list.InstalledDistributions.Should().HaveCount(1);

@@ -51,8 +51,8 @@ dotnet_style_readonly_field = true:suggestion
 dotnet_style_object_initializer = true:suggestion
 dotnet_style_collection_initializer = true:suggestion
 dotnet_style_explicit_tuple_names = true:suggestion
-dotnet_style_null_propagation =true:error
-dotnet_style_coalesce_expression =true:error
+dotnet_style_null_propagation = true:error
+dotnet_style_coalesce_expression = true:error
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:silent
 dotnet_style_prefer_inferred_tuple_names = true:suggestion
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
@@ -67,7 +67,7 @@ dotnet_naming_style.pascal_case_style.capitalization             = pascal_case
 # Use PascalCase for constant fields  
 dotnet_naming_rule.constant_fields_should_be_pascal_case.severity = suggestion
 dotnet_naming_rule.constant_fields_should_be_pascal_case.symbols  = constant_fields
-dotnet_naming_rule.constant_fields_should_be_pascal_case.style    = pascal_case_style
+dotnet_naming_rule.constant_fields_should_be_pascal_case.style = pascal_case_style
 dotnet_naming_symbols.constant_fields.applicable_kinds            = field
 dotnet_naming_symbols.constant_fields.applicable_accessibilities  = *
 dotnet_naming_symbols.constant_fields.required_modifiers          = const
@@ -76,6 +76,10 @@ dotnet_diagnostic.CA1823.severity=error
 dotnet_diagnostic.CA1836.severity=error
 dotnet_style_namespace_match_folder=true:error
 dotnet_style_allow_multiple_blank_lines_experimental=true:error
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+tab_width = 4
+dotnet_diagnostic.VSTHRD111.severity = error
 ###############################
 # C# Coding Conventions       #
 ###############################
@@ -100,7 +104,7 @@ csharp_style_conditional_delegate_call = true:suggestion
 # Modifier preferences
 csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:suggestion
 # Expression-level preferences
-csharp_prefer_braces =true:error
+csharp_prefer_braces = true:error
 csharp_style_deconstructed_variable_declaration = true:suggestion
 csharp_prefer_simple_default_expression = true:suggestion
 csharp_style_pattern_local_over_anonymous_function = true:suggestion
@@ -154,7 +158,7 @@ dotnet_diagnostic.VSTHRD200.severity = error
 dotnet_diagnostic.MA0048.severity = error
 
 # MA0004: Use Task.ConfigureAwait(false)
-dotnet_diagnostic.MA0004.severity = error
+dotnet_diagnostic.MA0004.severity = none
 
 # CS8618: Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 dotnet_diagnostic.CS8618.severity = error
@@ -170,8 +174,13 @@ dotnet_diagnostic.MA0044.severity=error
 
 # VSTHRD001: Avoid legacy thread switching APIs
 dotnet_diagnostic.VSTHRD001.severity = none
-csharp_style_namespace_declarations=file_scoped:error
+csharp_style_namespace_declarations= file_scoped:error
 csharp_style_unused_value_assignment_preference=discard_variable:error
+csharp_using_directive_placement = outside_namespace:silent
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
 
 [*.vb]
 # Modifier preferences

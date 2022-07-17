@@ -24,7 +24,7 @@ public class WslProviderTests
 
         var wsl = new WslProvider(wslApi);
 
-        var list = await wsl.GetAllInstalledDistributionsAsync(extension);
+        var list = await wsl.GetAllInstalledDistributionsAsync(extension).ConfigureAwait(false);
 
         list.Alerts.Should().NotBeEmpty();
         list.InstalledDistributions.Should().BeEmpty();
@@ -35,9 +35,24 @@ public class WslProviderTests
     {
         var devices = new DistroInfo[]
         {
-            new DistroInfo() { DistroName = "docker-desktop-data", IsDefault = false, WslVersion = 2, },
-            new DistroInfo() { DistroName = "docker-desktop", IsDefault = false, WslVersion = 2, },
-            new DistroInfo() { DistroName = "Ubuntu 40.2", IsDefault = false, WslVersion = 2, },
+            new DistroInfo()
+            {
+                DistroName = "docker-desktop-data",
+                IsDefault = false,
+                WslVersion = 2,
+            },
+            new DistroInfo()
+            {
+                DistroName = "docker-desktop",
+                IsDefault = false,
+                WslVersion = 2,
+            },
+            new DistroInfo()
+            {
+                DistroName = "Ubuntu 40.2",
+                IsDefault = false,
+                WslVersion = 2,
+            },
         };
 
         var wslApi = A.Fake<IWslApi>();
@@ -48,17 +63,18 @@ public class WslProviderTests
 
         var wsl = new WslProvider(wslApi);
 
-        var list = await wsl.GetAllInstalledDistributionsAsync("");
+        var list = await wsl.GetAllInstalledDistributionsAsync("").ConfigureAwait(false);
 
         list.Alerts.Should().BeEmpty();
         list.InstalledDistributions.Should().HaveCount(1);
     }
 
-
     private static readonly object[] DEVICES_TEST_SOURCES = new[] { Array.Empty<DistroInfo>(), };
 
     [TestCaseSource(nameof(DEVICES_TEST_SOURCES))]
-    public async Task GetAllInstalledDistributionsAsync_ShouldReturnNoDistrosInstalledAsync(DistroInfo[] distroList)
+    public async Task GetAllInstalledDistributionsAsync_ShouldReturnNoDistrosInstalledAsync(
+        DistroInfo[] distroList
+    )
     {
         var wslApi = A.Fake<IWslApi>();
         var msg = "msg";
@@ -68,7 +84,7 @@ public class WslProviderTests
 
         var wsl = new WslProvider(wslApi);
 
-        var list = await wsl.GetAllInstalledDistributionsAsync("");
+        var list = await wsl.GetAllInstalledDistributionsAsync("").ConfigureAwait(false);
 
         list.Alerts.Should().HaveCount(1);
         list.InstalledDistributions.Should().BeEmpty();

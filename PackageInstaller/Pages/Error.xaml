@@ -6,6 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:PackageInstaller.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:a="using:Microsoft.UI.Xaml.Automation"
+    a:AutomationProperties.AutomationId="ReactivePageError"
     mc:Ignorable="d"
 >
     <controls:Grid Padding="40">
@@ -57,7 +59,7 @@
                 Content="Show details"
                 IsEnabled="True"
             />
-            <controls:Button x:Name="Button" Content="Close" />
+            <controls:Button x:Name="Button" Content="Close" a:AutomationProperties.AutomationId="CloseButton" />
         </controls:StackPanel>
     </controls:Grid>
 </local:ReactivePageError>

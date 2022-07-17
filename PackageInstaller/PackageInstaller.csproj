@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net6.0-windows10.0.20348.0</TargetFramework>
@@ -14,6 +14,10 @@
         <Nullable>enable</Nullable>
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
+        <WindowsPackageType>None</WindowsPackageType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(WindowsPackageType)' == 'None'">
+        <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     </PropertyGroup>
     <ItemGroup>
         <Content Remove="Assets\DistroIcons\README.md" />
@@ -86,7 +90,7 @@
         <None Remove="Pages\GettingStarted.xaml" />
         <None Remove="Pages\NotificationHub.xaml" />
     </ItemGroup>
-    <ItemGroup>
+    <ItemGroup Condition="'$(WindowsPackageType)' != 'None'">
         <AppxManifest Include="Package.appxmanifest">
             <SubType>Designer</SubType>
         </AppxManifest>

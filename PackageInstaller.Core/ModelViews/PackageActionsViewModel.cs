@@ -325,16 +325,17 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         {
             var distroName = arg.Distro.Id;
 
-            var packageManager = await _packageManagers.GetSupportedManagerAsync(
-                PackageFilePath ?? throw new Exception("Package file path is null"),
-                distroName,
-                arg.Distro.Origin
-            );
+            var packageManager = await _packageManagers
+                .GetSupportedManagerAsync(
+                    PackageFilePath ?? throw new Exception("Package file path is null"),
+                    distroName,
+                    arg.Distro.Origin
+                )
+                .ConfigureAwait(false);
 
-            var isInstalled = await packageManager.IsPackageInstalledAsync(
-                distroName,
-                PackageMetaData.PackageName
-            );
+            var isInstalled = await packageManager
+                .IsPackageInstalledAsync(distroName, PackageMetaData.PackageName)
+                .ConfigureAwait(false);
 
             if (!isInstalled)
             {
@@ -345,10 +346,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             }
             else
             {
-                var installedPackageInfo = await packageManager.GetInstalledPackageInfoAsync(
-                    distroName,
-                    PackageMetaData.PackageName
-                );
+                var installedPackageInfo = await packageManager
+                    .GetInstalledPackageInfoAsync(distroName, PackageMetaData.PackageName)
+                    .ConfigureAwait(false);
 
                 var installationStatus = packageManager.CompareVersions(
                     installedPackageInfo.VersionCode,
@@ -374,17 +374,19 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     {
         InProgress = true;
 
-        await Task.Delay(10);
+        await Task.Delay(10).ConfigureAwait(false);
 
         var ext = Path.GetExtension(PackageFilePath?.WindowsPath ?? "").TrimStart('.');
 
         var distributionLists = await Task.WhenAll(
             _distributionProviders.Select((dp) => dp.GetAllInstalledDistributionsAsync(ext))
-        );
+        )
+            .ConfigureAwait(false);
 
         var installedDistributions = await GetSupportDistributionsAsync(
             distributionLists.SelectMany(x => x.InstalledDistributions)
-        );
+        )
+            .ConfigureAwait(false);
 
         _distroSourceList.Edit(
             (list) =>
@@ -405,7 +407,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
         if (SelectedWslDistribution == null && _distroSourceList.Count > 0)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(0));
+            await Task.Delay(TimeSpan.FromMilliseconds(0)).ConfigureAwait(false);
 
             SelectedWslDistribution = _distroSourceList.Items.First();
         }
@@ -416,9 +418,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
         else if (PackageMetaData.IconName != null)
         {
-            PackageIconStream = await _iconThemeManager.ActiveIconTheme.GetSvgIconByNameAsync(
-                PackageMetaData.IconName
-            );
+            PackageIconStream = await _iconThemeManager.ActiveIconTheme
+                .GetSvgIconByNameAsync(PackageMetaData.IconName)
+                .ConfigureAwait(false);
         }
         else
         {
@@ -440,12 +442,16 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
                     foreach (var packageManager in _packageManagers)
                     {
                         if (
-                            await packageManager.IsSupportedByDistributionAsync(d.Id, d.Origin)
+                            await packageManager
+                                .IsSupportedByDistributionAsync(d.Id, d.Origin)
+                                .ConfigureAwait(false)
                             && (
-                                await packageManager.IsPackageSupportedAsync(
-                                    PackageFilePath
-                                    ?? throw new Exception("Package file path is null")
-                                )
+                                await packageManager
+                                    .IsPackageSupportedAsync(
+                                        PackageFilePath
+                                            ?? throw new Exception("Package file path is null")
+                                    )
+                                    .ConfigureAwait(false)
                             ).isSupported
                         )
                         {
