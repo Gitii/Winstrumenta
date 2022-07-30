@@ -14,10 +14,14 @@
         <Nullable>enable</Nullable>
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
-        <WindowsPackageType>None</WindowsPackageType>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(WindowsPackageType)' == 'None'">
+    <PropertyGroup Condition="'$(PROFILE_IS_PACKAGED)' == 'true'">
+        <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+        <WindowsPackageType>MSIX</WindowsPackageType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(PROFILE_IS_PACKAGED)' == 'false'">
         <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+        <WindowsPackageType>None</WindowsPackageType>
     </PropertyGroup>
     <ItemGroup>
         <Content Remove="Assets\DistroIcons\README.md" />
