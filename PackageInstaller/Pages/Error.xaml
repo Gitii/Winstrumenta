@@ -21,9 +21,9 @@
             <controls:RowDefinition Height="Auto" />
         </controls:Grid.RowDefinitions>
         <controls:TextBlock controls:Grid.Column="0" TextWrapping="Wrap">
-            <Run x:Name="Title" FontSize="24" FontWeight="Bold" />
+            <Run x:Name="Title" FontSize="24" FontWeight="Bold" a:AutomationProperties.AutomationId="ErrorTitle" />
             <LineBreak />
-            <Run x:Name="Description" />
+            <Run x:Name="Description" a:AutomationProperties.AutomationId="ErrorDescription" />
         </controls:TextBlock>
 
         <controls:ScrollViewer

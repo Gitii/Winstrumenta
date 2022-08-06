@@ -30,6 +30,7 @@
             controls:Grid.ColumnSpan="2"
             Style="{StaticResource HeaderTextBlockStyle}"
             Margin="10,0"
+            AutomationProperties.AutomationId="Title"
         >
             Getting started!
         </controls:TextBlock>
@@ -50,9 +51,17 @@
                 <controls:Viewbox MaxHeight="100" MaxWidth="100">
                     <SymbolIcon Symbol="Download" />
                 </controls:Viewbox>
-                <controls:TextBlock FontSize="20" TextWrapping="WrapWholeWords" Padding="25" TextAlignment="Center">
+                <controls:TextBlock
+                    FontSize="20"
+                    TextWrapping="WrapWholeWords"
+                    Padding="25"
+                    TextAlignment="Center"
+                    AutomationProperties.AutomationId="PickSection"
+                >
                     Drag and Drop files here or
-                    <documents:Hyperlink x:Name="PickHyperLink">click here to pick them</documents:Hyperlink>
+                    <documents:Hyperlink x:Name="PickHyperLink" AutomationProperties.AutomationId="PickHyperLink">
+                        click here to pick them
+                    </documents:Hyperlink>
                 </controls:TextBlock>
             </controls:StackPanel>
         </controls:Border>
@@ -71,7 +80,13 @@
                 <controls:Viewbox MaxHeight="100" MaxWidth="100">
                     <SymbolIcon Symbol="TouchPointer" />
                 </controls:Viewbox>
-                <controls:TextBlock FontSize="20" TextWrapping="WrapWholeWords" Padding="25" TextAlignment="Center">
+                <controls:TextBlock
+                    FontSize="20"
+                    TextWrapping="WrapWholeWords"
+                    Padding="25"
+                    TextAlignment="Center"
+                    AutomationProperties.AutomationId="ExplorerSection"
+                >
                     Double click in Windows Explorer to install
                 </controls:TextBlock>
             </controls:StackPanel>

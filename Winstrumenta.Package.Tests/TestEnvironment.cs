@@ -11,6 +11,7 @@ class TestEnvironment
     private string _testBaseDirectory;
 
     public const string WAD_URL = "127.0.0.1:4723";
+    private const string WAD_FOLDER_NAME = "wad";
 
     public TestEnvironmentDetails? PreparedEnvDetails => _environment;
 
@@ -21,22 +22,21 @@ class TestEnvironment
 
     public async Task<TestEnvironmentDetails> PrepareAsync()
     {
-        var (nodeAlreayExtracted, nodePath) = await DownloadAndExtractAsync(
-                @"https://nodejs.org/dist/latest-v16.x/node-v16.15.1-win-x64.zip",
-                "node"
-            )
+        var nodeDownloadUrl = await GetNodeDownloadUrlAsync().ConfigureAwait(false);
+
+        var (nodeAlreadyExtracted, nodePath) = await DownloadAndExtractAsync(nodeDownloadUrl, "node")
             .ConfigureAwait(false);
 
         var npmPath = Path.Combine(nodePath, "npm.cmd");
 
-        if (!nodeAlreayExtracted)
+        if (!nodeAlreadyExtracted)
         {
             await ExecuteAsync(npmPath, "install", "-g", "appium").ConfigureAwait(false);
         }
 
         var (_, wadPath) = await DownloadAndExtractAsync(
-                @"https://github.com/licanhua/YWinAppDriver/releases/download/v0.2.88.0/WinAppDriver.zip",
-                "wad"
+                "https://github.com/Gitii/Winstrumenta/raw/main/Artifacts/Windows%20Application%20Driver.zip",
+                WAD_FOLDER_NAME
             )
             .ConfigureAwait(false);
 
@@ -54,6 +54,28 @@ class TestEnvironment
         return d;
     }
 
+    private async Task<string> GetNodeDownloadUrlAsync()
+    {
+        using var client = new HttpClient();
+        var hashes = await client
+            .GetStringAsync("https://nodejs.org/download/release/latest-v16.x/SHASUMS256.txt")
+            .ConfigureAwait(false);
+
+        var lines = hashes.Split(
+            new string[] { "\n", "\n\r" },
+            StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries
+        );
+
+        var nodeX64ZipLine = lines.First((x) => x.Contains("node-") && x.Contains("win-x64.zip"));
+
+        var fileName = nodeX64ZipLine.Split(
+            " ",
+            StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries
+        )[^1];
+
+        return $"https://nodejs.org/download/release/latest-v16.x/{fileName}";
+    }
+
     public async Task StartAsync()
     {
         var details = PreparedEnvDetails;
@@ -64,7 +86,17 @@ class TestEnvironment
 
         if (await IsPortOpenAsync(WAD_URL).ConfigureAwait(false) is false)
         {
-            await ExecuteAsync(details.Value.WadPath, waitForExit: false).ConfigureAwait(false);
+            await ExecuteAsync(
+                    details.Value.WadPath,
+                    false,
+                    "--urls",
+                    WAD_URL,
+                    "--basepath",
+                    "/wd/hub",
+                    "--logpath",
+                    "logs"
+                )
+                .ConfigureAwait(false);
         }
     }
 
@@ -200,6 +232,28 @@ class TestEnvironment
         foreach (var file in files)
         {
             File.Move(file, Path.Combine(targetDirectory, Path.GetFileName(file)!));
+        }
+    }
+
+    public static void KillApp() { }
+
+    public static void KillWAD(string directory)
+    {
+        var outputDirectory = Path.Combine(directory, WAD_FOLDER_NAME);
+
+        foreach (var process in Process.GetProcesses())
+        {
+            if (
+                (process.MainModule?.FileName ?? "").Equals(
+                    outputDirectory,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+            {
+                process.Kill();
+            }
+
+            process.Dispose();
         }
     }
 }

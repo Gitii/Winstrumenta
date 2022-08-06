@@ -220,7 +220,7 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
                     .DowngradeAsync(distroName, packageFilePath, progressController)
                     .ConfigureAwait(false);
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(null, $"Unknown action {_selectedAction}");
         }
     }
 
