@@ -8,7 +8,7 @@ command = dotnet
 arguments = pprettier --write "{file}"
 always_run = true
 
-[*.{xml,csproj,xaml,appxmanifest,props,wapproj}]
+[*.{xml,csproj,xaml,appxmanifest,props,wapproj,Build.props,msbuildproj}]
 command = dotnet
 arguments = pprettier --write "{file}" --plugin "<NodeModulesPath>/@prettier/plugin-xml" --parser "xml" --print-width 120 --xml-whitespace-sensitivity "ignore" --tab-width 4
 always_run = true

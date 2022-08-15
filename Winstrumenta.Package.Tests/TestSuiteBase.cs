@@ -98,17 +98,6 @@ public class TestSuiteBase
         return _environment!.TeardownAsync();
     }
 
-    private void KillApp(string windowHandle)
-    {
-        foreach (var process in Process.GetProcesses())
-        {
-            if (process.MainWindowHandle.ToString() == windowHandle)
-            {
-                process.Kill(true);
-            }
-        }
-    }
-
     public void Sleep(int milliseconds)
     {
         Thread.Sleep(milliseconds);
