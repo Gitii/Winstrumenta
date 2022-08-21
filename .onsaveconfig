@@ -17,3 +17,8 @@ always_run = true
 command = dotnet
 arguments = pprettier --write "{file}" --plugin "<NodeModulesPath>/prettier-plugin-sh"
 always_run = true
+
+[*.hcl]
+command = packer
+arguments = fmt "{file}"
+always_run = true
