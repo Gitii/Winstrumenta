@@ -154,7 +154,7 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
 
             var distroMv = _distribution;
 
-            var (success, log) = await ExecuteActionAsync(progressController).ConfigureAwait(false);
+            var (success, log) = await ExecuteActionAsync(progressController).ConfigureAwait(true);
 
             if (!success)
             {
@@ -194,31 +194,31 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
 
         var packageManager = await _packageManagers
             .GetSupportedManagerAsync(packageFilePath, distroName, distroMv.Distro.Origin)
-            .ConfigureAwait(false);
+            .ConfigureAwait(true);
 
         switch (_selectedAction)
         {
             case PackageAction.Launch:
                 await packageManager
                     .LaunchAsync(distroName, _packageMetaData.PackageName, progressController)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
                 return (true, String.Empty);
             case PackageAction.Install:
                 return await packageManager
                     .InstallAsync(distroName, packageFilePath, progressController)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
             case PackageAction.Uninstall:
                 return await packageManager
                     .UninstallAsync(distroName, _packageMetaData.PackageName, progressController)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
             case PackageAction.Upgrade:
                 return await packageManager
                     .UpgradeAsync(distroName, packageFilePath, progressController)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
             case PackageAction.Downgrade:
                 return await packageManager
                     .DowngradeAsync(distroName, packageFilePath, progressController)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
             default:
                 throw new ArgumentOutOfRangeException(null, $"Unknown action {_selectedAction}");
         }

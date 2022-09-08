@@ -6,11 +6,6 @@ using Sextant;
 
 namespace PackageInstaller.Core.ModelViews;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage(
-    "Usage",
-    "MA0004:Use Task.ConfigureAwait(false)",
-    Justification = "ModelView should care about thread context."
-)]
 public class InstallViewModel : ReactiveObject, Sextant.IViewModel, INavigable
 {
     public struct NavigationParameter
@@ -34,7 +29,7 @@ public class InstallViewModel : ReactiveObject, Sextant.IViewModel, INavigable
             throw new Exception($"No arguments");
         }
 
-        var package = parms.Arguments[0];
+        // var package = parms.Arguments[0];
 
         return Observable.Return(Unit.Default);
     }
