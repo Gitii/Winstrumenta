@@ -33,6 +33,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.WINSTRUMENTA_E2E_SSH_PRIVATE_KEY }}
       - name: Checkout submodules
+        shell: bash
         run: git submodule update --init --recursive
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
