@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using JetBrains.Profiler.Api;
 using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
@@ -55,7 +54,7 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
 
     public async Task ProcessAsync(string[] arguments)
     {
-        await Task.Delay(10).ConfigureAwait(false);
+        await Task.Delay(10).ConfigureAwait(true);
 
         try
         {
@@ -66,17 +65,17 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
                 return;
             }
 
-            await _iconThemeManager.LoadThemesAsync().ConfigureAwait(false);
+            await _iconThemeManager.LoadThemesAsync().ConfigureAwait(true);
 
             var packageFilePath = ParseArguments(arguments);
 
             var packageManager = await _packagesManagers
                 .GetSupportedManagerAsync(packageFilePath)
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
 
             var data = await packageManager
                 .ExtractPackageMetaDataAsync(packageFilePath)
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
 
             var navParms = new PackageActionsViewModel.NavigationParameter()
             {
