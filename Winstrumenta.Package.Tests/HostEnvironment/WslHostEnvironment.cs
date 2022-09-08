@@ -24,7 +24,7 @@ class WslHostEnvironment : BaseHostEnvironment
             shellExecute: true
         );
 
-        var results = await cmd.WaitAndGetResultsAsync();
+        var results = await cmd.WaitAndGetResultsAsync().ConfigureAwait(false);
 
         if (results.ExitCode != 0)
         {
@@ -58,7 +58,7 @@ class WslHostEnvironment : BaseHostEnvironment
             asRoot: true
         );
 
-        var results = await cmd.WaitAndGetResultsAsync();
+        var results = await cmd.WaitAndGetResultsAsync().ConfigureAwait(false);
 
         if (results.ExitCode != 0)
         {

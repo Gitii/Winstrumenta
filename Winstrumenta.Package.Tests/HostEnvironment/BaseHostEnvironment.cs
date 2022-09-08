@@ -20,14 +20,14 @@ abstract class BaseHostEnvironment : IHostEnvironment
 
     public async Task StartAsync()
     {
-        await StopAsync();
+        await StopAsync().ConfigureAwait(false);
 
-        await CreateQemuDisk();
+        await CreateQemuDiskAsync().ConfigureAwait(false);
 
-        await BootQemuEmulator();
+        await BootQemuEmulatorAsync().ConfigureAwait(false);
     }
 
-    private async Task BootQemuEmulator()
+    private async Task BootQemuEmulatorAsync()
     {
         if (string.IsNullOrEmpty(_tempDisk))
         {
@@ -35,48 +35,49 @@ abstract class BaseHostEnvironment : IHostEnvironment
         }
 
         await ExecuteAsync(
-            "qemu-system-x86_64",
-            "-name",
-            _vmName,
-            "-machine",
-            "type=q35,accel=kvm",
-            "-bios",
-            "/usr/share/ovmf/OVMF.fd",
-            "-cpu",
-            "host",
-            "-m",
-            "7G",
-            "-device",
-            "virtio-scsi-pci,id=scsi0",
-            "-device",
-            "scsi-hd,bus=scsi0.0,drive=drive0",
-            "-drive",
-            $"if=none,file={_tempDisk},id=drive0,cache=unsafe,discard=unmap,format=qcow2",
-            "-device",
-            "qemu-xhci",
-            "-device",
-            "virtio-tablet",
-            "-vga",
-            "qxl",
-            "-vnc",
-            "0.0.0.0:0",
-            "-netdev",
-            $"user,id=net0,hostfwd=tcp::{_port}-:22",
-            "-device",
-            "e1000,netdev=net0",
-            "-daemonize",
-            "-device",
-            "virtio-serial-pci",
-            "-chardev",
-            "socket,path=/tmp/packer-windows-qga.sock,server,nowait,id=qga0",
-            "-device",
-            "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0",
-            "-daemonize"
-        );
+                "qemu-system-x86_64",
+                "-name",
+                _vmName,
+                "-machine",
+                "type=q35,accel=kvm",
+                "-bios",
+                "/usr/share/ovmf/OVMF.fd",
+                "-cpu",
+                "host",
+                "-m",
+                "7G",
+                "-device",
+                "virtio-scsi-pci,id=scsi0",
+                "-device",
+                "scsi-hd,bus=scsi0.0,drive=drive0",
+                "-drive",
+                $"if=none,file={_tempDisk},id=drive0,cache=unsafe,discard=unmap,format=qcow2",
+                "-device",
+                "qemu-xhci",
+                "-device",
+                "virtio-tablet",
+                "-vga",
+                "qxl",
+                "-vnc",
+                "0.0.0.0:0",
+                "-netdev",
+                $"user,id=net0,hostfwd=tcp::{_port}-:22",
+                "-device",
+                "e1000,netdev=net0",
+                "-daemonize",
+                "-device",
+                "virtio-serial-pci",
+                "-chardev",
+                "socket,path=/tmp/packer-windows-qga.sock,server,nowait,id=qga0",
+                "-device",
+                "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0",
+                "-daemonize"
+            )
+            .ConfigureAwait(false);
 
-        await DetermineDaemonPidAsync();
+        await DetermineDaemonPidAsync().ConfigureAwait(false);
 
-        await WaitForVmToBecomeReadyAsync();
+        await WaitForVmToBecomeReadyAsync().ConfigureAwait(false);
     }
 
     private async Task WaitForVmToBecomeReadyAsync()
@@ -91,19 +92,19 @@ abstract class BaseHostEnvironment : IHostEnvironment
             {
                 Console.WriteLine("Checking if vm is ready...");
 
-                if (await IsPortOpenAsync("localhost", _port))
+                if (await IsPortOpenAsync("localhost", _port).ConfigureAwait(false))
                 {
                     // vm is ready
                     Console.WriteLine("vm is ready :)");
                     return;
                 }
 
-                if (await IsProcessRunningAsync(_daemonPid) is false)
+                if (await IsProcessRunningAsync(_daemonPid).ConfigureAwait(false) is false)
                 {
                     throw new Exception("Couldn't find running vm. Has it crashed?");
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(1));
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
             }
 
             throw new Exception("Vm couldn't boot up propably :(");
@@ -118,7 +119,7 @@ abstract class BaseHostEnvironment : IHostEnvironment
     {
         try
         {
-            await ExecuteAsync("kill", "-0", pid.ToString());
+            await ExecuteAsync("kill", "-0", pid.ToString()).ConfigureAwait(false);
             return true;
         }
         catch
@@ -129,7 +130,8 @@ abstract class BaseHostEnvironment : IHostEnvironment
 
     private async Task DetermineDaemonPidAsync()
     {
-        var (output, _) = await ExecuteShellAsync("ps axo \"pid,args\" | grep qemu | grep vm-test");
+        var (output, _) = await ExecuteShellAsync("ps axo \"pid,args\" | grep qemu | grep vm-test")
+            .ConfigureAwait(false);
 
         if (!output.Contains("qemu-system-x86_64"))
         {
@@ -155,7 +157,7 @@ abstract class BaseHostEnvironment : IHostEnvironment
             using var client = new TcpClient();
             client.ReceiveTimeout = 1000;
             client.SendTimeout = 1000;
-            await client.ConnectAsync(host, port);
+            await client.ConnectAsync(host, port).ConfigureAwait(false);
             return true;
         }
         catch
@@ -164,43 +166,44 @@ abstract class BaseHostEnvironment : IHostEnvironment
         }
     }
 
-    private async Task CreateQemuDisk()
+    private async Task CreateQemuDiskAsync()
     {
         if (!string.IsNullOrEmpty(_tempDisk))
         {
             return;
         }
 
-        (_tempDisk, _) = await ExecuteAsync("mktemp", ".qcow2");
+        (_tempDisk, _) = await ExecuteAsync("mktemp", ".qcow2").ConfigureAwait(false);
 
-        await ExecuteAsync("qemu-img", "create", "-f", "qcow2", "-b", _refernceImage, _tempDisk);
+        await ExecuteAsync("qemu-img", "create", "-f", "qcow2", "-b", _refernceImage, _tempDisk)
+            .ConfigureAwait(false);
     }
 
     public async Task StopAsync()
     {
         if (!string.IsNullOrEmpty(_tempDisk))
         {
-            await ExecuteAsync("rm", "-f", _tempDisk);
+            await ExecuteAsync("rm", "-f", _tempDisk).ConfigureAwait(false);
             _tempDisk = null;
         }
 
         if (_daemonPid > 0)
         {
-            if (await IsProcessRunningAsync(_daemonPid))
+            if (await IsProcessRunningAsync(_daemonPid).ConfigureAwait(false))
             {
-                await KillProcess(_daemonPid);
+                await KillProcessAsync(_daemonPid).ConfigureAwait(false);
             }
         }
     }
 
-    private async Task KillProcess(int pid)
+    private Task KillProcessAsync(int pid)
     {
-        await ExecuteAsync("kill", pid.ToString());
+        return ExecuteAsync("kill", pid.ToString());
     }
 
     public async Task ResetAsync()
     {
-        await StopAsync();
-        await StartAsync();
+        await StopAsync().ConfigureAwait(false);
+        await StartAsync().ConfigureAwait(false);
     }
 }
