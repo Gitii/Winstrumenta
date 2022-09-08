@@ -28,8 +28,8 @@ The main tool right now is `Package Manager`.
 
 <p align="center">
   <picture>
-      <source srcset="Assets/Package-Screenshot-dark.png" media="(prefers-color-scheme: dark)">
-      <img src="Assets/Package-Screenshot-white.png" alt="PM-Logo" width="600">
+      <source srcset="Assets/Package-Screenshot-dark-mixed.png" media="(prefers-color-scheme: dark)">
+      <img src="Assets/Package-Screenshot-white-mixed.png" alt="PM-Logo" width="600">
   </picture>
 </p>
 
