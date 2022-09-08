@@ -18,7 +18,7 @@ namespace PackageInstaller;
 public static class Program
 {
     [STAThread]
-    public static Task Main(string[] args)
+    public static void Main(string[] args)
     {
         var builder = new WindowsAppSdkHostBuilder<App>();
 
@@ -28,7 +28,7 @@ public static class Program
 
         app.Services.UseMicrosoftDependencyResolver();
 
-        return app.StartAsync();
+        app.StartAsync().GetAwaiter().GetResult();
     }
 
     private static void ConfigureServices(WindowsAppSdkHostBuilder<App> builder)

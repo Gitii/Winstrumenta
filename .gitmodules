@@ -1,0 +1,3 @@
+[submodule "Windows.Tests.e2e"]
+	path = Windows.Tests.e2e
+	url = ../Winstrumenta.e2e.git

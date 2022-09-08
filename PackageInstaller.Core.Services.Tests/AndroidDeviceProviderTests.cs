@@ -17,7 +17,7 @@ public class AndroidDeviceProviderTests
 
         var adp = new AndroidDeviceProvider(adb);
 
-        var list = await adp.GetAllInstalledDistributionsAsync("");
+        var list = await adp.GetAllInstalledDistributionsAsync("").ConfigureAwait(false);
 
         list.Alerts.Should().BeEmpty();
         list.InstalledDistributions.Should().BeEmpty();
@@ -32,8 +32,9 @@ public class AndroidDeviceProviderTests
         var adp = new AndroidDeviceProvider(adb);
 
         var list = await adp.GetAllInstalledDistributionsAsync(
-            AndroidDeviceProvider.APK_FILE_EXTENSION
-        );
+                AndroidDeviceProvider.APK_FILE_EXTENSION
+            )
+            .ConfigureAwait(false);
 
         list.InstalledDistributions.Should().BeEmpty();
         list.Alerts.Should().HaveCount(1);
@@ -49,8 +50,9 @@ public class AndroidDeviceProviderTests
         var adp = new AndroidDeviceProvider(adb);
 
         var list = await adp.GetAllInstalledDistributionsAsync(
-            AndroidDeviceProvider.APK_FILE_EXTENSION
-        );
+                AndroidDeviceProvider.APK_FILE_EXTENSION
+            )
+            .ConfigureAwait(false);
 
         list.InstalledDistributions.Should().BeEmpty();
         list.Alerts.Should().HaveCount(1);
@@ -97,8 +99,9 @@ public class AndroidDeviceProviderTests
         var adp = new AndroidDeviceProvider(adb);
 
         var list = await adp.GetAllInstalledDistributionsAsync(
-            AndroidDeviceProvider.APK_FILE_EXTENSION
-        );
+                AndroidDeviceProvider.APK_FILE_EXTENSION
+            )
+            .ConfigureAwait(false);
 
         list.InstalledDistributions.Should().HaveCount(1);
         list.InstalledDistributions

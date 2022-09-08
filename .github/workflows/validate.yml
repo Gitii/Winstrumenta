@@ -28,6 +28,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          submodules: true
+          ssh-key: ${{ secrets.WINSTRUMENTA_E2E_SSH_PRIVATE_KEY }}
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
         with:
@@ -43,4 +46,5 @@ jobs:
       - name: Build
         run: msbuild /m /t:build /restore /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:AppxPackage=false /m Winstrumenta.sln
       - name: Test
+        if: ${{ matrix.platform != 'arm64' }} # skip arm64 tests since github runners are only x86 and x64 but not arm64
         run: Get-ChildItem -Recurse -Filter "*.Tests.dll" | ? { $_.FullName -Match "bin.[^.]+.Release" -and $_.FullName -notmatch "ref" } | % { vstest.console.exe $_.FullName }
