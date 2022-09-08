@@ -27,12 +27,15 @@ The main tool right now is `Package Manager`.
 # Package Manager
 
 <p align="center">
-  <img src="Assets/Package-Screenshot.png" alt="PM-Logo" width="600">
+  <picture>
+      <source srcset="Assets/Package-Screenshot-dark-mixed.png" media="(prefers-color-scheme: dark)">
+      <img src="Assets/Package-Screenshot-white-mixed.png" alt="PM-Logo" width="600">
+  </picture>
 </p>
 
 `Package Manager` is graphical use interface for managing `deb`, `rpm` and `apk` packages. It integrates into seamlessy in the windows explorer.
 
-- `deb`, `rpm` and `apk` (WSA) packages are supported
+- `deb`, `rpm` and `apk` (on WSA, emulators and physical devices) packages are supported
 
 - Easy selection of target distribution (if there are multiple ones)
 
@@ -41,6 +44,13 @@ The main tool right now is `Package Manager`.
 - Easy up- or downgrade of packages
 
 - Launch installed packages or uninstall them
+
+## More insights
+
+<p align="center">
+  <b>Install android package on Windows Subsystem for Android (WSA)</b><br/>
+  <img src="Assets/Package-Video-WSA.gif" alt="PM-Logo" width="600">
+</p>
 
 ## Getting started with `Package Manager`
 
@@ -61,8 +71,6 @@ Please note that `WSL 2` needs to be activated and running. Managing apps in WSL
 
   - Alpine packages (`apk`)
 
-  - Android packages (`apk`) for physical devices and emulators
-
   - Arch packages (`ar`)
 
 - Advanced package management:
@@ -79,7 +87,9 @@ Winstrumenta is free and open-source software licensed under MIT.
 
 ## Information collected
 
-All apps in the by Winstrumenta toolset do not collect any personal identiying information.
+All apps in the by Winstrumenta toolset do not collect any personal identiying information. However they do have access to files and folders on your file system.
+The Windows Store and Windows app host do collect data on usage, for example, who bought/used the app and crash reports.
+If you open any files or links in the app that go to other websites you will need to look at their privacy policy.
 
 ## Use of information
 
