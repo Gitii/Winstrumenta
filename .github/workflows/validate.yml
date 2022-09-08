@@ -28,13 +28,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Configure SSH agent to allow access to private submodules
-        uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.WINSTRUMENTA_E2E_SSH_PRIVATE_KEY }}
-      - name: Checkout submodules
-        shell: bash
-        run: git submodule update --init --recursive
+          submodules: true
+          ssh-key: ${{ secrets.WINSTRUMENTA_E2E_SSH_PRIVATE_KEY }}
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v1
         with:
