@@ -17,8 +17,8 @@ public class PathImplTests
     [TestCase("/", "The path is not rooted to a drive with a drive letter: /")]
     [TestCase("\\", "The path is not rooted to a drive with a drive letter: \\")]
     [TestCase("//awdawdawd", "The path is not rooted to a drive with a drive letter: //awdawdawd")]
-    [TestCase("\\wsl$\\est", "Cannot convert a wsl share to a unix path")]
-    [TestCase("\\wsl.localhost\\est", "Cannot convert a wsl share to a unix path")]
+    [TestCase("\\\\wsl$\\test", "Cannot convert a wsl share to a unix path")]
+    [TestCase("\\\\wsl.localhost\\test", "Cannot convert a wsl share to a unix path")]
     public void ToUnixPath_ShouldThrowWhenPathIsInvalid(string? path, string exceptionMessage)
     {
         var pathImpl = new PathImpl();
