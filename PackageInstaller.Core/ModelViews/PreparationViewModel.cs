@@ -11,9 +11,11 @@ namespace PackageInstaller.Core.ModelViews;
 
 public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
 {
-    private IEnumerable<IPlatformDependentPackageManager> _packagesManagers;
-    private IPath _path;
-    private IIconThemeManager _iconThemeManager;
+    private readonly IEnumerable<IPlatformDependentPackageManager> _packagesManagers;
+    private readonly IPath _path;
+    private readonly IIconThemeManager _iconThemeManager;
+    private readonly IFile _file;
+    private readonly IDisposableFiles _disposableFiles;
 
     public readonly struct NavigationParameter
     {
@@ -36,6 +38,8 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
         _packagesManagers = packagesManagers;
         _path = path;
         _iconThemeManager = iconThemeManager;
+        _file = file;
+        _disposableFiles = disposableFiles;
     }
 
     public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
