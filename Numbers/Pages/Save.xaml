@@ -1,0 +1,79 @@
+<local:ReactivePageSave
+    x:Class="Numbers.Pages.Save"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Numbers.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:w3c="using:AssyntSoftware.WinUI3Controls"
+    xmlns:system="using:System"
+    xmlns:text="using:System.Text"
+    mc:Ignorable="d"
+>
+    <Grid Padding="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer>
+            <StackPanel Orientation="Vertical" Spacing="8" HorizontalAlignment="Stretch" Grid.Row="0">
+                <w3c:GroupBox Heading="Location" MaxWidth="600" HorizontalContentAlignment="Stretch">
+                    <StackPanel Orientation="Vertical" Spacing="8">
+                        <TextBox x:Name="FileName" Header="File name" HorizontalAlignment="Stretch" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                x:Name="Directory"
+                                Header="Directory"
+                                HorizontalAlignment="Stretch"
+                                IsReadOnly="True"
+                                Grid.Column="0"
+                            />
+                            <Button x:Name="ChangeFilePath" Content="..." Grid.Column="1" VerticalAlignment="Bottom" />
+                        </Grid>
+                    </StackPanel>
+                </w3c:GroupBox>
+                <w3c:GroupBox Heading="Encoding" MaxWidth="600" HorizontalContentAlignment="Stretch">
+                    <StackPanel Orientation="Vertical" Spacing="8">
+                        <ComboBox x:Name="Delimiter" IsEditable="True" Header="Delimiter" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="system:String">
+                                    <Grid>
+                                        <TextBlock
+                                            Text="{Binding Converter={StaticResource DescriptiveStringConverter}}"
+                                        />
+                                    </Grid>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox x:Name="Quote" Header="Quote character" MaxLength="1" HorizontalAlignment="Stretch" />
+                        <ComboBox x:Name="FileEncoding" Header="File Encoding" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="text:Encoding">
+                                    <Grid>
+                                        <TextBlock Text="{Binding EncodingName}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </w3c:GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch">
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Content="Save Copy As" x:Name="SaveFileAs" HorizontalAlignment="Right" Margin="4,8" />
+                <Button x:Name="SaveFile" HorizontalAlignment="Right" Margin="4,8">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE105;" />
+                        <TextBlock Text="Save" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</local:ReactivePageSave>

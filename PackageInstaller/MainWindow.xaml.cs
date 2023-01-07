@@ -9,9 +9,9 @@ using NativeInterop.Win32.Xaml;
 using ReactiveUI;
 using Microsoft.UI.Xaml.Controls;
 using Sextant;
-using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services.WinUI;
+using Shared.Misc;
 
 namespace PackageInstaller;
 

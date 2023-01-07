@@ -4,11 +4,11 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using DynamicData;
-using PackageInstaller.Core.Exceptions;
-using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
 using Sextant;
+using Shared.Misc;
+using Shared.Services;
 
 namespace PackageInstaller.Core.ModelViews;
 
@@ -163,9 +163,7 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
 
             var navParms = new ResultViewModel.NavigationParameter()
             {
-                Title = GetActionSuccessTitle(),
-                Description = GetActionSuccessDescription(distroMv),
-                Details = log
+                Title = GetActionSuccessTitle(), Description = GetActionSuccessDescription(distroMv), Details = log
             };
 
             _viewStackService
@@ -242,15 +240,15 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
         return _selectedAction switch
         {
             PackageAction.Launch
-              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been launched in '{distroMv.Name}'.",
+                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been launched in '{distroMv.Name}'.",
             PackageAction.Install
-              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been installed in '{distroMv.Name}'.",
+                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been installed in '{distroMv.Name}'.",
             PackageAction.Uninstall
-              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been uninstalled in '{distroMv.Name}'.",
+                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been uninstalled in '{distroMv.Name}'.",
             PackageAction.Upgrade
-              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been upgraded in '{distroMv.Name}'.",
+                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been upgraded in '{distroMv.Name}'.",
             PackageAction.Downgrade
-              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been downgraded in '{distroMv.Name}'.",
+                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been downgraded in '{distroMv.Name}'.",
             _ => throw new ArgumentOutOfRangeException(nameof(_selectedAction))
         };
     }

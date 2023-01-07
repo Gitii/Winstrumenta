@@ -2,6 +2,7 @@
 using System.Reactive.Threading.Tasks;
 using Community.Wsl.Sdk;
 using ReactiveUI;
+using Shared.Services;
 
 namespace PackageInstaller.Core.Services;
 

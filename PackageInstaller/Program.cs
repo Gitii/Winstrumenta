@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection;
 using Community.Wsa.Sdk;
 using Community.Wsl.Sdk;
@@ -10,6 +9,8 @@ using PackageInstaller.Core.Services;
 using PackageInstaller.Core.Services.WinUI;
 using PackageInstaller.Pages;
 using ReactiveUI;
+using Shared.Services;
+using Shared.Services.Implementations.WinuiUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 

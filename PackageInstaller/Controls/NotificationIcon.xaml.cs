@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Windows.Forms;
-using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
 using PackageInstaller.Core.Services;
 using Application = Microsoft.UI.Xaml.Application;
 using UserControl = Microsoft.UI.Xaml.Controls.UserControl;
@@ -44,20 +41,20 @@ public sealed partial class NotificationIcon : UserControl
         return prio switch
         {
             DistributionList.AlertPriority.Critical
-                => GetResources(
-                    "InfoBarErrorSeverityIconBackground",
-                    "InfoBarErrorSeverityIconForeground"
-                ),
+              => GetResources(
+                  "InfoBarErrorSeverityIconBackground",
+                  "InfoBarErrorSeverityIconForeground"
+              ),
             DistributionList.AlertPriority.Important
-                => GetResources(
-                    "InfoBarWarningSeverityIconBackground",
-                    "InfoBarWarningSeverityIconForeground"
-                ),
+              => GetResources(
+                  "InfoBarWarningSeverityIconBackground",
+                  "InfoBarWarningSeverityIconForeground"
+              ),
             DistributionList.AlertPriority.Information
-                => GetResources(
-                    "InfoBarInformationalSeverityIconBackground",
-                    "InfoBarInformationalSeverityIconForeground"
-                ),
+              => GetResources(
+                  "InfoBarInformationalSeverityIconBackground",
+                  "InfoBarInformationalSeverityIconForeground"
+              ),
             _ => throw new ArgumentOutOfRangeException(nameof(prio), prio, null)
         };
 

@@ -2,6 +2,7 @@
 using System.Reactive.Threading.Tasks;
 using Community.Archives.Rpm;
 using Community.Wsl.Sdk;
+using Shared.Services;
 
 namespace PackageInstaller.Core.Services;
 

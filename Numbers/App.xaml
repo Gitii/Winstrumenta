@@ -1,0 +1,30 @@
+<hosting:CancelableApplication
+    x:Class="Numbers.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:hosting="using:CommunityToolkit.Extensions.Hosting"
+    xmlns:numbers="using:Numbers"
+>
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+
+                <ResourceDictionary
+                    Source="ms-appx:///CommunityToolkit.WinUI.UI.Controls.DataGrid/DataGrid/DataGrid.xaml"
+                />
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="WindowCaptionBackground">
+                        <ThemeResource ResourceKey="ApplicationPageBackgroundThemeBrush" />
+                    </SolidColorBrush>
+                    <SolidColorBrush x:Key="WindowCaptionBackgroundDisabled">
+                        <ThemeResource ResourceKey="ApplicationPageBackgroundThemeBrush" />
+                    </SolidColorBrush>
+                    <numbers:DescriptiveStringConverter x:Key="DescriptiveStringConverter" />
+                </ResourceDictionary>
+                <!--  Other merged dictionaries here  -->
+            </ResourceDictionary.MergedDictionaries>
+            <!--  Other app resources here  -->
+        </ResourceDictionary>
+    </Application.Resources>
+</hosting:CancelableApplication>

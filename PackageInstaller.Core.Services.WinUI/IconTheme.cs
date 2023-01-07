@@ -4,7 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PackageInstaller.Core.Helpers;
+using Shared.Misc;
 
 namespace PackageInstaller.Core.Services.WinUI;
 
