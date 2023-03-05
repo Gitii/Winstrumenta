@@ -66,7 +66,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared.Services.Implementat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared.Services.Implementations.Tests", "Shared.Services.Implementations.Tests\Shared.Services.Implementations.Tests.csproj", "{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numbers.Core.Services.Emit", "Numbers.Core.Services.Emit\Numbers.Core.Services.Emit.csproj", "{12F45A4C-5E33-45E1-817E-711D0D4D48DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Numbers.Core.Services.Emit", "Numbers.Core.Services.Emit\Numbers.Core.Services.Emit.csproj", "{12F45A4C-5E33-45E1-817E-711D0D4D48DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -412,8 +412,8 @@ Global
 		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|arm64.ActiveCfg = Debug|Any CPU
 		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|arm64.Build.0 = Debug|Any CPU
-		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|x64.Build.0 = Debug|Any CPU
+		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|x64.ActiveCfg = Debug|x64
+		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|x64.Build.0 = Debug|x64
 		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Debug|x86.Build.0 = Debug|Any CPU
 		{ECA81669-17BA-45F7-9C62-AC9C6B7D4F13}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -428,8 +428,8 @@ Global
 		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|arm64.ActiveCfg = Debug|Any CPU
 		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|arm64.Build.0 = Debug|Any CPU
-		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|x64.Build.0 = Debug|Any CPU
+		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|x64.ActiveCfg = Debug|x64
+		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|x64.Build.0 = Debug|x64
 		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Debug|x86.Build.0 = Debug|Any CPU
 		{12F45A4C-5E33-45E1-817E-711D0D4D48DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
