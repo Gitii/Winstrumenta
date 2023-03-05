@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -9,11 +10,14 @@ using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using PackageInstaller.Core.ModelViews;
 using ReactiveUI;
 using Splat;
+using Brush = Microsoft.UI.Xaml.Media.Brush;
 
 namespace PackageInstaller.Pages;
 
@@ -74,9 +78,27 @@ public sealed partial class GettingStarted
                     .InvokeCommand(ViewModel!.LaunchWithFileCommand)
                     .DisposeWith(disposable);
 
+                Observable
+                    .FromEventPattern<DragEventHandler, DragEventArgs>(
+                        ev => this.PickSection.DragOver += ev,
+                        ev => this.PickSection.DragOver -= ev
+                    )
+                    .Select(x => x.EventArgs)
+                    .Subscribe(
+                        (args) =>
+                        {
+                            args.AcceptedOperation = IsValidDrop(args)
+                              ? DataPackageOperation.Copy
+                              : DataPackageOperation.None;
+                        }
+                    )
+                    .DisposeWith(disposable);
+
                 this.ViewModel!.PickFileInteraction
                     .RegisterHandler(PickFileAsync)
                     .DisposeWith(disposable);
+
+                this.BindCommand(ViewModel, (vm) => vm.ExitCommand, (v) => v.ExitButton).DisposeWith(disposable);
             }
         );
     }
@@ -104,7 +126,7 @@ public sealed partial class GettingStarted
     private bool IsValidDrop(DragEventArgs args)
     {
         return !args.Handled
-            && args.Data.GetView().AvailableFormats.Contains(StandardDataFormats.StorageItems);
+            && args.DataView.Contains(StandardDataFormats.StorageItems);
     }
 
     private async Task<string?> GetDroppedFileAsync(DragEventArgs args)
@@ -112,5 +134,17 @@ public sealed partial class GettingStarted
         var items = await args.DataView.GetStorageItemsAsync();
 
         return items.FirstOrDefault((i) => i.IsOfType(StorageItemTypes.File))?.Path;
+    }
+
+    private void Section_OnPointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        var control = (Border)sender;
+        control.Background = (Brush)Resources["ShiningTranslucentGray"];
+    }
+
+    private void Section_OnPointerLeft(object sender, PointerRoutedEventArgs e)
+    {
+        var control = (Border)sender;
+        control.Background = (Brush)Resources["TranslucentGray"];
     }
 }

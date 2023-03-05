@@ -10,19 +10,15 @@
 
     <ItemGroup>
         <PackageReference Include="Community.Wsl.Sdk" Version="3.0.0" />
-        <PackageReference Include="DynamicData" Version="7.8.5" />
+        <PackageReference Include="DynamicData" Version="7.13.1" />
         <PackageReference Include="JetBrains.Profiler.Api" Version="1.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
         <PackageReference Include="ReactiveUI" Version="18.0.10" />
         <PackageReference Include="Sextant" Version="2.12.4" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Shared.Misc\Shared.Misc.csproj" />
-      <ProjectReference Include="..\Shared.Services\Shared.Services.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Exceptions\" />
+        <ProjectReference Include="..\Shared.Misc\Shared.Misc.csproj" />
+        <ProjectReference Include="..\Shared.Services\Shared.Services.csproj" />
     </ItemGroup>
 </Project>
