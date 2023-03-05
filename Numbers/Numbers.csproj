@@ -1,0 +1,113 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0-windows10.0.20348.0</TargetFramework>
+        <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+        <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+        <Platforms>x86;x64;arm64</Platforms>
+        <RootNamespace>Numbers</RootNamespace>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <UseWinUI>true</UseWinUI>
+        <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+        <StartupObject>Numbers.Program</StartupObject>
+        <Nullable>enable</Nullable>
+        <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
+        <PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
+        <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+        <WindowsPackageType>MSIX</WindowsPackageType>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Remove="Assets\error.png" />
+        <None Remove="Controls\PlaceholderContainer.xaml" />
+        <None Remove="Controls\Shimmer.xaml" />
+        <None Remove="Pages\Error.xaml" />
+        <None Remove="Pages\Preparation.xaml" />
+        <None Remove="Pages\Save.xaml" />
+        <None Remove="Pages\Table.xaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Assets\SplashScreen.scale-200.png" />
+        <Content Include="Assets\LockScreenLogo.scale-200.png" />
+        <Content Include="Assets\Square150x150Logo.scale-200.png" />
+        <Content Include="Assets\Square44x44Logo.scale-200.png" />
+        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+        <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AssyntSoftware.WinUI3Controls" Version="2.0.1" />
+        <PackageReference Include="Community.Sextant.WinUI" Version="0.5.0" />
+        <PackageReference Include="Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection" Version="0.5.0" />
+        <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.3" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.194" />
+        <PackageReference Include="ReactiveUI" Version="18.3.1" />
+        <PackageReference Include="ReactiveUI.WinUI" Version="18.3.1" />
+        <PackageReference Include="Scrutor" Version="4.2.0" />
+        <PackageReference Include="SharpNinja.Extensions.WindowsAppSdkHost" Version="1.2.0" />
+        <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.2.8" />
+        <Manifest Include="$(ApplicationManifest)" />
+    </ItemGroup>
+
+    <!-- 
+    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+    Tools extension to be activated for this project even if the Windows App SDK Nuget
+    package has not yet been restored.
+  -->
+    <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+        <ProjectCapability Include="Msix" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\NativeInterop.Win32.Xaml\NativeInterop.Win32.Xaml.csproj" />
+        <ProjectReference Include="..\NativeInterop.Win32\NativeInterop.Win32.csproj" />
+        <ProjectReference Include="..\Numbers.Core.Services\Numbers.Core.Services.csproj" />
+        <ProjectReference Include="..\Numbers.Core\Numbers.Core.csproj" />
+        <ProjectReference Include="..\Shared.Misc\Shared.Misc.csproj" />
+        <ProjectReference
+            Include="..\Shared.Services.Implementations.Winui\Shared.Services.Implementations.WinUI.csproj"
+        />
+        <ProjectReference Include="..\Shared.Services.Implementations\Shared.Services.Implementations.csproj" />
+        <ProjectReference Include="..\Shared.Services\Shared.Services.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Update="App.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </None>
+        <None Update="MainWindow.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </None>
+        <Page Update="Pages\Table.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+    </ItemGroup>
+    <ItemGroup>
+        <Page Update="Controls\PlaceholderContainer.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Controls\Shimmer.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Pages\Error.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Pages\Preparation.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Pages\Save.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+    </ItemGroup>
+
+    <!-- 
+    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
+    Explorer "Package and Publish" context menu entry to be enabled for this project even if 
+    the Windows App SDK Nuget package has not yet been restored.
+  -->
+    <PropertyGroup
+        Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'"
+    >
+        <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+    </PropertyGroup>
+</Project>

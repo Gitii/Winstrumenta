@@ -4,10 +4,11 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using Microsoft.Extensions.Hosting;
-using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
 using Sextant;
+using Shared.Misc;
+using Shared.Services;
 
 namespace PackageInstaller.Core.ModelViews;
 
@@ -91,7 +92,10 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         GotoNotificationHub = ReactiveCommand.Create(
             () =>
             {
-                var navParams = new NotificationHubModelView.NavigationParameter() { Notifications = Notifications, };
+                var navParams = new NotificationHubModelView.NavigationParameter()
+                {
+                    Notifications = Notifications,
+                };
 
                 _viewStackService
                     .PushPage<NotificationHubModelView>(navParams.ToNavigationParameter())
@@ -125,10 +129,10 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             BuildCommandFunction(PackageAction.Downgrade),
             "Downgrade",
             "This action may not do any dependency checking on downgrades "
-            + "and therefore will not warn you if the downgrade breaks the dependency "
-            + "of some other package.This can have serious side effects, downgrading "
-            + "essential system components can even make your whole system unusable. "
-            + "Use with care."
+                + "and therefore will not warn you if the downgrade breaks the dependency "
+                + "of some other package.This can have serious side effects, downgrading "
+                + "essential system components can even make your whole system unusable. "
+                + "Use with care."
         );
         _doNothingActionMv = new ActionModelView(
             () => _applicationLifetime.StopApplication(),
@@ -443,7 +447,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
                                 await packageManager
                                     .IsPackageSupportedAsync(
                                         PackageFilePath
-                                        ?? throw new Exception("Package file path is null")
+                                            ?? throw new Exception("Package file path is null")
                                     )
                                     .ConfigureAwait(true)
                             ).isSupported

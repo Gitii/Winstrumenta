@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+        <Platforms>x64;x86;arm64</Platforms>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="CsvHelper" Version="28.0.1" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Numbers.Core\Numbers.Core.csproj" />
+    </ItemGroup>
+</Project>

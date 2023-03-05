@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
-using PackageInstaller.Core.Helpers;
+using Shared.Misc;
 
 namespace PackageInstaller.Core.Services.WinUI;
 

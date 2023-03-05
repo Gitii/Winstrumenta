@@ -1,5 +1,6 @@
 ﻿using Community.Wsa.Sdk;
 using Community.Wsa.Sdk.Exceptions;
+using Shared.Services;
 
 namespace PackageInstaller.Core.Services;
 

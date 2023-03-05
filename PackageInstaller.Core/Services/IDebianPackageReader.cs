@@ -1,4 +1,6 @@
-﻿namespace PackageInstaller.Core.Services;
+﻿using Shared.Services;
+
+namespace PackageInstaller.Core.Services;
 
 public interface IDebianPackageReader
 {

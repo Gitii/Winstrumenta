@@ -1,9 +1,9 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using PackageInstaller.Core.Helpers;
-using PackageInstaller.Core.Services;
 using ReactiveUI;
 using Sextant;
+using Shared.Misc;
+using Shared.Services;
 
 namespace PackageInstaller.Core.ModelViews;
 

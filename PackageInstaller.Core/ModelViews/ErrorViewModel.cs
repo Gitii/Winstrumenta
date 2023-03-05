@@ -4,10 +4,9 @@ using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Hosting;
-using PackageInstaller.Core.Exceptions;
-using PackageInstaller.Core.Helpers;
 using ReactiveUI;
 using Sextant;
+using Shared.Misc;
 
 #endregion
 

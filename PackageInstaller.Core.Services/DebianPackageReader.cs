@@ -2,6 +2,7 @@
 using Community.Archives.Ar;
 using Community.Archives.Core;
 using Community.Archives.Tar;
+using Shared.Services;
 
 namespace PackageInstaller.Core.Services;
 

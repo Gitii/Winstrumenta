@@ -1,18 +1,21 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using PackageInstaller.Core.Helpers;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
 using Sextant;
+using Shared.Misc;
+using Shared.Services;
 
 namespace PackageInstaller.Core.ModelViews;
 
 public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
 {
-    private IEnumerable<IPlatformDependentPackageManager> _packagesManagers;
-    private IPath _path;
-    private IIconThemeManager _iconThemeManager;
+    private readonly IEnumerable<IPlatformDependentPackageManager> _packagesManagers;
+    private readonly IPath _path;
+    private readonly IIconThemeManager _iconThemeManager;
+    private readonly IFile _file;
+    private readonly IDisposableFiles _disposableFiles;
 
     public readonly struct NavigationParameter
     {
@@ -26,13 +29,17 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
         IParameterViewStackService viewStackService,
         IEnumerable<IPlatformDependentPackageManager> packagesManagers,
         IPath path,
-        IIconThemeManager iconThemeManager
+        IIconThemeManager iconThemeManager,
+        IFile file,
+        IDisposableFiles disposableFiles
     )
     {
         _viewStackService = viewStackService;
         _packagesManagers = packagesManagers;
         _path = path;
         _iconThemeManager = iconThemeManager;
+        _file = file;
+        _disposableFiles = disposableFiles;
     }
 
     public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
@@ -113,9 +120,22 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
 
         var filePath = arguments[0];
 
-        if (!File.Exists(filePath))
+        if (!_file.Exists(filePath))
         {
             throw new FileNotFoundException("The file doesn't exist", filePath);
+        }
+
+        var fullPath = _path.GetFullPath(filePath);
+
+        if (_path.IsWslNetworkShare(fullPath) || _path.IsNetworkShare(fullPath))
+        {
+            // copy the original file to a temp location if it's on a network path
+            var tempFile = _file.GetTemporaryFilePath(Path.GetExtension(fullPath));
+            _disposableFiles.AddFiles(tempFile);
+
+            _file.CopyFile(fullPath, tempFile);
+
+            filePath = tempFile;
         }
 
         return _path.ToFileSystemPath(filePath);

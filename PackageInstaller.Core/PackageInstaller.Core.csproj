@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net6.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -15,5 +15,14 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
         <PackageReference Include="ReactiveUI" Version="18.0.10" />
         <PackageReference Include="Sextant" Version="2.12.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Shared.Misc\Shared.Misc.csproj" />
+      <ProjectReference Include="..\Shared.Services\Shared.Services.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Exceptions\" />
     </ItemGroup>
 </Project>

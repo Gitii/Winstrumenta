@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using OpenQA.Selenium.Appium;
+﻿using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Windows;
 
 namespace Winstrumenta.Package.Tests;
