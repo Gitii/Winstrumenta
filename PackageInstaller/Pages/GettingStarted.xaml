@@ -13,7 +13,8 @@
     mc:Ignorable="d"
 >
     <controls:Page.Resources>
-        <media:SolidColorBrush x:Name="TranslucentGray" Opacity="0.7" Color="Gray" />
+        <media:SolidColorBrush x:Name="ShiningTranslucentGray" Opacity="0.7" Color="Gray" />
+        <media:SolidColorBrush x:Name="TranslucentGray" Opacity="0.2" Color="Gray" />
     </controls:Page.Resources>
     <controls:Grid>
         <controls:Grid.ColumnDefinitions>
@@ -23,14 +24,14 @@
         <controls:Grid.RowDefinitions>
             <controls:RowDefinition Height="Auto" />
             <controls:RowDefinition Height="*" />
+            <controls:RowDefinition Height="Auto" />
         </controls:Grid.RowDefinitions>
         <controls:TextBlock
             controls:Grid.Row="0"
             controls:Grid.Column="0"
             controls:Grid.ColumnSpan="2"
-            Style="{StaticResource HeaderTextBlockStyle}"
-            Margin="10,0"
             AutomationProperties.AutomationId="Title"
+            Margin="5,5"
         >
             Getting started!
         </controls:TextBlock>
@@ -44,10 +45,12 @@
             CornerRadius="10"
             Background="{StaticResource TranslucentGray}"
             attachedProperties:FrameworkElementExtensions.Cursor="Hand"
-            AllowDrop="False"
+            AllowDrop="True"
             CanDrag="False"
+            PointerEntered="Section_OnPointerEntered"
+            PointerExited="Section_OnPointerLeft"
         >
-            <controls:StackPanel VerticalAlignment="Center">
+            <controls:StackPanel VerticalAlignment="Center" AllowDrop="True">
                 <controls:Viewbox MaxHeight="100" MaxWidth="100">
                     <SymbolIcon Symbol="Download" />
                 </controls:Viewbox>
@@ -56,6 +59,7 @@
                     TextWrapping="WrapWholeWords"
                     Padding="25"
                     TextAlignment="Center"
+                    AllowDrop="True"
                     AutomationProperties.AutomationId="PickSection"
                 >
                     Drag and Drop files here or
@@ -75,6 +79,8 @@
             CornerRadius="10"
             Background="{StaticResource TranslucentGray}"
             attachedProperties:FrameworkElementExtensions.Cursor="Hand"
+            PointerEntered="Section_OnPointerEntered"
+            PointerExited="Section_OnPointerLeft"
         >
             <controls:StackPanel VerticalAlignment="Center">
                 <controls:Viewbox MaxHeight="100" MaxWidth="100">
@@ -91,5 +97,13 @@
                 </controls:TextBlock>
             </controls:StackPanel>
         </controls:Border>
+        <RelativePanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Padding="10,0,10,10">
+            <Button
+                x:Name="ExitButton"
+                RelativePanel.AlignVerticalCenterWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
+                Content="Exit"
+            />
+        </RelativePanel>
     </controls:Grid>
 </local:ReactivePageGettingStarted>

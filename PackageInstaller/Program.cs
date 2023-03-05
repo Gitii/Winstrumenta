@@ -10,6 +10,8 @@ using PackageInstaller.Core.Services.WinUI;
 using PackageInstaller.Pages;
 using ReactiveUI;
 using Shared.Services;
+using Shared.Services.Implementations;
+using Shared.Services.Implementations.WinUI;
 using Shared.Services.Implementations.WinuiUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
@@ -54,7 +56,9 @@ public static class Program
                 .FromAssembliesOf(
                         typeof(IDistributionProvider),
                         typeof(WslProvider),
-                        typeof(IconThemeManager)
+                        typeof(IconThemeManager),
+                        typeof(Launcher),
+                        typeof(PathImpl)
                     )
                     .AddClasses(true)
                     .AsImplementedInterfaces()

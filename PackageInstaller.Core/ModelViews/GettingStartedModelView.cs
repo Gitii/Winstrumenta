@@ -28,16 +28,14 @@ public class GettingStartedModelView : ReactiveObject, IViewModel, INavigable
         PickFilesCommand = ReactiveCommand.CreateFromTask(PickFilesAsync);
         LaunchExplorerCommand = ReactiveCommand.CreateFromTask(LaunchExplorerAsync);
         LaunchWithFileCommand = ReactiveCommand.CreateFromTask<string?>(LaunchWithFileAsync);
+        ExitCommand = ReactiveCommand.Create(() => Environment.Exit(0));
     }
 
     private async Task LaunchWithFileAsync(string? filePath)
     {
         if (filePath != null)
         {
-            var navParams = new PreparationViewModel.NavigationParameter()
-            {
-                Arguments = new[] { filePath }
-            };
+            var navParams = new PreparationViewModel.NavigationParameter() { Arguments = new[] { filePath } };
 
             _viewStackService
                 .PushPage<PreparationViewModel>(navParams.ToNavigationParameter())
@@ -70,6 +68,7 @@ public class GettingStartedModelView : ReactiveObject, IViewModel, INavigable
     public ReactiveCommand<Unit, Unit> PickFilesCommand { get; }
     public ReactiveCommand<Unit, Unit> LaunchExplorerCommand { get; }
     public ReactiveCommand<string?, Unit> LaunchWithFileCommand { get; }
+    public ReactiveCommand<Unit, Unit> ExitCommand { get; }
 
     public string Id { get; } = nameof(GettingStartedModelView);
 
