@@ -2,14 +2,12 @@
   "profiles": {
     "PackageInstaller (Package)": {
       "commandName": "MsixPackage",
-      "environmentVariables": {
-      },
+      "environmentVariables": {},
       "nativeDebugging": true
     },
     "PackageInstaller (Unpackaged)": {
       "commandName": "Project",
-      "environmentVariables": {
-      },
+      "environmentVariables": {},
       "nativeDebugging": true
     }
   }

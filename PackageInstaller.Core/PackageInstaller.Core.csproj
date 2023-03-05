@@ -13,7 +13,7 @@
         <PackageReference Include="DynamicData" Version="7.13.1" />
         <PackageReference Include="JetBrains.Profiler.Api" Version="1.2.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-        <PackageReference Include="ReactiveUI" Version="18.0.10" />
+        <PackageReference Include="ReactiveUI" Version="18.4.25" />
         <PackageReference Include="Sextant" Version="2.12.4" />
     </ItemGroup>
 
