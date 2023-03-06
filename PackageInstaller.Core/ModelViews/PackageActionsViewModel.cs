@@ -47,6 +47,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
     DistributionModelView? _selectedWslDistribution;
     private IThreadHelpers _threadHelpers;
+    private readonly IApplicationLifeCycle _lifeCycle;
 
 #pragma warning disable MA0051 // Method is too long
     public PackageActionsViewModel(
@@ -57,7 +58,8 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         IEnumerable<IPlatformDependentPackageManager> packageManagers,
         IPath path,
         IIconThemeManager iconThemeManager,
-        IThreadHelpers threadHelpers
+        IThreadHelpers threadHelpers,
+        IApplicationLifeCycle lifeCycle
     )
     {
         _applicationLifetime = applicationLifetime;
@@ -67,6 +69,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         _path = path;
         _iconThemeManager = iconThemeManager;
         _threadHelpers = threadHelpers;
+        _lifeCycle = lifeCycle;
 
         _progressStatusMessage = String.Empty;
         ProgressStatusMessage = String.Empty;
@@ -85,7 +88,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             () =>
             {
                 _applicationLifetime.StopApplication();
-                Environment.Exit(0);
+                _lifeCycle.Exit(0);
             }
         );
 

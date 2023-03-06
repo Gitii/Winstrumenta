@@ -56,7 +56,13 @@ public class NativeWindow
             RECT rect;
             PInvoke.GetWindowRect(new HWND(_hwnd), out rect);
 
-            return new Rectangle { Bottom = rect.bottom, Left = rect.left, Right = rect.right, Top = rect.top };
+            return new Rectangle
+            {
+                Bottom = rect.bottom,
+                Left = rect.left,
+                Right = rect.right,
+                Top = rect.top
+            };
         }
     }
 

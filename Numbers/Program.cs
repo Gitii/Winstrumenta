@@ -66,6 +66,7 @@ public static class Program
         );
 
         collection.AddSingleton<IGlobalContext, GlobalContext>();
+        collection.AddSingleton<IApplicationLifeCycle, ApplicationLifeCycleImpl>();
     }
 
     private static void ConfigureComplexServices(IServiceCollection collection)

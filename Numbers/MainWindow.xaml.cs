@@ -20,6 +20,7 @@ using Numbers.Core.Services;
 using ReactiveUI;
 using Sextant;
 using Shared.Misc;
+using Shared.Services;
 
 namespace Numbers;
 
@@ -27,16 +28,19 @@ public sealed partial class MainWindow : DesktopWindow
 {
     private readonly IParameterViewStackService _viewStackService;
     private readonly INavigationService _navigationService;
+    private readonly IApplicationLifeCycle _lifeCycle;
     private string args = string.Empty;
     private IDisposable? _windowUiDisposable;
 
     public MainWindow(
         IParameterViewStackService viewStackService,
-        INavigationService navigationService
+        INavigationService navigationService,
+        IApplicationLifeCycle lifeCycle
     )
     {
         _viewStackService = viewStackService;
         _navigationService = navigationService;
+        _lifeCycle = lifeCycle;
 
         this.InitializeComponent();
 
@@ -182,11 +186,6 @@ public sealed partial class MainWindow : DesktopWindow
         CommandBar.SecondaryCommands.Clear();
     }
 
-    private void CloseButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        Environment.Exit(0);
-    }
-
     private void NavigationView_OnSelectionChanged(
         NavigationView sender,
         NavigationViewSelectionChangedEventArgs args
@@ -206,5 +205,10 @@ public sealed partial class MainWindow : DesktopWindow
                     .Subscribe();
                 break;
         }
+    }
+
+    private void MainWindow_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        _lifeCycle.Exit(0);
     }
 }

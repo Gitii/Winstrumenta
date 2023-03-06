@@ -25,6 +25,7 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
     private readonly SourceList<OperationProgressModelView> _operationSourceList;
     private ReadOnlyObservableCollection<OperationProgressModelView> _operationList;
     private IThreadHelpers _threadHelpers;
+    private readonly IApplicationLifeCycle _lifeCycle;
 
     public ICommand RetryActionCommand { get; }
 
@@ -51,12 +52,14 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
     public ActionExecutionViewModel(
         IParameterViewStackService viewStackService,
         IEnumerable<IPlatformDependentPackageManager> packageManagers,
-        IThreadHelpers threadHelpers
+        IThreadHelpers threadHelpers,
+        IApplicationLifeCycle lifeCycle
     )
     {
         _viewStackService = viewStackService;
         _packageManagers = packageManagers;
         _threadHelpers = threadHelpers;
+        _lifeCycle = lifeCycle;
 
         _operationSourceList = new SourceList<OperationProgressModelView>();
         _operationSourceList
@@ -68,7 +71,7 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
             .Subscribe();
 
         RetryActionCommand = ReactiveCommand.CreateFromTask(ExecuteAsync);
-        CloseCommand = ReactiveCommand.Create(() => Environment.Exit(0));
+        CloseCommand = ReactiveCommand.Create(() => _lifeCycle.Exit(0));
         ShowErrorActions = ReactiveCommand.Create(ShowErrorInPopup);
 
         _showPopupInteraction = new Interaction<PopupInput, Unit>();
@@ -163,7 +166,9 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
 
             var navParms = new ResultViewModel.NavigationParameter()
             {
-                Title = GetActionSuccessTitle(), Description = GetActionSuccessDescription(distroMv), Details = log
+                Title = GetActionSuccessTitle(),
+                Description = GetActionSuccessDescription(distroMv),
+                Details = log
             };
 
             _viewStackService
@@ -240,15 +245,15 @@ public class ActionExecutionViewModel : ReactiveObject, IViewModel, INavigable
         return _selectedAction switch
         {
             PackageAction.Launch
-                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been launched in '{distroMv.Name}'.",
+              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been launched in '{distroMv.Name}'.",
             PackageAction.Install
-                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been installed in '{distroMv.Name}'.",
+              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been installed in '{distroMv.Name}'.",
             PackageAction.Uninstall
-                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been uninstalled in '{distroMv.Name}'.",
+              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been uninstalled in '{distroMv.Name}'.",
             PackageAction.Upgrade
-                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been upgraded in '{distroMv.Name}'.",
+              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been upgraded in '{distroMv.Name}'.",
             PackageAction.Downgrade
-                => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been downgraded in '{distroMv.Name}'.",
+              => $"The package '{_packageMetaData.PackageLabel}' ({_packageMetaData.VersionLabel}) has been downgraded in '{distroMv.Name}'.",
             _ => throw new ArgumentOutOfRangeException(nameof(_selectedAction))
         };
     }

@@ -24,9 +24,7 @@ namespace PackageInstaller.Pages;
     "MA0048:File name must match type name",
     Justification = "Workaround: Xaml doesn't support generic types."
 )]
-public class ReactivePageGettingStarted : ReactivePage<GettingStartedModelView>
-{
-}
+public class ReactivePageGettingStarted : ReactivePage<GettingStartedModelView> { }
 
 public sealed partial class GettingStarted
 {
@@ -43,7 +41,8 @@ public sealed partial class GettingStarted
                     .RegisterHandler(PickFileAsync)
                     .DisposeWith(disposable);
 
-                this.BindCommand(ViewModel, (vm) => vm.ExitCommand, (v) => v.ExitButton).DisposeWith(disposable);
+                this.BindCommand(ViewModel, (vm) => vm.ExitCommand, (v) => v.ExitButton)
+                    .DisposeWith(disposable);
             }
         );
     }
@@ -101,8 +100,8 @@ public sealed partial class GettingStarted
                 (args) =>
                 {
                     args.AcceptedOperation = IsValidDrop(args)
-                        ? DataPackageOperation.Copy
-                        : DataPackageOperation.None;
+                      ? DataPackageOperation.Copy
+                      : DataPackageOperation.None;
                 }
             )
             .DisposeWith(disposable);
@@ -130,8 +129,7 @@ public sealed partial class GettingStarted
 
     private bool IsValidDrop(DragEventArgs args)
     {
-        return !args.Handled
-               && args.DataView.Contains(StandardDataFormats.StorageItems);
+        return !args.Handled && args.DataView.Contains(StandardDataFormats.StorageItems);
     }
 
     private async Task<string?> GetDroppedFileAsync(DragEventArgs args)

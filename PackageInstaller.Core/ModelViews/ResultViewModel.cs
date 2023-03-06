@@ -4,12 +4,14 @@ using Microsoft.Extensions.Hosting;
 using ReactiveUI;
 using Sextant;
 using Shared.Misc;
+using Shared.Services;
 
 namespace PackageInstaller.Core.ModelViews;
 
 public class ResultViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
+    private readonly IApplicationLifeCycle _lifeCycle;
 
     public enum ResultTheme
     {
@@ -27,9 +29,13 @@ public class ResultViewModel : ReactiveObject, IViewModel, INavigable
         public ResultTheme? Theme { get; init; }
     }
 
-    public ResultViewModel(IHostApplicationLifetime applicationLifetime)
+    public ResultViewModel(
+        IHostApplicationLifetime applicationLifetime,
+        IApplicationLifeCycle lifeCycle
+    )
     {
         _applicationLifetime = applicationLifetime;
+        _lifeCycle = lifeCycle;
 
         _title = String.Empty;
         Title = string.Empty;
@@ -44,7 +50,7 @@ public class ResultViewModel : ReactiveObject, IViewModel, INavigable
             () =>
             {
                 _applicationLifetime.StopApplication();
-                Environment.Exit(1);
+                _lifeCycle.Exit(1);
             }
         );
 

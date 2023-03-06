@@ -67,23 +67,23 @@ public class WslProvider : IDistributionProvider
                 {
                     Title = "WSL is not installed",
                     Message = "Please install WSL.",
-                    HelpUrl =
-                        "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
+                    HelpUrl = "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
                     Priority = DistributionList.AlertPriority.Critical
                 }
             )
         );
     }
 
-    private static Task<DistributionList> CreateWslNotSupportedResultAsync(string? notSupportedMessage)
+    private static Task<DistributionList> CreateWslNotSupportedResultAsync(
+        string? notSupportedMessage
+    )
     {
         return Task.FromResult(
             DistributionList.CreateWithAlertOnly(
                 new DistributionList.Alert()
                 {
                     Message = notSupportedMessage ?? "WSL is not supported on this device.",
-                    HelpUrl =
-                        "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
+                    HelpUrl = "https://docs.microsoft.com/en-us/windows/wsl/install#prerequisites",
                     Priority = DistributionList.AlertPriority.Critical
                 }
             )
