@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.UI;
+using Windows.Win32;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using WinRT;
 
@@ -30,6 +33,8 @@ public class DesktopWindow : Window, INativeWindowListener
         _nativeWindow = new NativeWindow(_hwnd);
         _nativeWindow.AddListener(this);
     }
+
+    public StartupLocation StartupLocation { get; set; } = StartupLocation.Default;
 
     public int Width
     {
@@ -217,7 +222,62 @@ public class DesktopWindow : Window, INativeWindowListener
         }
 
         _loaded = true;
+
+        UpdateInitialLocation();
+
         Loaded?.Invoke(this, new WindowLoadedEventArgs(this));
+    }
+
+    private void UpdateInitialLocation()
+    {
+        switch (StartupLocation)
+        {
+            case StartupLocation.CenterScreen:
+                CenterOnScreen();
+                return;
+            case StartupLocation.CenterParentProcess:
+                CenterByParentProcess();
+                return;
+            default:
+                return;
+        }
+    }
+
+    /// <summary>
+    /// Center the window based on the main window of the parent process (the process which started this application) when it's first shown.
+    /// </summary>
+    public void CenterByParentProcess()
+    {
+        var parentProcess = Win32.ParentProcessUtilities.GetParentProcess();
+        if (parentProcess == null)
+        {
+            CenterOnScreen();
+            return;
+        }
+
+        var size = new System.Drawing.Size(Width, Height);
+        var monitorSize = DisplayInformation.GetMonitorSizeFromWindow(
+            parentProcess.MainWindowHandle
+        );
+
+        _nativeWindow.Position = new Point(
+            monitorSize.Width / 2 - size.Width / 2,
+            monitorSize.Height / 2 - size.Height / 2
+        );
+    }
+
+    /// <summary>
+    /// Center the window on the screen when it's first shown.
+    /// </summary>
+    public void CenterOnScreen()
+    {
+        var size = new System.Drawing.Size(Width, Height);
+        var monitorSize = DisplayInformation.GetMonitorSizeFromWindow(_hwnd);
+
+        _nativeWindow.Position = new Point(
+            monitorSize.Width / 2 - size.Width / 2,
+            monitorSize.Height / 2 - size.Height / 2
+        );
     }
 
     private void Window_Activated(object sender, WindowActivatedEventArgs args)

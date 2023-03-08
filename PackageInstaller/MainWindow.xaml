@@ -16,6 +16,7 @@
     SystemBackdropEnabled="True"
     mc:Ignorable="d"
     Closing="MainWindow_OnClosing"
+    StartupLocation="CenterParentProcess"
 >
     <controls:Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <controls:Grid.RowDefinitions>
