@@ -8,6 +8,9 @@ on:
     branches:
       - main
   workflow_call:
+    secrets:
+      WINSTRUMENTA_E2E_SSH_PRIVATE_KEY:
+        required: true
 
 jobs:
   check_formatting:
