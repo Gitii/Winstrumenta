@@ -39,11 +39,11 @@ public class ErrorViewModel : ReactiveObject, IViewModel, INavigable
         _errorTitle = String.Empty;
         ErrorTitle = String.Empty;
 
-        Close = ReactiveCommand.CreateFromTask(
+        Close = ReactiveCommand.Create(
             () =>
             {
                 _applicationLifetime.StopApplication();
-                return _lifeCycle.Exit(1);
+                _lifeCycle.Exit(1);
             }
         );
 
