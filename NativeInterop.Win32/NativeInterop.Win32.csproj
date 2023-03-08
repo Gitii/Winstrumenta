@@ -22,5 +22,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230217.4" />
+        <PackageReference Include="System.Management" Version="6.0.0" />
     </ItemGroup>
 </Project>
