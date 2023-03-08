@@ -125,11 +125,13 @@
                 <controls:ColumnDefinition Width="*" />
                 <controls:ColumnDefinition Width="Auto" />
             </controls:Grid.ColumnDefinitions>
-            <controls:Grid
-                controls:Grid.Column="0"
-                attached:FrameworkElementExtensions.Cursor="Hand"
-            >
-                <controls1:NotificationIcon HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" x:Name="NotificationIconGlyph" />
+            <controls:Grid controls:Grid.Column="0" attached:FrameworkElementExtensions.Cursor="Hand">
+                <controls1:NotificationIcon
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Padding="5"
+                    x:Name="NotificationIconGlyph"
+                />
             </controls:Grid>
             <controls:StackPanel controls:Grid.Column="1" Orientation="Vertical" Spacing="4">
                 <controls:StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
@@ -147,6 +149,19 @@
                         </controls:ComboBox.ItemTemplate>
                     </controls:ComboBox>
                     <controls:SplitButton x:Name="ActionButton">
+                        <controls:SplitButton.Resources>
+                            <controls:Flyout x:Name="ActionFlyout">
+                                <controls:StackPanel Spacing="15" Orientation="Vertical" HorizontalAlignment="Stretch">
+                                    <TextBlock
+                                        HorizontalAlignment="Stretch"
+                                        MaxWidth="250"
+                                        TextWrapping="WrapWholeWords"
+                                        x:Name="ActionFlyoutText"
+                                    />
+                                    <controls:Button x:Name="ActionFlyoutButton" Content="Acknowledged and Continue" />
+                                </controls:StackPanel>
+                            </controls:Flyout>
+                        </controls:SplitButton.Resources>
                         <controls:StackPanel Orientation="Horizontal">
                             <controls:FontIcon
                                 x:Name="PrimaryActionButtonIcon"

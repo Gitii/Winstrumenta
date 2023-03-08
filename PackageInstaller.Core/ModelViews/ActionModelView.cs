@@ -5,29 +5,43 @@ namespace PackageInstaller.Core.ModelViews;
 
 public class ActionModelView : ReactiveObject
 {
-    public ActionModelView(Func<Task> action, string title, string? warningText = null)
+    public ActionModelView(
+        Func<ActionModelView, Task> action,
+        string title,
+        string? warningText = null,
+        string? tooltip = null
+    )
     {
         Title = title;
         WarningText = warningText;
         ActionCommand = ReactiveCommand.CreateFromTask(action);
+        ToolTip = tooltip;
     }
 
-    public ActionModelView(Action action, string title, string? warningText = null)
+    public ActionModelView(
+        Action<ActionModelView> action,
+        string title,
+        string? warningText = null,
+        string? tooltip = null
+    )
     {
         Title = title;
         WarningText = warningText;
         ActionCommand = ReactiveCommand.CreateFromTask(
-            () =>
+            (ActionModelView vm) =>
             {
-                action();
+                action(vm);
                 return Task.CompletedTask;
             }
         );
+        ToolTip = tooltip;
     }
 
     public string Title { get; }
 
     public string? WarningText { get; }
 
-    public ReactiveCommand<Unit, Unit> ActionCommand { get; }
+    public string? ToolTip { get; }
+
+    public ReactiveCommand<ActionModelView, Unit> ActionCommand { get; }
 }

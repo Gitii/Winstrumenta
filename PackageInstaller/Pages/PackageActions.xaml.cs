@@ -3,14 +3,17 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using DynamicData;
 using DynamicData.Binding;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services;
 using ReactiveUI;
+using Windows.Foundation;
 
 namespace PackageInstaller.Pages;
 
@@ -106,6 +109,14 @@ public sealed partial class PackageActions
                     .DisposeWith(disposable);
 
                 this.ViewModel
+                    .WhenAnyValue((vm) => vm.PrimaryAction!.ToolTip)
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(
+                        (tooltip) => ToolTipService.SetToolTip(PrimaryActionButtonText, tooltip)
+                    )
+                    .DisposeWith(disposable);
+
+                this.ViewModel
                     .WhenAnyValue((vm) => vm.PackageIconStream)
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .BindTo(this, (v) => v.PackageIcon.Source)
@@ -135,7 +146,8 @@ public sealed partial class PackageActions
                 this.BindCommand(
                         ViewModel,
                         (vm) => vm.PrimaryAction!.ActionCommand,
-                        (v) => v.ActionButton
+                        (v) => v.ActionButton,
+                        (vm) => vm.PrimaryAction
                     )
                     .DisposeWith(disposable);
 
@@ -155,13 +167,16 @@ public sealed partial class PackageActions
                             SecondaryActions.Items.AddRange(
                                 list.Select(
                                     (a) =>
-                                        (
-                                            new MenuFlyoutItem()
-                                            {
-                                                Text = a.Title,
-                                                Command = a.ActionCommand,
-                                            }
-                                        )
+                                    {
+                                        var item = new MenuFlyoutItem()
+                                        {
+                                            Text = a.Title,
+                                            Command = a.ActionCommand,
+                                            CommandParameter = a
+                                        };
+                                        ToolTipService.SetToolTip(item, a.ToolTip);
+                                        return item;
+                                    }
                                 )
                             );
                         }
@@ -204,6 +219,48 @@ public sealed partial class PackageActions
                     .Select(x => Unit.Default)
                     .InvokeCommand(ViewModel!.GotoNotificationHub)
                     .DisposeWith(disposable);
+
+                this.ViewModel.ActionConfirmationDialogInteraction.RegisterHandler(
+                    (interaction) =>
+                    {
+                        TaskCompletionSource src = new TaskCompletionSource();
+                        RoutedEventHandler handleClick = null!;
+                        TypedEventHandler<FlyoutBase, FlyoutBaseClosingEventArgs>? handleClose =
+                            null!;
+
+                        handleClick = (_, _) =>
+                        {
+                            ActionFlyout.Closing -= handleClose;
+                            ActionFlyoutButton.Click -= handleClick;
+
+                            if (!interaction.IsHandled)
+                            {
+                                interaction.SetOutput(true);
+                            }
+
+                            src.SetResult();
+                        };
+
+                        handleClose = (_, _) =>
+                        {
+                            ActionFlyout.Closing -= handleClose;
+                            ActionFlyoutButton.Click -= handleClick;
+
+                            if (!interaction.IsHandled)
+                            {
+                                interaction.SetOutput(false);
+                            }
+
+                            src.SetResult();
+                        };
+                        ActionFlyout.Closing += handleClose;
+                        ActionFlyoutButton.Click += handleClick;
+                        ActionFlyout.ShowAt(ActionButton);
+                        ActionFlyoutText.Text = interaction.Input;
+
+                        return src.Task;
+                    }
+                );
             }
         );
     }

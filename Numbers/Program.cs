@@ -9,7 +9,6 @@ using ReactiveUI;
 using Shared.Services;
 using Shared.Services.Implementations;
 using Shared.Services.Implementations.WinUI;
-using Shared.Services.Implementations.WinuiUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 
