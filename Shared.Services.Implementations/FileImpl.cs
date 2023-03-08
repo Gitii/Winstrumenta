@@ -26,6 +26,11 @@ public class FileImpl : IFile
         return Path.Join(tempFolder, fileName);
     }
 
+    public void Delete(string path)
+    {
+        File.Delete(path);
+    }
+
     public FileStream OpenRead(string path)
     {
         return File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);

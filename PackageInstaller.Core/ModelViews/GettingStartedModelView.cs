@@ -13,29 +13,35 @@ public class GettingStartedModelView : ReactiveObject, IViewModel, INavigable
     private readonly Interaction<Unit, PickFileOutput> _pickFileInteraction;
     private readonly IParameterViewStackService _viewStackService;
     private readonly IKnownFolders _knownFolders;
+    private readonly IApplicationLifeCycle _lifeCycle;
 
     public GettingStartedModelView(
         ILauncher launcher,
         IParameterViewStackService viewStackService,
-        IKnownFolders knownFolders
+        IKnownFolders knownFolders,
+        IApplicationLifeCycle lifeCycle
     )
     {
         _launcher = launcher;
         _viewStackService = viewStackService;
         _knownFolders = knownFolders;
+        _lifeCycle = lifeCycle;
         _pickFileInteraction = new Interaction<Unit, PickFileOutput>(RxApp.MainThreadScheduler);
 
         PickFilesCommand = ReactiveCommand.CreateFromTask(PickFilesAsync);
         LaunchExplorerCommand = ReactiveCommand.CreateFromTask(LaunchExplorerAsync);
         LaunchWithFileCommand = ReactiveCommand.CreateFromTask<string?>(LaunchWithFileAsync);
-        ExitCommand = ReactiveCommand.Create(() => Environment.Exit(0));
+        ExitCommand = ReactiveCommand.Create(() => _lifeCycle.Exit(0));
     }
 
     private async Task LaunchWithFileAsync(string? filePath)
     {
         if (filePath != null)
         {
-            var navParams = new PreparationViewModel.NavigationParameter() { Arguments = new[] { filePath } };
+            var navParams = new PreparationViewModel.NavigationParameter()
+            {
+                Arguments = new[] { filePath }
+            };
 
             _viewStackService
                 .PushPage<PreparationViewModel>(navParams.ToNavigationParameter())

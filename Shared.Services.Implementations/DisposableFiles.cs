@@ -2,7 +2,14 @@
 
 public class DisposableFiles : IDisposableFiles
 {
-    private ISet<string> _files = new HashSet<string>();
+    private readonly IFile _file;
+    private readonly ISet<string> _files;
+
+    public DisposableFiles(IFile file)
+    {
+        _file = file;
+        _files = new HashSet<string>();
+    }
 
     public void Dispose()
     {
@@ -21,11 +28,11 @@ public class DisposableFiles : IDisposableFiles
     {
         foreach (var file in _files)
         {
-            if (File.Exists(file))
+            if (_file.Exists(file))
             {
                 try
                 {
-                    File.Delete(file);
+                    _file.Delete(file);
                 }
                 catch (Exception e)
                 {

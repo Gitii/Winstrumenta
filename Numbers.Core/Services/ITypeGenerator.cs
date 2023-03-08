@@ -4,7 +4,10 @@ namespace Numbers.Core.Services;
 
 public interface ITypeGenerator
 {
-    public (Type type, string[] fieldNames, IDictionary<string, string> map) BuildRowTypeFromHeaders(string[] headers);
+    public (Type type, string[] fieldNames, IDictionary<
+        string,
+        string
+    > map) BuildRowTypeFromHeaders(string[] headers);
 
     public static string[] SanitizeHeaders(string[] headers)
     {

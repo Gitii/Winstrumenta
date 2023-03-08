@@ -59,7 +59,8 @@ public class Csv : ICsv
 
         RegisterRecord(data.RecordType, data.RecordColumnMapping, csv.Context);
 
-        await csv.WriteRecordsAsync(data.Rows.Select((r) => r.Cells) as IEnumerable).ConfigureAwait(false);
+        await csv.WriteRecordsAsync(data.Rows.Select((r) => r.Cells) as IEnumerable)
+            .ConfigureAwait(false);
 
         await csv.FlushAsync().ConfigureAwait(false);
     }

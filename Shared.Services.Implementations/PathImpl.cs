@@ -16,11 +16,18 @@ public class PathImpl : IPath
 
         if (windowsPath.Length < 2 || !char.IsLetter(windowsPath[0]) || windowsPath[1] != ':')
         {
-            throw new Exception($"The path is not rooted to a drive with a drive letter: {windowsPath}");
+            throw new Exception(
+                $"The path is not rooted to a drive with a drive letter: {windowsPath}"
+            );
         }
 
-        var pathWithoutRoot = windowsPath.Substring(2)
-            .TrimStart(Path.PathSeparator, Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var pathWithoutRoot = windowsPath
+            .Substring(2)
+            .TrimStart(
+                Path.PathSeparator,
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar
+            );
 
         return $"{ToUnixMount(windowsPath)}/{pathWithoutRoot.Replace('\\', '/')}";
     }
@@ -104,7 +111,9 @@ public class PathImpl : IPath
             return $"{driveLetter}:{pathWithoutMount}".Replace('/', '\\');
         }
 
-        throw new Exception("A path to the root fs of a unix distro cannot be converted to a windows path");
+        throw new Exception(
+            "A path to the root fs of a unix distro cannot be converted to a windows path"
+        );
     }
 
     private bool IsWindowsPath(string path)

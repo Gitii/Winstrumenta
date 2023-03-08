@@ -24,7 +24,10 @@ class TestEnvironment
     {
         var nodeDownloadUrl = await GetNodeDownloadUrlAsync().ConfigureAwait(false);
 
-        var (nodeAlreadyExtracted, nodePath) = await DownloadAndExtractAsync(nodeDownloadUrl, "node")
+        var (nodeAlreadyExtracted, nodePath) = await DownloadAndExtractAsync(
+                nodeDownloadUrl,
+                "node"
+            )
             .ConfigureAwait(false);
 
         var npmPath = Path.Combine(nodePath, "npm.cmd");

@@ -10,18 +10,26 @@ namespace PackageInstaller.AttachedProperties;
 public static partial class FrameworkElementExtensions
 {
     private static readonly object _cursorLock = new object();
-    private static readonly InputCursor _defaultCursor = InputSystemCursor.Create(InputSystemCursorShape.Arrow);
+    private static readonly InputCursor _defaultCursor = InputSystemCursor.Create(
+        InputSystemCursorShape.Arrow
+    );
 
     private static readonly Dictionary<InputSystemCursorShape, InputCursor> _cursors =
-        new Dictionary<InputSystemCursorShape, InputCursor> { { InputSystemCursorShape.Arrow, _defaultCursor } };
+        new Dictionary<InputSystemCursorShape, InputCursor>
+        {
+            { InputSystemCursorShape.Arrow, _defaultCursor }
+        };
 
     /// <summary>
     /// Dependency property for specifying the target <see cref="InputSystemCursorShape"/> to be shown
     /// over the target <see cref="FrameworkElement"/>.
     /// </summary>
-    public static readonly DependencyProperty CursorProperty =
-        DependencyProperty.RegisterAttached("Cursor", typeof(InputSystemCursorShape),
-            typeof(FrameworkElementExtensions), new PropertyMetadata(InputSystemCursorShape.Arrow, CursorChanged));
+    public static readonly DependencyProperty CursorProperty = DependencyProperty.RegisterAttached(
+        "Cursor",
+        typeof(InputSystemCursorShape),
+        typeof(FrameworkElementExtensions),
+        new PropertyMetadata(InputSystemCursorShape.Arrow, CursorChanged)
+    );
 
     /// <summary>
     /// Set the target <see cref="InputSystemCursorShape"/>.
@@ -96,7 +104,8 @@ public static partial class FrameworkElementExtensions
 
     private static void SetCursor(Object element, InputCursor cursor)
     {
-        var prop = element.GetType()
+        var prop = element
+            .GetType()
             .GetProperty("ProtectedCursor", BindingFlags.Instance | BindingFlags.NonPublic);
 
         if (prop != null)

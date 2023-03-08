@@ -15,6 +15,7 @@
     UseMicaSystemBackdrop="True"
     SystemBackdropEnabled="True"
     mc:Ignorable="d"
+    Closing="MainWindow_OnClosing"
 >
     <controls:Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <controls:Grid.RowDefinitions>

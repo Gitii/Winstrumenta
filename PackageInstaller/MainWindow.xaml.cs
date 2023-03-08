@@ -12,6 +12,7 @@ using Sextant;
 using PackageInstaller.Core.ModelViews;
 using PackageInstaller.Core.Services.WinUI;
 using Shared.Misc;
+using Shared.Services;
 
 namespace PackageInstaller;
 
@@ -21,16 +22,19 @@ public sealed partial class MainWindow : DesktopWindow
     private readonly INavigationService _navigationService;
     private readonly ThemeManager _themeManager;
     private string args = string.Empty;
+    private readonly IApplicationLifeCycle _lifeCycle;
 
     public MainWindow(
         IParameterViewStackService viewStackService,
         INavigationService navigationService,
-        ThemeManager themeManager
+        ThemeManager themeManager,
+        IApplicationLifeCycle lifeCycle
     )
     {
         _viewStackService = viewStackService;
         _navigationService = navigationService;
         _themeManager = themeManager;
+        _lifeCycle = lifeCycle;
 
         this.InitializeComponent();
 
@@ -97,8 +101,8 @@ public sealed partial class MainWindow : DesktopWindow
             .Subscribe();
     }
 
-    private void CloseButton_OnClick(object sender, RoutedEventArgs e)
+    private void MainWindow_OnClosing(object? sender, WindowClosingEventArgs e)
     {
-        Environment.Exit(0);
+        _lifeCycle.Exit(0);
     }
 }

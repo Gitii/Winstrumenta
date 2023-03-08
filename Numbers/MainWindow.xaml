@@ -13,6 +13,7 @@
     Resizeable="True"
     UseMicaSystemBackdrop="True"
     SystemBackdropEnabled="True"
+    Closing="MainWindow_OnClosing"
     mc:Ignorable="d"
 >
     <controls:Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">

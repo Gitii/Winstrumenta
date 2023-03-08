@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using ReactiveUI;
 using Sextant;
 using Shared.Misc;
+using Shared.Services;
 
 #endregion
 
@@ -15,14 +16,19 @@ namespace Numbers.Core.ModelViews;
 public class ErrorViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
+    private readonly IApplicationLifeCycle _lifeCycle;
     private string _errorDescription;
     string _errorDetails;
     bool _errorDetailsVisible;
     private string _errorTitle;
 
-    public ErrorViewModel(IHostApplicationLifetime applicationLifetime)
+    public ErrorViewModel(
+        IHostApplicationLifetime applicationLifetime,
+        IApplicationLifeCycle lifeCycle
+    )
     {
         _applicationLifetime = applicationLifetime;
+        _lifeCycle = lifeCycle;
 
         _errorDescription = String.Empty;
         ErrorDescription = String.Empty;
@@ -37,7 +43,7 @@ public class ErrorViewModel : ReactiveObject, IViewModel, INavigable
             () =>
             {
                 _applicationLifetime.StopApplication();
-                Environment.Exit(1);
+                _lifeCycle.Exit(1);
             }
         );
 

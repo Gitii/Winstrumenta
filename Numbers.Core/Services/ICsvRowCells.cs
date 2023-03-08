@@ -2,4 +2,4 @@
 
 namespace Numbers.Core.Services;
 
-public interface ICsvRowCells: INotifyPropertyChanged { }
+public interface ICsvRowCells : INotifyPropertyChanged { }
