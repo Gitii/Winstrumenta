@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.UI.Dispatching;
 
-namespace Shared.Services.Implementations.WinuiUI;
+namespace Shared.Services.Implementations.WinUI;
 
 public class ThreadHelpers : IThreadHelpers
 {

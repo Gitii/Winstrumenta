@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using DynamicData;
 using Microsoft.Extensions.Hosting;
 using PackageInstaller.Core.Services;
@@ -48,6 +49,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
     DistributionModelView? _selectedWslDistribution;
     private IThreadHelpers _threadHelpers;
     private readonly IApplicationLifeCycle _lifeCycle;
+    private readonly Interaction<string, bool> _actionConfirmationDialogInteraction;
 
 #pragma warning disable MA0051 // Method is too long
     public PackageActionsViewModel(
@@ -70,6 +72,8 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         _iconThemeManager = iconThemeManager;
         _threadHelpers = threadHelpers;
         _lifeCycle = lifeCycle;
+
+        _actionConfirmationDialogInteraction = new Interaction<string, bool>();
 
         _progressStatusMessage = String.Empty;
         ProgressStatusMessage = String.Empty;
@@ -111,35 +115,43 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
             .SelectMany(OnSelectedDistributionChangedAsync)
             .Subscribe();
 
-        _launchActionMv = new ActionModelView(BuildCommandFunction(PackageAction.Launch), "Launch");
+        _launchActionMv = new ActionModelView(
+            BuildCommandFunction(PackageAction.Launch),
+            "Launch",
+            tooltip: "Launch the application"
+        );
         _installActionMv = new ActionModelView(
             BuildCommandFunction(PackageAction.Install),
-            "Install"
+            "Install",
+            tooltip: "Install this application in the selected distribution"
         );
         _uninstallActionMv = new ActionModelView(
             BuildCommandFunction(PackageAction.Uninstall),
-            "Uninstall"
+            "Uninstall",
+            tooltip: "Uninstall this application in the selected distribution"
         );
         _reinstallActionMv = new ActionModelView(
             BuildCommandFunction(PackageAction.Install),
-            "Reinstall"
+            "Reinstall",
+            tooltip: "Reinstall this application in the selected distribution"
         );
         _upgradeActionMv = new ActionModelView(
             BuildCommandFunction(PackageAction.Upgrade),
-            "Upgrade"
+            "Upgrade",
+            tooltip: "Upgrade this application in the selected distribution"
         );
         _downgradeActionMv = new ActionModelView(
             BuildCommandFunction(PackageAction.Downgrade),
             "Downgrade",
             "This action may not do any dependency checking on downgrades "
                 + "and therefore will not warn you if the downgrade breaks the dependency "
-                + "of some other package.This can have serious side effects, downgrading "
+                + "of some other package. This can have serious side effects, downgrading "
                 + "essential system components can even make your whole system unusable. "
                 + "Use with care."
         );
         _doNothingActionMv = new ActionModelView(
-            () => _applicationLifetime.StopApplication(),
-            "Do nothing and exit"
+            (_) => _applicationLifetime.StopApplication(),
+            "Do nothing and close"
         );
 
         _primaryAction = this.WhenAnyValue((mv) => mv.PackageInstallationStatus)
@@ -251,6 +263,9 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
     public string Id { get; } = nameof(PackageActionsViewModel);
 
+    public Interaction<string, bool> ActionConfirmationDialogInteraction =>
+        _actionConfirmationDialogInteraction;
+
     private IImmutableList<ActionModelView> ChooseSecondaryActions(
         IPlatformDependentPackageManager.PackageInstallationStatus? arg
     )
@@ -300,10 +315,22 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
         }
     }
 
-    private Action BuildCommandFunction(PackageAction action)
+    private Func<ActionModelView, Task> BuildCommandFunction(PackageAction action)
     {
-        return () =>
+        return async (ActionModelView avm) =>
         {
+            if (avm.WarningText != null)
+            {
+                var confirmedByUser = await _actionConfirmationDialogInteraction
+                    .Handle(avm.WarningText)
+                    .ToTask()
+                    .ConfigureAwait(true);
+                if (!confirmedByUser)
+                {
+                    return;
+                }
+            }
+
             var navParms = new ActionExecutionViewModel.NavigationParameter()
             {
                 Distribution = SelectedWslDistribution!,
@@ -408,7 +435,7 @@ public class PackageActionsViewModel : ReactiveObject, IViewModel, INavigable
 
         if (SelectedWslDistribution == null && _distroSourceList.Count > 0)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(0)).ConfigureAwait(true);
+            await Task.Delay(TimeSpan.FromMilliseconds(10)).ConfigureAwait(true);
 
             SelectedWslDistribution = _distroSourceList.Items.First();
         }

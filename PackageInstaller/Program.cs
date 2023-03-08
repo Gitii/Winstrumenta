@@ -12,7 +12,6 @@ using ReactiveUI;
 using Shared.Services;
 using Shared.Services.Implementations;
 using Shared.Services.Implementations.WinUI;
-using Shared.Services.Implementations.WinuiUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 
@@ -41,8 +40,8 @@ public static class Program
             {
                 ConfigureSplatIntegration(collection);
                 ConfigureModelViews(collection);
-                ConfigureComplexServices(collection);
                 ConfigureServiceDiscovery(collection);
+                ConfigureComplexServices(collection);
             }
         );
     }
