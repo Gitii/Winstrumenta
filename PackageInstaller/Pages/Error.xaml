@@ -51,14 +51,58 @@
             controls:Grid.ColumnSpan="2"
             controls:Grid.Row="2"
             Orientation="Horizontal"
+            VerticalAlignment="Center"
             Spacing="5"
         >
-            <controls:Button
-                x:Name="ToggleErrorDetails"
-                VerticalAlignment="Top"
-                Content="Show details"
-                IsEnabled="True"
-            />
+            <controls:Button Margin="0,0,15,0">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xEBE8;" />
+                    <TextBlock Text="Found a bug?" />
+                </StackPanel>
+                <controls:Button.Flyout>
+                    <Flyout>
+                        <StackPanel Spacing="16" Orientation="Vertical" MaxWidth="250">
+                            <TextBlock HorizontalAlignment="Stretch" Style="{ThemeResource BaseTextBlockStyle}">
+                                <TextBlock.Text>
+                                    Do you think this is a bug?
+                                    Please create a new github issue or contribute to an existing matching issue!
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <StackPanel Spacing="24">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <Button x:Name="CopyErrorDetails">
+                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                            <FontIcon
+                                                FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                Glyph="&#xE16F;"
+                                            />
+                                            <TextBlock Text="Copy error details" />
+                                        </StackPanel>
+                                    </Button>
+                                    <FontIcon
+                                        FontWeight="Bold"
+                                        x:Name="CopiedToClipboardIcon"
+                                        Foreground="Green"
+                                        FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                        Glyph="&#xE10B;"
+                                    />
+                                </StackPanel>
+
+                                <Button x:Name="OpenGithubPageButton">
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <FontIcon
+                                            FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                            Glyph="&#xE8A7;"
+                                        />
+                                        <TextBlock Text="Open project's Github page" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Flyout>
+                </controls:Button.Flyout>
+            </controls:Button>
+            <controls:Button x:Name="ToggleErrorDetails" Content="Show details" IsEnabled="True" />
             <controls:Button x:Name="Button" Content="Close" a:AutomationProperties.AutomationId="CloseButton" />
         </controls:StackPanel>
     </controls:Grid>

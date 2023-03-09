@@ -49,6 +49,27 @@ public sealed partial class Error
                         (v) => v.ToggleErrorDetails
                     )
                     .DisposeWith(disposable);
+                this.BindCommand(
+                        ViewModel,
+                        (vm) => vm.CopyErrorDetailsToClipboard,
+                        (v) => v.CopyErrorDetails,
+                        (vm) => vm.CompleteErrorDetails
+                    )
+                    .DisposeWith(disposable);
+                this.BindCommand(
+                        ViewModel,
+                        (vm) => vm.OpenGithubPage,
+                        (v) => v.OpenGithubPageButton
+                    )
+                    .DisposeWith(disposable);
+
+                this.OneWayBind(
+                        ViewModel,
+                        (vm) => vm.AreErrorDetailsCopiedToClipboard,
+                        (v) => v.CopiedToClipboardIcon.Visibility,
+                        (isCopied) => isCopied ? Visibility.Visible : Visibility.Collapsed
+                    )
+                    .DisposeWith(disposable);
             }
         );
     }
