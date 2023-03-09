@@ -2,7 +2,7 @@
   "profiles": {
     "PackageInstaller (Package)": {
       "commandName": "MsixPackage",
-      "commandLineArgs": "adawdawd",
+      "commandLineArgs": "",
       "nativeDebugging": true
     },
     "PackageInstaller (Unpackaged)": {

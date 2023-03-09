@@ -65,6 +65,12 @@ public sealed partial class Result
                     .DisposeWith(disposable);
                 this.BindCommand(ViewModel, (vm) => vm.ToggleDetailsCommand, (v) => v.ToggleDetails)
                     .DisposeWith(disposable);
+                this.BindCommand(
+                        ViewModel,
+                        (vm) => vm.OpenGithubPage,
+                        (v) => v.OpenGithubPageButton
+                    )
+                    .DisposeWith(disposable);
             }
         );
     }

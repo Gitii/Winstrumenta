@@ -52,7 +52,37 @@
             Orientation="Horizontal"
             Spacing="5"
         >
-            <controls:Button x:Name="ToggleDetails" VerticalAlignment="Top" Content="Show details" IsEnabled="True" />
+            <controls:Button Margin="0,0,15,0">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE76E;" />
+                    <TextBlock Text="Have an idea or feature request?" />
+                </StackPanel>
+                <controls:Button.Flyout>
+                    <Flyout>
+                        <StackPanel Spacing="16" Orientation="Vertical" MaxWidth="250">
+                            <TextBlock HorizontalAlignment="Stretch" Style="{ThemeResource BaseTextBlockStyle}">
+                                <TextBlock.Text>
+                                    Do you have an idea or feature request?
+                                    Please create a feature request or star the project!
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <StackPanel Spacing="24">
+                                <Button x:Name="OpenGithubPageButton">
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <FontIcon
+                                            FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                            Glyph="&#xE8A7;"
+                                        />
+                                        <TextBlock Text="Open project's Github page" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Flyout>
+                </controls:Button.Flyout>
+            </controls:Button>
+
+            <controls:Button x:Name="ToggleDetails" Content="Show details" IsEnabled="True" />
             <controls:Button x:Name="Button" Content="Close" />
         </controls:StackPanel>
     </controls:Grid>
