@@ -2,12 +2,11 @@
   "profiles": {
     "PackageInstaller (Package)": {
       "commandName": "MsixPackage",
-      "environmentVariables": {},
+      "commandLineArgs": "\"C:\\Users\\Germi\\Downloads\\gh_2.23.0_linux_amd64.deb\"",
       "nativeDebugging": true
     },
     "PackageInstaller (Unpackaged)": {
       "commandName": "Project",
-      "environmentVariables": {},
       "nativeDebugging": true
     }
   }

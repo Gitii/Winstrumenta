@@ -12,6 +12,7 @@ public class ResultViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IApplicationLifeCycle _lifeCycle;
+    private readonly ILauncher _launcher;
 
     public enum ResultTheme
     {
@@ -31,11 +32,13 @@ public class ResultViewModel : ReactiveObject, IViewModel, INavigable
 
     public ResultViewModel(
         IHostApplicationLifetime applicationLifetime,
-        IApplicationLifeCycle lifeCycle
+        IApplicationLifeCycle lifeCycle,
+        ILauncher launcher
     )
     {
         _applicationLifetime = applicationLifetime;
         _lifeCycle = lifeCycle;
+        _launcher = launcher;
 
         _title = String.Empty;
         Title = string.Empty;
@@ -58,6 +61,15 @@ public class ResultViewModel : ReactiveObject, IViewModel, INavigable
             () =>
             {
                 AreDetailsVisible = !AreDetailsVisible;
+            }
+        );
+
+        OpenGithubPage = ReactiveCommand.CreateFromTask(
+            () =>
+            {
+                var builder = new UriBuilder("https://github.com/Gitii/Winstrumenta/issues");
+
+                return _launcher.LaunchAsync(builder.Uri);
             }
         );
     }
@@ -126,4 +138,6 @@ public class ResultViewModel : ReactiveObject, IViewModel, INavigable
     public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleDetailsCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenGithubPage { get; }
 }
