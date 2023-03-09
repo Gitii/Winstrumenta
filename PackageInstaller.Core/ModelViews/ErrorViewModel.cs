@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Hosting;
@@ -9,26 +7,31 @@ using Sextant;
 using Shared.Misc;
 using Shared.Services;
 
-#endregion
-
 namespace PackageInstaller.Core.ModelViews;
 
 public class ErrorViewModel : ReactiveObject, IViewModel, INavigable
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IApplicationLifeCycle _lifeCycle;
+    private readonly ILauncher _launcher;
+    private readonly IClipboardManager _clipboardManager;
     private string _errorDescription;
     string _errorDetails;
     bool _errorDetailsVisible;
     private string _errorTitle;
+    private readonly ObservableAsPropertyHelper<bool> _copiedToClipboard;
 
     public ErrorViewModel(
         IHostApplicationLifetime applicationLifetime,
-        IApplicationLifeCycle lifeCycle
+        IApplicationLifeCycle lifeCycle,
+        ILauncher launcher,
+        IClipboardManager clipboardManager
     )
     {
         _applicationLifetime = applicationLifetime;
         _lifeCycle = lifeCycle;
+        _launcher = launcher;
+        _clipboardManager = clipboardManager;
 
         _errorDescription = String.Empty;
         ErrorDescription = String.Empty;
@@ -53,6 +56,28 @@ public class ErrorViewModel : ReactiveObject, IViewModel, INavigable
                 ErrorDetailsVisible = !ErrorDetailsVisible;
             }
         );
+
+        OpenGithubPage = ReactiveCommand.CreateFromTask(
+            () =>
+            {
+                var builder = new UriBuilder("https://github.com/Gitii/Winstrumenta/issues");
+
+                return _launcher.LaunchAsync(builder.Uri);
+            }
+        );
+
+        CopyErrorDetailsToClipboard = ReactiveCommand.CreateFromTask(
+            (string errorDetails) => _clipboardManager.CopyAsync(errorDetails)
+        );
+
+        _copiedToClipboard = CopyErrorDetailsToClipboard
+            .Select((_) => true)
+            .ToProperty(
+                this,
+                (x) => x.AreErrorDetailsCopiedToClipboard,
+                scheduler: RxApp.MainThreadScheduler,
+                getInitialValue: () => false
+            );
     }
 
     public string ErrorTitle
@@ -79,9 +104,15 @@ public class ErrorViewModel : ReactiveObject, IViewModel, INavigable
         set { this.RaiseAndSetIfChanged(ref _errorDetails, value); }
     }
 
+    public bool AreErrorDetailsCopiedToClipboard => _copiedToClipboard.Value;
+
     public ReactiveCommand<Unit, Unit> Close { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleErrorDetails { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenGithubPage { get; }
+
+    public ReactiveCommand<string, Unit> CopyErrorDetailsToClipboard { get; }
 
     public IObservable<Unit> WhenNavigatedTo(INavigationParameter parameter)
     {
@@ -122,6 +153,8 @@ public class ErrorViewModel : ReactiveObject, IViewModel, INavigable
     }
 
     public string Id { get; } = nameof(ErrorViewModel);
+
+    public string CompleteErrorDetails => $"{ErrorTitle}\n\n{ErrorDescription}\n\n{ErrorDetails}";
 
     public readonly struct NavigationParameter
     {
