@@ -106,7 +106,9 @@ public class PreparationViewModel : ReactiveObject, IViewModel, INavigable
 
     private void NavigateToGettingStarted()
     {
-        _viewStackService.PushPage<GettingStartedModelView>().Subscribe();
+        _viewStackService
+            .PushPage<GettingStartedModelView>(new Sextant.NavigationParameter())
+            .Subscribe();
     }
 
     private FileSystemPath ParseArguments(string[] arguments)

@@ -25,6 +25,7 @@
             <controls:RowDefinition Height="Auto" />
             <controls:RowDefinition Height="*" />
             <controls:RowDefinition Height="Auto" />
+            <controls:RowDefinition Height="Auto" />
         </controls:Grid.RowDefinitions>
         <controls:TextBlock
             controls:Grid.Row="0"
@@ -57,7 +58,7 @@
                 <controls:TextBlock
                     FontSize="20"
                     TextWrapping="WrapWholeWords"
-                    Padding="25"
+                    Padding="20"
                     TextAlignment="Center"
                     AllowDrop="True"
                     AutomationProperties.AutomationId="PickSection"
@@ -89,20 +90,37 @@
                 <controls:TextBlock
                     FontSize="20"
                     TextWrapping="WrapWholeWords"
-                    Padding="25"
+                    Padding="20"
                     TextAlignment="Center"
                     AutomationProperties.AutomationId="ExplorerSection"
                 >
-                    Double click in Windows Explorer to install
+                    Double click package files in Windows Explorer to install
                 </controls:TextBlock>
             </controls:StackPanel>
         </controls:Border>
-        <RelativePanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Padding="10,0,10,10">
+        <InfoBar
+            x:Name="DefaultAppsSettingsPageInfo"
+            Severity="Informational"
+            IsClosable="False"
+            IsOpen="True"
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="10"
+            Height="60"
+        >
+            <InfoBar.Message>Remember to change the default file type associations.</InfoBar.Message>
+            <InfoBar.ActionButton>
+                <Button x:Name="OpenDefaultAppsSettingsPage" Content="Open Settings" />
+            </InfoBar.ActionButton>
+        </InfoBar>
+        <RelativePanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Padding="10,0,10,10">
             <Button
                 x:Name="ExitButton"
                 RelativePanel.AlignVerticalCenterWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
-                Content="Exit"
+                Content="Close"
+                AutomationProperties.AutomationId="Close"
             />
         </RelativePanel>
     </controls:Grid>

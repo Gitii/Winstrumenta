@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using ReactiveUI;
 using Sextant;
 using Shared.Misc;
@@ -32,6 +33,11 @@ public class GettingStartedModelView : ReactiveObject, IViewModel, INavigable
         LaunchExplorerCommand = ReactiveCommand.CreateFromTask(LaunchExplorerAsync);
         LaunchWithFileCommand = ReactiveCommand.CreateFromTask<string?>(LaunchWithFileAsync);
         ExitCommand = ReactiveCommand.Create(() => _lifeCycle.Exit(0));
+        OpenDefaultAppsSettingsPageCommand = ReactiveCommand.CreateFromTask(
+            _launcher.LaunchDefaultAppsSettingsPageAsync
+        );
+
+        _userShouldCheckFileHandlerRegistrations = false;
     }
 
     private async Task LaunchWithFileAsync(string? filePath)
@@ -75,6 +81,17 @@ public class GettingStartedModelView : ReactiveObject, IViewModel, INavigable
     public ReactiveCommand<Unit, Unit> LaunchExplorerCommand { get; }
     public ReactiveCommand<string?, Unit> LaunchWithFileCommand { get; }
     public ReactiveCommand<Unit, Unit> ExitCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenDefaultAppsSettingsPageCommand { get; }
+
+    bool _userShouldCheckFileHandlerRegistrations;
+    public bool UserShouldCheckFileHandlerRegistrations
+    {
+        get { return _userShouldCheckFileHandlerRegistrations; }
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _userShouldCheckFileHandlerRegistrations, value);
+        }
+    }
 
     public string Id { get; } = nameof(GettingStartedModelView);
 
@@ -92,6 +109,15 @@ public class GettingStartedModelView : ReactiveObject, IViewModel, INavigable
 
     public IObservable<Unit> WhenNavigatingTo(INavigationParameter parameter)
     {
-        return Observable.Return(Unit.Default);
+        return ProcessAsync().ToObservable(RxApp.MainThreadScheduler);
+    }
+
+    public async Task ProcessAsync()
+    {
+        await Task.Delay(10).ConfigureAwait(true);
+
+        UserShouldCheckFileHandlerRegistrations = !await _launcher
+            .VerifyThatAllFileTypeAssociationsAreRegisteredAsync()
+            .ConfigureAwait(true);
     }
 }

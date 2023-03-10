@@ -8,7 +8,11 @@ public class GettingStartedPageTests : TestSuiteBase
     [Test]
     public void ShouldShowGettingStartedPageWhenNoArgumentsProvided()
     {
-        GetSession().FindElementByAccessibilityId("Title").Text.Should().Be("Getting started!");
+        var session = GetSession();
+        session.FindElementByAccessibilityId("Title").Text.Should().Be("Getting started!");
+        session.FindElementByAccessibilityId("Close").Click();
+
+        WaitFor(() => IsAppRunning().Should().BeFalse("App should have been closed by clicking the close button"));
     }
 
     [Test]
@@ -33,7 +37,7 @@ public class GettingStartedPageTests : TestSuiteBase
 
     private bool HasExplorerAsChildProcess()
     {
-        var process = GetProcess();
+        var process = GetAppProcess();
 
         if (process == null)
         {
@@ -45,12 +49,4 @@ public class GettingStartedPageTests : TestSuiteBase
             .Any(childProcess => childProcess.ProcessName == "explorer.exe");
     }
 
-    private Process? GetProcess()
-    {
-        return Process
-            .GetProcesses()
-            .FirstOrDefault(
-                (p) => p.MainWindowHandle.ToString() == GetSession().CurrentWindowHandle
-            );
-    }
 }

@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium.Appium;
+﻿using System.Diagnostics;
+using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Windows;
 
 namespace Winstrumenta.Package.Tests;
@@ -41,7 +42,7 @@ public class TestSuiteBase
         opts.AddAdditionalCapability("deviceName", "WindowsPC");
 
         _session = new WindowsDriver<WindowsElement>(
-            new Uri($"http://{TestEnvironment.WAD_URL}/wd/hub"),
+            new Uri($"{TestEnvironment.WAD_URL}/wd/hub"),
             opts
         );
     }
@@ -100,5 +101,51 @@ public class TestSuiteBase
     public void Sleep(int milliseconds)
     {
         Thread.Sleep(milliseconds);
+    }
+
+    public void WaitFor(Action check, int timeout = 2_000, int numberOfChecks = 5)
+    {
+        int sleepDuration = timeout / numberOfChecks;
+        Exception? previousException = null;
+
+        while (numberOfChecks > 0)
+        {
+            numberOfChecks--;
+
+            try
+            {
+                check();
+                return;
+            }
+            catch (Exception e)
+            {
+                previousException = e;
+
+                Thread.Sleep(sleepDuration);
+            }
+        }
+
+        throw new Exception("WaitFor: check failed!", previousException);
+    }
+
+    public bool IsAppRunning()
+    {
+        using var proc = GetAppProcess();
+
+        return proc is { HasExited: false };
+    }
+
+    public Process? GetAppProcess()
+    {
+        return Process
+            .GetProcesses()
+            .FirstOrDefault(
+                (p) => p.MainWindowHandle.ToString() == GetSession().CurrentWindowHandle
+            );
+    }
+
+    public byte[] GetFixtureFromFile(string filename)
+    {
+        return File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, filename));
     }
 }

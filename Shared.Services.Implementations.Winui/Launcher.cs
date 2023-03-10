@@ -14,4 +14,14 @@ public class Launcher : ILauncher
     {
         return Windows.System.Launcher.LaunchFolderPathAsync(folderPath).AsTask();
     }
+
+    public Task LaunchDefaultAppsSettingsPageAsync()
+    {
+        return Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:defaultapps")).AsTask();
+    }
+
+    public async Task<bool> VerifyThatAllFileTypeAssociationsAreRegisteredAsync()
+    {
+        return false; // not possible to actually check
+    }
 }
