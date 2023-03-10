@@ -85,6 +85,7 @@
         <None Remove="Images\Wide310x150Logo.scale-200.png" />
         <None Remove="Images\Wide310x150Logo.scale-400.png" />
         <None Remove="Package.appxmanifest" />
+        <None Remove="PackageInstaller.ico" />
         <None Remove="Pages\GettingStarted.xaml" />
         <None Remove="Pages\NotificationHub.xaml" />
     </ItemGroup>
@@ -145,6 +146,7 @@
         <Content Include="Images\Wide310x150Logo.scale-150.png" />
         <Content Include="Images\Wide310x150Logo.scale-200.png" />
         <Content Include="Images\Wide310x150Logo.scale-400.png" />
+        <Content Include="PackageInstaller.ico" />
     </ItemGroup>
 
     <ItemGroup>

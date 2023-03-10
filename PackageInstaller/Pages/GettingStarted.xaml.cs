@@ -43,6 +43,21 @@ public sealed partial class GettingStarted
 
                 this.BindCommand(ViewModel, (vm) => vm.ExitCommand, (v) => v.ExitButton)
                     .DisposeWith(disposable);
+
+                this.BindCommand(
+                        ViewModel,
+                        (vm) => vm.OpenDefaultAppsSettingsPageCommand,
+                        (v) => v.OpenDefaultAppsSettingsPage
+                    )
+                    .DisposeWith(disposable);
+
+                this.OneWayBind(
+                        ViewModel,
+                        (vm) => vm.UserShouldCheckFileHandlerRegistrations,
+                        (v) => v.DefaultAppsSettingsPageInfo.Visibility,
+                        (visible) => visible ? Visibility.Visible : Visibility.Collapsed
+                    )
+                    .DisposeWith(disposable);
             }
         );
     }

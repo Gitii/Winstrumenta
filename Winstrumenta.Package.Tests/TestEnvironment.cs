@@ -10,7 +10,7 @@ class TestEnvironment
     private TestEnvironmentDetails? _environment;
     private string _testBaseDirectory;
 
-    public const string WAD_URL = "127.0.0.1:4723";
+    public const string WAD_URL = "http://127.0.0.1:4723";
     private const string WAD_FOLDER_NAME = "wad";
 
     public TestEnvironmentDetails? PreparedEnvDetails => _environment;

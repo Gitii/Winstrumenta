@@ -1,8 +1,11 @@
 ﻿using Microsoft.UI.Xaml;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading;
+using Windows.ApplicationModel;
+using Windows.Storage;
 using Community.Sextant.WinUI;
 using Community.Sextant.WinUI.Adapters;
 using NativeInterop.Win32.Xaml;
@@ -23,24 +26,33 @@ public sealed partial class MainWindow : DesktopWindow
     private readonly ThemeManager _themeManager;
     private string args = string.Empty;
     private readonly IApplicationLifeCycle _lifeCycle;
+    private IPath _path;
 
     public MainWindow(
         IParameterViewStackService viewStackService,
         INavigationService navigationService,
         ThemeManager themeManager,
-        IApplicationLifeCycle lifeCycle
+        IApplicationLifeCycle lifeCycle,
+        IPath path
     )
     {
         _viewStackService = viewStackService;
         _navigationService = navigationService;
         _themeManager = themeManager;
         _lifeCycle = lifeCycle;
+        _path = path;
 
         this.InitializeComponent();
 
         Title = "Winstrumenta PackageManager";
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(DummyTitleBar); // do not set the title bar to use a 100% custom one.
+
+        var iconPath = Path.Combine(Package.Current.InstalledPath, "PackageInstaller.ico");
+        if (File.Exists(iconPath))
+        {
+            _nativeWindow.LoadIcon(iconPath);
+        }
     }
 
     public void SetLaunchArgs(string arguments)
