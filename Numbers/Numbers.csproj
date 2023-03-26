@@ -37,14 +37,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AssyntSoftware.WinUI3Controls" Version="2.0.1" />
+        <PackageReference Include="AssyntSoftware.WinUI3Controls" Version="2.0.3" />
         <PackageReference Include="Community.Sextant.WinUI" Version="0.6.1" />
         <PackageReference Include="Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection" Version="0.6.1" />
         <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230217.4" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.755" />
-        <PackageReference Include="ReactiveUI" Version="18.4.25" />
-        <PackageReference Include="ReactiveUI.WinUI" Version="18.4.25" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230313.1" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
+        <PackageReference Include="ReactiveUI" Version="18.4.26" />
+        <PackageReference Include="ReactiveUI.WinUI" Version="18.4.26" />
         <PackageReference Include="Scrutor" Version="4.2.1" />
         <PackageReference Include="SharpNinja.Extensions.WindowsAppSdkHost" Version="1.2.0" />
         <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.6.8" />
@@ -65,9 +65,7 @@
         <ProjectReference Include="..\Numbers.Core.Services\Numbers.Core.Services.csproj" />
         <ProjectReference Include="..\Numbers.Core\Numbers.Core.csproj" />
         <ProjectReference Include="..\Shared.Misc\Shared.Misc.csproj" />
-        <ProjectReference
-            Include="..\Shared.Services.Implementations.Winui\Shared.Services.Implementations.WinUI.csproj"
-        />
+        <ProjectReference Include="..\Shared.Services.Implementations.Winui\Shared.Services.Implementations.WinUI.csproj" />
         <ProjectReference Include="..\Shared.Services.Implementations\Shared.Services.Implementations.csproj" />
         <ProjectReference Include="..\Shared.Services\Shared.Services.csproj" />
     </ItemGroup>
@@ -105,9 +103,7 @@
     Explorer "Package and Publish" context menu entry to be enabled for this project even if 
     the Windows App SDK Nuget package has not yet been restored.
   -->
-    <PropertyGroup
-        Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'"
-    >
+    <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
         <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
     </PropertyGroup>
 </Project>
