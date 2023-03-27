@@ -27,5 +27,7 @@ public partial class App
         _window.Activate();
     }
 
-    private MainWindow? _window;
+    private static MainWindow? _window = null;
+
+    public static MainWindow? Window => _window;
 }

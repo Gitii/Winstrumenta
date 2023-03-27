@@ -2,7 +2,6 @@
   "profiles": {
     "Numbers (Package)": {
       "commandName": "MsixPackage",
-      "commandLineArgs": "\"C:\\Users\\Germi\\Downloads\\cities.csv\"",
       "nativeDebugging": true
     },
     "Numbers (Unpackaged)": {

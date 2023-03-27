@@ -19,65 +19,29 @@
     <controls:Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <controls:Grid.RowDefinitions>
             <controls:RowDefinition Height="Auto" />
+            <controls:RowDefinition Height="Auto" />
             <controls:RowDefinition Height="*" />
         </controls:Grid.RowDefinitions>
-        <NavigationView
-            controls:Grid.Row="0"
-            Grid.RowSpan="2"
-            x:Name="NavigationView"
-            IsBackButtonVisible="Collapsed"
-            IsTitleBarAutoPaddingEnabled="False"
-            SelectionChanged="NavigationView_OnSelectionChanged"
-            IsSettingsVisible="False"
-            ExpandedModeThresholdWidth="9999"
-        >
-            <NavigationView.MenuItems>
-                <NavigationViewItem
-                    Icon="Document"
-                    x:Name="CurrentDocument"
-                    Content="Current Document"
-                    Tag="Document"
-                />
-                <NavigationViewItem Icon="Save" Content="Save" Tag="Save" />
-                <NavigationViewItem Icon="OpenFile" Content="Open" Tag="Open" />
-                <NavigationViewItem Icon="Cancel" Content="Exit" Tag="Exit" />
-            </NavigationView.MenuItems>
-            <Frame
-                x:Name="Content"
-                Margin="0,48,0,0"
-                Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-            />
-        </NavigationView>
-        <controls:Grid
-            Background="Transparent"
-            VerticalAlignment="Top"
-            HorizontalAlignment="Stretch"
-            Height="48"
-            Margin="48,0,48,0"
-            controls:Grid.Row="0"
-        >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <CommandBar
-                x:Name="CommandBar"
-                Grid.Column="0"
-                Height="70"
-                IsDynamicOverflowEnabled="False"
-                IsOpen="False"
-                OverflowButtonVisibility="Collapsed"
-            />
-            <Grid Grid.Column="1" x:Name="TitleBarContainer">
+        <Border x:Name="AppTitleBar" Height="48" VerticalAlignment="Top" Canvas.ZIndex="1" IsHitTestVisible="True">
+            <StackPanel Orientation="Horizontal" Padding="12,0">
+                <Image Width="18" Source="ms-appx:///NumbersLogo.png" />
                 <TextBlock
-                    x:Name="TitleBar"
-                    Text="Table"
-                    FontSize="18"
+                    x:Name="AppTitle"
+                    Margin="16,0,0,0"
                     VerticalAlignment="Center"
-                    HorizontalTextAlignment="Center"
-                    HorizontalAlignment="Stretch"
+                    Style="{StaticResource CaptionTextBlockStyle}"
                 />
-            </Grid>
-        </controls:Grid>
+            </StackPanel>
+        </Border>
+        <CommandBar
+            x:Name="CommandBar"
+            controls:Grid.Row="1"
+            IsDynamicOverflowEnabled="False"
+            IsOpen="False"
+            OverflowButtonVisibility="Collapsed"
+            DefaultLabelPosition="Right"
+            HorizontalAlignment="Left"
+        />
+        <Frame x:Name="Content" controls:Grid.Row="2" Background="Transparent" />
     </controls:Grid>
 </xaml:DesktopWindow>
