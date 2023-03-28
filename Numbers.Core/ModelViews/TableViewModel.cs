@@ -145,17 +145,30 @@ public class TableViewModel : ReactiveObject, IViewModel, INavigable, IWindowInt
             return Task.CompletedTask;
         }
 
-        UpdateContext(
-            _context.Table!,
-            new FileEncoding()
-            {
-                Delimiter = this.Delimiter,
-                Encoding = Encoding,
-                QuoteCharacter = QuoteCharacter,
-            }
-        );
+        try
+        {
+            UpdateContext(
+                _context.Table!,
+                new FileEncoding()
+                {
+                    Delimiter = this.Delimiter,
+                    Encoding = Encoding,
+                    QuoteCharacter = QuoteCharacter,
+                }
+            );
 
-        return _csv.SaveAsAsync(_context);
+            return _csv.SaveAsAsync(_context);
+        }
+        catch (Exception e)
+        {
+            var navParms = new ErrorViewModel.NavigationParameter() { Exception = e };
+
+            _viewStackService
+                .PushPage<ErrorViewModel>(navParms.ToNavigationParameter())
+                .Subscribe();
+
+            return Task.CompletedTask;
+        }
     }
 
     public ICommand SaveCommand { get; }
