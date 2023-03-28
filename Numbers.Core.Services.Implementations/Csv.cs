@@ -68,23 +68,22 @@ public class Csv : ICsv
 
     public Task SaveAsAsync(IGlobalContext context)
     {
-        if (context.FilePath is null)
-        {
-            throw new ArgumentException("file path in context must not be null", nameof(context));
-        }
+        var filePath =
+            context.FilePath
+            ?? throw new ArgumentException(
+                "file path in context must not be null",
+                nameof(context)
+            );
 
-        var encoding = context.FileEncoding;
-        if (encoding is null)
-        {
-            throw new ArgumentException("encoding in context must not be null", nameof(context));
-        }
+        var encoding =
+            context.FileEncoding
+            ?? throw new ArgumentException("encoding in context must not be null", nameof(context));
 
-        if (context.Table is null)
-        {
-            throw new ArgumentException("csv data in context must not be null", nameof(context));
-        }
+        var table =
+            context.Table
+            ?? throw new ArgumentException("csv data in context must not be null", nameof(context));
 
-        return SaveAsAsync(context.Table, encoding.Value, context.FilePath);
+        return SaveAsAsync(table, encoding, filePath);
     }
 
     private async Task<(List<ICsvRow>, FileEncoding)> ReadRowsAsync(
