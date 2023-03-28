@@ -1,5 +1,4 @@
-﻿using Microsoft.UI.Xaml;
-using System;
+﻿using System;
 using System.Linq;
 using System.Reactive;
 using System.Threading;

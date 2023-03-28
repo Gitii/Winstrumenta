@@ -14,6 +14,7 @@
     UseMicaSystemBackdrop="True"
     SystemBackdropEnabled="True"
     Closing="MainWindow_OnClosing"
+    StartupLocation="CenterParentProcess"
     mc:Ignorable="d"
 >
     <controls:Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">

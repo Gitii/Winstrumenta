@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Numbers.Core.Services;
+namespace Numbers.Core.Services.Implementations;
 
 class CsvRow100 : ICsvRowCells
 {

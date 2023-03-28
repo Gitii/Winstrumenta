@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Numbers.Controls;
 using Numbers.Core.ModelViews;
 using Numbers.Core.Services;
+using Numbers.Core.Services.Implementations;
 using Numbers.Pages;
 using ReactiveUI;
 using Shared.Services;

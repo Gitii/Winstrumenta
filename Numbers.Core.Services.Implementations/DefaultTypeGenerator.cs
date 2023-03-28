@@ -1,4 +1,4 @@
-﻿namespace Numbers.Core.Services;
+﻿namespace Numbers.Core.Services.Implementations;
 
 public class DefaultTypeGenerator : ITypeGenerator
 {

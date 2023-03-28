@@ -6,7 +6,59 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:system="using:System"
+    xmlns:text="using:System.Text"
     mc:Ignorable="d"
 >
-    <controls:DataGrid x:Name="DataGrid" IsReadOnly="False" SelectionMode="Extended" AutoGenerateColumns="False" GridLinesVisibility="All" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <controls:DataGrid
+            Grid.Row="0"
+            x:Name="DataGrid"
+            IsReadOnly="False"
+            SelectionMode="Extended"
+            AutoGenerateColumns="False"
+            GridLinesVisibility="All"
+        />
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Stretch" Padding="5">
+            <StackPanel.Resources>
+                <ResourceDictionary Source="ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml" />
+            </StackPanel.Resources>
+            <ComboBox
+                x:Name="Delimiter"
+                IsEditable="True"
+                HorizontalAlignment="Stretch"
+                ToolTipService.ToolTip="Delimiter"
+            >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="system:String">
+                        <Grid>
+                            <TextBlock Text="{Binding Converter={StaticResource DescriptiveStringConverter}}" />
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <AppBarSeparator />
+
+            <TextBox
+                x:Name="Quote"
+                MaxLength="1"
+                HorizontalAlignment="Stretch"
+                ToolTipService.ToolTip="Quote character"
+            />
+            <AppBarSeparator />
+            <ComboBox x:Name="FileEncoding" HorizontalAlignment="Stretch" ToolTipService.ToolTip="Encoding">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="text:Encoding">
+                        <Grid>
+                            <TextBlock Text="{Binding EncodingName}" />
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+    </Grid>
 </local:ReactivePageTable>

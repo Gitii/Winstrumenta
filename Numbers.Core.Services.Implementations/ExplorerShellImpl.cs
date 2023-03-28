@@ -1,6 +1,6 @@
 ﻿using ShellLink;
 
-namespace Numbers.Core.Services;
+namespace Numbers.Core.Services.Implementations;
 
 public class ExplorerShellImpl : IExplorerShell
 {
@@ -25,18 +25,16 @@ public class ExplorerShellImpl : IExplorerShell
                         );
                 }
             )
+            .Select(GetLinkTarget)
+            .Where(File.Exists)
             .Select(
                 (f) =>
-                {
-                    var realFile = GetLinkTarget(f);
-
-                    return new RecentlyUsedFile()
+                    new RecentlyUsedFile()
                     {
-                        FileName = Path.GetFileName(realFile),
-                        FullPath = realFile,
-                        AccessTime = File.GetLastAccessTime(realFile),
-                    };
-                }
+                        FileName = Path.GetFileName(f),
+                        FullPath = f,
+                        AccessTime = File.GetLastAccessTime(f),
+                    }
             );
     }
 

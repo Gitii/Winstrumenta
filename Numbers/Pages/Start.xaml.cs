@@ -5,10 +5,8 @@ using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Numbers.Core.ModelViews;
-using Numbers.Core.Services;
 using ReactiveUI;
 using Windows.Storage.Pickers;
-using WinRT.Interop;
 
 namespace Numbers.Pages;
 

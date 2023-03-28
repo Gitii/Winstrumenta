@@ -1,11 +1,11 @@
 ﻿using System.Collections;
-using CsvHelper;
-using CsvHelper.Configuration;
 using System.Globalization;
 using System.Reflection;
+using CsvHelper;
+using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 
-namespace Numbers.Core.Services;
+namespace Numbers.Core.Services.Implementations;
 
 public class Csv : ICsv
 {
@@ -49,6 +49,7 @@ public class Csv : ICsv
             Quote = encoding.QuoteCharacter,
             BadDataFound = null,
             TrimOptions = TrimOptions.Trim,
+            ShouldQuote = _ => encoding.QuoteCharacter != '\0'
         };
 
         using var writer = new StreamWriter(

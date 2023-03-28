@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net6.0-windows10.0.20348.0</TargetFramework>
@@ -66,10 +66,14 @@
     <ItemGroup>
         <ProjectReference Include="..\NativeInterop.Win32.Xaml\NativeInterop.Win32.Xaml.csproj" />
         <ProjectReference Include="..\NativeInterop.Win32\NativeInterop.Win32.csproj" />
-        <ProjectReference Include="..\Numbers.Core.Services\Numbers.Core.Services.csproj" />
+        <ProjectReference
+            Include="..\Numbers.Core.Services.Implementations\Numbers.Core.Services.Implementations.csproj"
+        />
         <ProjectReference Include="..\Numbers.Core\Numbers.Core.csproj" />
         <ProjectReference Include="..\Shared.Misc\Shared.Misc.csproj" />
-        <ProjectReference Include="..\Shared.Services.Implementations.Winui\Shared.Services.Implementations.WinUI.csproj" />
+        <ProjectReference
+            Include="..\Shared.Services.Implementations.Winui\Shared.Services.Implementations.WinUI.csproj"
+        />
         <ProjectReference Include="..\Shared.Services.Implementations\Shared.Services.Implementations.csproj" />
         <ProjectReference Include="..\Shared.Services\Shared.Services.csproj" />
     </ItemGroup>
@@ -81,7 +85,7 @@
             <Generator>MSBuild:Compile</Generator>
         </None>
         <Page Update="Controls\RecentlyUsedFileView.xaml">
-          <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+            <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
         </Page>
         <Page Update="Pages\Start.xaml">
             <Generator>MSBuild:Compile</Generator>
@@ -113,7 +117,9 @@
     Explorer "Package and Publish" context menu entry to be enabled for this project even if 
     the Windows App SDK Nuget package has not yet been restored.
   -->
-    <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <PropertyGroup
+        Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'"
+    >
         <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
     </PropertyGroup>
 </Project>

@@ -5,7 +5,6 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Windows.Input;
 using Windows.System;
 using Community.Sextant.WinUI;
 using Community.Sextant.WinUI.Adapters;

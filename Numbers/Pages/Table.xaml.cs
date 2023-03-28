@@ -52,8 +52,31 @@ public sealed partial class Table
                     )
                     .DisposeWith(disposable);
 
-                this.ViewModel.WhenAnyValue((vm) => vm.Rows).ObserveOn(RxApp.MainThreadScheduler)
-                    .BindTo(this, (v) => v.DataGrid.ItemsSource).DisposeWith(disposable);
+                this.ViewModel
+                    .WhenAnyValue((vm) => vm.Rows)
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .BindTo(this, (v) => v.DataGrid.ItemsSource)
+                    .DisposeWith(disposable);
+
+                this.Bind(ViewModel, (vm) => vm.Delimiter, (v) => v.Delimiter.Text)
+                    .DisposeWith(disposable);
+                this.Bind(ViewModel, (vm) => vm.QuoteCharacter, (v) => v.Quote.Text)
+                    .DisposeWith(disposable);
+                this.Bind(ViewModel, (vm) => vm.Encoding, (v) => v.FileEncoding.SelectedItem)
+                    .DisposeWith(disposable);
+
+                this.OneWayBind(
+                        ViewModel,
+                        (vm) => vm.DelimiterOptions,
+                        (v) => v.Delimiter.ItemsSource
+                    )
+                    .DisposeWith(disposable);
+                this.OneWayBind(
+                        ViewModel,
+                        (vm) => vm.EncodingOptions,
+                        (v) => v.FileEncoding.ItemsSource
+                    )
+                    .DisposeWith(disposable);
             }
         );
     }
