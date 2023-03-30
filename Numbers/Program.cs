@@ -2,8 +2,10 @@
 using Community.Sextant.WinUI.Microsoft.Extensions.DependencyInjection;
 using CommunityToolkit.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Numbers.Controls;
 using Numbers.Core.ModelViews;
 using Numbers.Core.Services;
+using Numbers.Core.Services.Implementations;
 using Numbers.Pages;
 using ReactiveUI;
 using Shared.Services;
@@ -94,6 +96,11 @@ public static class Program
                         viewBuilder.RegisterViewAndViewModel<Table, TableViewModel>();
                         viewBuilder.RegisterViewAndViewModel<Error, ErrorViewModel>();
                         viewBuilder.RegisterViewAndViewModel<Save, SaveViewModel>();
+                        viewBuilder.RegisterViewAndViewModel<Start, StartViewModel>();
+                        viewBuilder.RegisterViewAndViewModel<
+                            RecentlyUsedFileView,
+                            RecentlyUsedFileViewModel
+                        >();
                     }
                 );
             }

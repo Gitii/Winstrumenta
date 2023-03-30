@@ -5,7 +5,6 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Windows.Input;
 using Windows.System;
 using Community.Sextant.WinUI;
 using Community.Sextant.WinUI.Adapters;
@@ -26,6 +25,8 @@ namespace Numbers;
 
 public sealed partial class MainWindow : DesktopWindow
 {
+    private const string DEFAULT_APP_TITLE = "Numbers";
+    private const string DEFAULT_NO_TITLE = "<No title>";
     private readonly IParameterViewStackService _viewStackService;
     private readonly INavigationService _navigationService;
     private readonly IApplicationLifeCycle _lifeCycle;
@@ -44,9 +45,9 @@ public sealed partial class MainWindow : DesktopWindow
 
         this.InitializeComponent();
 
-        Title = "Winstrumenta Numbers";
-        ExtendsContentIntoTitleBar = true;
-        SetTitleBar(TitleBarContainer); // do not set the title bar to use a 100% custom one.
+        Title = AppTitle.Text = DEFAULT_APP_TITLE;
+        ExtendsContentIntoTitleBar = true; // enable custom titlebar
+        SetTitleBar(AppTitleBar); // set user ui element as titlebar
     }
 
     public void SetLaunchArgs(string arguments)
@@ -81,7 +82,7 @@ public sealed partial class MainWindow : DesktopWindow
             )
             .NotifyOn(RxApp.MainThreadScheduler);
 
-        _navigationService.SetAdapter(new NavigationViewAdapter(Content, this, NavigationView));
+        _navigationService.SetAdapter(new FrameNavigationViewAdapter(Content, this));
 
         ForceUpdateTheme();
         _viewStackService.PageStack.Subscribe(OnPageChanged);
@@ -96,11 +97,21 @@ public sealed partial class MainWindow : DesktopWindow
             }
         }
 
-        var navParams = new PreparationViewModel.NavigationParameter() { Arguments = arguments, };
+        if (arguments.Length == 0)
+        {
+            _viewStackService.PushPage<StartViewModel>(new NavigationParameter()).Subscribe();
+        }
+        else
+        {
+            var navParams = new PreparationViewModel.NavigationParameter()
+            {
+                Arguments = arguments,
+            };
 
-        _viewStackService
-            .PushPage<PreparationViewModel>(navParams.ToNavigationParameter())
-            .Subscribe();
+            _viewStackService
+                .PushPage<PreparationViewModel>(navParams.ToNavigationParameter())
+                .Subscribe();
+        }
     }
 
     private void OnPageChanged(IImmutableList<IViewModel> stack)
@@ -113,6 +124,12 @@ public sealed partial class MainWindow : DesktopWindow
 
         if (stack.Last() is IWindowInterface ui)
         {
+            if (_windowUiDisposable != null)
+            {
+                _windowUiDisposable.Dispose();
+                _windowUiDisposable = null;
+            }
+
             var disposable = new CompositeDisposable();
 
             ui.WhenAnyValue(x => x.WindowTitle)
@@ -120,7 +137,7 @@ public sealed partial class MainWindow : DesktopWindow
                 .Subscribe(
                     (title) =>
                     {
-                        CurrentDocument.Content = TitleBar.Text = title ?? TitleBar.Text;
+                        Title = AppTitle.Text = title ?? DEFAULT_NO_TITLE;
                     }
                 )
                 .DisposeWith(disposable);
@@ -130,6 +147,8 @@ public sealed partial class MainWindow : DesktopWindow
                 .Subscribe(
                     (items) =>
                     {
+                        CommandBar.Visibility =
+                            items?.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
                         CommandBar.PrimaryCommands.Clear();
                         CommandBar.PrimaryCommands.AddRange(
                             items?.Select(ToAppBarButton) ?? Array.Empty<AppBarButton>()
@@ -147,7 +166,7 @@ public sealed partial class MainWindow : DesktopWindow
         return (
             new AppBarButton()
             {
-                Content = arg.Label,
+                Label = arg.Label,
                 Icon =
                     arg.Icon != null
                         ? new FontIcon()
@@ -184,27 +203,6 @@ public sealed partial class MainWindow : DesktopWindow
 
         CommandBar.PrimaryCommands.Clear();
         CommandBar.SecondaryCommands.Clear();
-    }
-
-    private void NavigationView_OnSelectionChanged(
-        NavigationView sender,
-        NavigationViewSelectionChangedEventArgs args
-    )
-    {
-        switch (args.SelectedItemContainer.Tag)
-        {
-            case "Document":
-                _viewStackService
-                    .PushPage<TableViewModel>(new Sextant.NavigationParameter(), resetStack: true)
-                    .Subscribe();
-                break;
-
-            case "Save":
-                _viewStackService
-                    .PushPage<SaveViewModel>(new Sextant.NavigationParameter(), resetStack: true)
-                    .Subscribe();
-                break;
-        }
     }
 
     private void MainWindow_OnClosing(object? sender, WindowClosingEventArgs e)

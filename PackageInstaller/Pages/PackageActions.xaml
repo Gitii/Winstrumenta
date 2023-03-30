@@ -10,11 +10,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:media="using:Microsoft.UI.Xaml.Media.Animation"
     xmlns:modelViews="using:PackageInstaller.Core.ModelViews"
-    xmlns:reactiveUi="using:ReactiveUI"
     xmlns:xaml="using:Microsoft.UI.Xaml"
     xmlns:b="using:Microsoft.UI.Xaml.Data"
-    xmlns:w="using:System.Windows"
-    xmlns:ui="using:CommunityToolkit.WinUI.UI"
     mc:Ignorable="d"
 >
     <controls:Page.Triggers>

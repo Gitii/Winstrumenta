@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.UI;
-using Windows.Win32;
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using WinRT;
 

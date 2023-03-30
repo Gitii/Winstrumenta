@@ -137,21 +137,16 @@ public class SaveViewModel : ReactiveObject, IViewModel, INavigable
 
     public IObservable<Unit> WhenNavigatingTo(INavigationParameter parameter)
     {
-        var contextFileEncoding = _context.FileEncoding;
-        if (contextFileEncoding == null)
-        {
-            throw new Exception("Expected global context to have file encoding");
-        }
+        var contextFileEncoding =
+            _context.FileEncoding
+            ?? throw new Exception("Expected global context to have file encoding");
 
-        var filePath = _context.FilePath;
-        if (filePath == null)
-        {
-            throw new Exception("Expected global context to have file path");
-        }
+        var filePath =
+            _context.FilePath ?? throw new Exception("Expected global context to have file path");
 
-        Delimiter = contextFileEncoding.Value.Delimiter;
-        QuoteCharacter = contextFileEncoding.Value.QuoteCharacter;
-        Encoding = contextFileEncoding.Value.Encoding;
+        Delimiter = contextFileEncoding.Delimiter;
+        QuoteCharacter = contextFileEncoding.QuoteCharacter;
+        Encoding = contextFileEncoding.Encoding;
 
         FileName = Path.GetFileName(filePath);
         FilePath = Path.GetDirectoryName(filePath) ?? "";

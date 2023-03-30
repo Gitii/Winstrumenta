@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using CommunityToolkit.WinUI.UI.Controls;
 using DynamicData;
 using Microsoft.UI.Xaml;
@@ -28,6 +29,7 @@ public sealed partial class Table
             {
                 this.ViewModel
                     .WhenAnyValue((vm) => vm.Columns)
+                    .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(
                         (columns) =>
                         {
@@ -50,7 +52,30 @@ public sealed partial class Table
                     )
                     .DisposeWith(disposable);
 
-                this.OneWayBind(ViewModel, (vm) => vm.Rows, (v) => v.DataGrid.ItemsSource)
+                this.ViewModel
+                    .WhenAnyValue((vm) => vm.Rows)
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .BindTo(this, (v) => v.DataGrid.ItemsSource)
+                    .DisposeWith(disposable);
+
+                this.Bind(ViewModel, (vm) => vm.Delimiter, (v) => v.Delimiter.Text)
+                    .DisposeWith(disposable);
+                this.Bind(ViewModel, (vm) => vm.QuoteCharacter, (v) => v.Quote.Text)
+                    .DisposeWith(disposable);
+                this.Bind(ViewModel, (vm) => vm.Encoding, (v) => v.FileEncoding.SelectedItem)
+                    .DisposeWith(disposable);
+
+                this.OneWayBind(
+                        ViewModel,
+                        (vm) => vm.DelimiterOptions,
+                        (v) => v.Delimiter.ItemsSource
+                    )
+                    .DisposeWith(disposable);
+                this.OneWayBind(
+                        ViewModel,
+                        (vm) => vm.EncodingOptions,
+                        (v) => v.FileEncoding.ItemsSource
+                    )
                     .DisposeWith(disposable);
             }
         );

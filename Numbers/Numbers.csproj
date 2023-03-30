@@ -20,10 +20,13 @@
     <ItemGroup>
         <None Remove="Assets\error.png" />
         <None Remove="Controls\PlaceholderContainer.xaml" />
+        <None Remove="Controls\RecentlyUsedFileView.xaml" />
         <None Remove="Controls\Shimmer.xaml" />
+        <None Remove="NumbersLogo.png" />
         <None Remove="Pages\Error.xaml" />
         <None Remove="Pages\Preparation.xaml" />
         <None Remove="Pages\Save.xaml" />
+        <None Remove="Pages\Start.xaml" />
         <None Remove="Pages\Table.xaml" />
     </ItemGroup>
 
@@ -34,6 +37,7 @@
         <Content Include="Assets\Square44x44Logo.scale-200.png" />
         <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
         <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+        <Content Include="NumbersLogo.png" />
     </ItemGroup>
 
     <ItemGroup>
@@ -62,7 +66,9 @@
     <ItemGroup>
         <ProjectReference Include="..\NativeInterop.Win32.Xaml\NativeInterop.Win32.Xaml.csproj" />
         <ProjectReference Include="..\NativeInterop.Win32\NativeInterop.Win32.csproj" />
-        <ProjectReference Include="..\Numbers.Core.Services\Numbers.Core.Services.csproj" />
+        <ProjectReference
+            Include="..\Numbers.Core.Services.Implementations\Numbers.Core.Services.Implementations.csproj"
+        />
         <ProjectReference Include="..\Numbers.Core\Numbers.Core.csproj" />
         <ProjectReference Include="..\Shared.Misc\Shared.Misc.csproj" />
         <ProjectReference
@@ -78,6 +84,12 @@
         <None Update="MainWindow.xaml">
             <Generator>MSBuild:Compile</Generator>
         </None>
+        <Page Update="Controls\RecentlyUsedFileView.xaml">
+            <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+        </Page>
+        <Page Update="Pages\Start.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
         <Page Update="Pages\Table.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
